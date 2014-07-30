@@ -5,18 +5,20 @@ module.exports = (function () {
     var WorkspaceRelation = require('./models/workspace-relation');
 
     return {
-        getItems: function (userId, callback) {
+        getItems:function (workspaceId, userId, callback) {
             Todo.find({
-                'userId': userId
+                /*'userId':userId,*/
+                'workspaceId':workspaceId
             }, function (error, items) {
                 callback(error, items);
             });
         },
-        save: function (userId, todoModel, callback) {
+        save:function (workspaceId, userId, todoModel, callback) {
             var todo = new Todo({
-                'userId': userId,
-                'title': todoModel.title,
-                'completed': todoModel.completed
+                'workspaceId':workspaceId,
+                'userId':userId,
+                'title':todoModel.title,
+                'completed':todoModel.completed
             });
 
             todo.save(function (error, model) {
@@ -24,7 +26,7 @@ module.exports = (function () {
                 callback(error, itemId);
             });
         },
-        update: function (userId, todoModels, callback) {
+        update:function (workspaceId, userId, todoModels, callback) {
             var leave = false;
             for (var modelIndex = 0; modelIndex < todoModels.length; modelIndex++) {
                 if (leave) {
@@ -50,7 +52,7 @@ module.exports = (function () {
 
             callback();
         },
-        remove: function (userId, todoIds, callback) {
+        remove:function (workspaceId, userId, todoIds, callback) {
             var leave = false;
             for (var idIndex = 0; idIndex < todoIds.length; idIndex++) {
                 if (leave) {
@@ -78,10 +80,10 @@ module.exports = (function () {
 
             callback();
         },
-        setUserWorkspaceId: function (userId, workspaceId, callback) {
+        setUserWorkspaceId:function (userId, workspaceId, callback) {
             var workspaceRelation = new WorkspaceRelation({
-                'userId': userId,
-                'workspaceId': workspaceId
+                'userId':userId,
+                'workspaceId':workspaceId
             });
 
             workspaceRelation.save(function (error) {
@@ -91,9 +93,9 @@ module.exports = (function () {
                 callback();
             })
         },
-        getUserWorkspaceId: function (userId, callback) {
+        getUserWorkspaceId:function (userId, callback) {
             WorkspaceRelation.findOne({
-                'userId': userId
+                'userId':userId
             }, function (error, model) {
                 if (error) {
                     throw error;
@@ -106,10 +108,10 @@ module.exports = (function () {
                 }
             });
         },
-        addWorkspace: function (name, creatorId, callback) {
+        addWorkspace:function (name, creatorId, callback) {
             var workspace = new Workspace({
-                'name': name,
-                'creatorId': creatorId
+                'name':name,
+                'creatorId':creatorId
             });
 
             workspace.save(function (error, model) {
@@ -120,7 +122,7 @@ module.exports = (function () {
                 callback(workspaceId);
             });
         },
-        getWorkspace: function (workspaceId, callback) {
+        getWorkspace:function (workspaceId, callback) {
             Workspace.findById(workspaceId, function (error, model) {
                 if (error) {
                     throw error;
@@ -128,7 +130,7 @@ module.exports = (function () {
                 callback(model);
             });
         },
-        getAllWorkspaces: function (callback) {
+        getAllWorkspaces:function (callback) {
             Workspace.find(function (error, workspaces) {
                 if (error) {
                     throw error;

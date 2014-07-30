@@ -1,18 +1,39 @@
-app.directive('todoApplication', ['$location', 'todoStorage', 'filterFilter',
-    function ($location, todoStorage, filterFilter) {
+app.directive('todoApplication', ['$location', 'todoStorage', 'workspaceProvider', 'filterFilter',
+    function ($location, todoStorage, workspaceProvider, filterFilter) {
         return {
-            restrict: 'A',
-            scope: {
-                workspaceId: '@',
-                workspaceName: '@'
+            restrict:'A',
+            scope:{
+                defaultWorkspaceId:'@'
             },
-            controller: function ($scope) {
+            controller:function ($scope) {
+
+                function getWorkspaceId() {
+                    return $scope.currentWorkspace['_id'];
+                }
 
                 $scope.showWorkspaces = false;
+                $scope.workspaces = [];
+                $scope.currentWorkspace = undefined;
 
-                $scope.$watch('workspaceId', function (workspaceId) {
-                    todoStorage.items(workspaceId, function (items) {
-                        $scope.todos = items;
+                $scope.$watch('defaultWorkspaceId', function (workspaceId) {
+                    workspaceProvider.getAllWorkspaces(function (workspaces) {
+                        $scope.workspaces = workspaces;
+
+                        $scope.$watch('currentWorkspace', function (workspace) {
+                            if (workspace) {
+                                var workspaceId = getWorkspaceId();
+
+                                workspaceProvider.setUserWorkspace(workspaceId, function () {
+                                    todoStorage.items(workspaceId, function (items) {
+                                        $scope.todos = items;
+                                    });
+                                });
+                            }
+                        });
+
+                        $scope.currentWorkspace = _.findWhere(workspaces, {
+                            _id:workspaceId
+                        });
                     });
                 });
 
@@ -23,7 +44,7 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'filterFilter',
                 $scope.$watch('todos', function () {
 
                     $scope.remainingCount = filterFilter($scope.todos, {
-                        completed: false
+                        completed:false
                     }).length;
 
                     $scope.doneCount = $scope.todos.length - $scope.remainingCount;
@@ -38,8 +59,8 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'filterFilter',
 
                 $scope.$watch('location.path()', function (path) {
                     $scope.statusFilter = (path === '/active') ?
-                    { completed: false } : (path === '/completed') ?
-                    { completed: true } : null;
+                    { completed:false } : (path === '/completed') ?
+                    { completed:true } : null;
                 });
 
                 $scope.addTodo = function () {
@@ -49,13 +70,13 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'filterFilter',
                     }
 
                     var item = {
-                        title: newTodo,
-                        completed: false
+                        title:newTodo,
+                        completed:false
                     };
 
-                    todoStorage.save({
-                        title: item.title,
-                        completed: item.completed
+                    todoStorage.save(getWorkspaceId(), {
+                        title:item.title,
+                        completed:item.completed
                     }, function (itemId) {
                         item._id = itemId;
 
@@ -75,12 +96,12 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'filterFilter',
                     if (!todo.title) {
                         $scope.removeTodo(todo);
                     } else {
-                        todoStorage.update([todo]);
+                        todoStorage.update(getWorkspaceId(), [todo]);
                     }
                 };
 
                 $scope.removeTodo = function (todo) {
-                    todoStorage.remove([todo['_id']], function () {
+                    todoStorage.remove(getWorkspaceId(), [todo['_id']], function () {
                         $scope.todos.splice($scope.todos.indexOf(todo), 1);
                     });
                 };
@@ -93,7 +114,7 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'filterFilter',
                         }
                     });
 
-                    todoStorage.remove(ids, function () {
+                    todoStorage.remove(getWorkspaceId(), ids, function () {
                         $scope.todos = $scope.todos.filter(function (val) {
                             return !val.completed;
                         });
@@ -101,7 +122,7 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'filterFilter',
                 };
 
                 $scope.mark = function (todo) {
-                    todoStorage.update([todo]);
+                    todoStorage.update(getWorkspaceId(), [todo]);
                 }
 
                 $scope.markAll = function (done) {
@@ -110,19 +131,23 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'filterFilter',
                     $scope.todos.forEach(function (todo) {
                         if (todo.completed != done) {
                             todos.push({
-                                _id: todo._id,
-                                completed: done,
-                                title: todo.title,
-                                userId: todo.userId
+                                _id:todo._id,
+                                completed:done,
+                                title:todo.title,
+                                userId:todo.userId
                             });
                         }
                     });
 
-                    todoStorage.update(todos, function () {
+                    todoStorage.update(getWorkspaceId(), todos, function () {
                         $scope.todos.forEach(function (todo) {
                             todo.completed = done;
                         });
                     });
+                };
+
+                $scope.logout = function () {
+                    window.location = 'logout';
                 };
             }
         }

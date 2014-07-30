@@ -24,19 +24,19 @@ app.factory('todoStorage', ['$http', function ($http) {
     }
 
     return {
-        items: function (workspaceId, callback) {
+        items:function (workspaceId, callback) {
             sendRequest({
-                method: 'GET',
-                url: '/api/items'
+                method:'GET',
+                url:'/api/items/' + workspaceId
             }, callback);
         },
-        save: function (todoModel, callback) {
+        save:function (workspaceId, todoModel, callback) {
             if (todoModel) {
                 sendRequest({
-                    method: 'POST',
-                    url: '/api/save',
-                    data: {
-                        todoModel: todoModel
+                    method:'POST',
+                    url:'/api/save/' + workspaceId,
+                    data:{
+                        todoModel:todoModel
                     }
                 }, function (data) {
                     callback(data.itemId);
@@ -45,26 +45,26 @@ app.factory('todoStorage', ['$http', function ($http) {
                 console.log('empty request');
             }
         },
-        update: function (todoModels, callback) {
+        update:function (workspaceId, todoModels, callback) {
             if (todoModels && todoModels.length) {
                 sendRequest({
-                    method: 'POST',
-                    url: '/api/update',
-                    data: {
-                        todoModels: todoModels
+                    method:'POST',
+                    url:'/api/update/' + workspaceId,
+                    data:{
+                        todoModels:todoModels
                     }
                 }, callback);
             } else {
                 console.log('empty request');
             }
         },
-        remove: function (todoIds, callback) {
+        remove:function (workspaceId, todoIds, callback) {
             if (todoIds && todoIds.length) {
                 sendRequest({
-                    method: 'POST',
-                    url: '/api/remove',
-                    data: {
-                        todoIds: todoIds
+                    method:'POST',
+                    url:'/api/remove/' + workspaceId,
+                    data:{
+                        todoIds:todoIds
                     }
                 }, callback);
             } else {

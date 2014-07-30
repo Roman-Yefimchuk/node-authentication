@@ -2,14 +2,19 @@ module.exports = function (app, passport, dbProvider) {
 
     var getUserContext = require('./context-provider')['getUserContext'];
 
+    function getWorkspaceId(request) {
+        var params = request.params;
+        return params.workspaceId;
+    }
+
     app.get('/api/get-all-workspaces', function (req, res) {
         var userId = getUserContext(req.user)['userId'];
         if (userId) {
             dbProvider.getAllWorkspaces(function (workspaces) {
                 res.send({
-                    status: true,
-                    message: 'Selected ' + workspaces.length + ' workspace(s)',
-                    data: workspaces
+                    status:true,
+                    message:'Selected ' + workspaces.length + ' workspace(s)',
+                    data:workspaces
                 });
             })
         } else {
@@ -22,10 +27,10 @@ module.exports = function (app, passport, dbProvider) {
         if (userId) {
             dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
                 res.send({
-                    status: true,
-                    message: 'Current user workspace ID: ' + workspaceId,
-                    data: {
-                        workspaceId: workspaceId
+                    status:true,
+                    message:'Current user workspace ID: ' + workspaceId,
+                    data:{
+                        workspaceId:workspaceId
                     }
                 });
             })
@@ -37,12 +42,11 @@ module.exports = function (app, passport, dbProvider) {
     app.get('/api/set-user-workspace/:workspaceId', function (req, res) {
         var userId = getUserContext(req.user)['userId'];
         if (userId) {
-            var params = req.params;
-            var workspaceId = params.workspaceId;
+            var workspaceId = getWorkspaceId(req);
             dbProvider.setUserWorkspaceId(userId, workspaceId, function () {
                 res.send({
-                    status: true,
-                    message: 'New workspace ID: ' + workspaceId
+                    status:true,
+                    message:'New workspace ID: ' + workspaceId
                 });
             });
         } else {
@@ -59,20 +63,21 @@ module.exports = function (app, passport, dbProvider) {
         }
     });
 
-    app.get('/api/items', function (req, res) {
+    app.get('/api/items/:workspaceId', function (req, res) {
         var userId = getUserContext(req.user)['userId'];
         if (userId) {
-            dbProvider.getItems(userId, function (error, items) {
+            var workspaceId = getWorkspaceId(req);
+            dbProvider.getItems(workspaceId, userId, function (error, items) {
                 if (error) {
                     res.send({
-                        status: false,
-                        message: error
+                        status:false,
+                        message:error
                     });
                 } else {
                     res.send({
-                        status: true,
-                        message: 'Selected ' + items.length + ' item(s)',
-                        data: items
+                        status:true,
+                        message:'Selected ' + items.length + ' item(s)',
+                        data:items
                     });
                 }
             });
@@ -81,22 +86,23 @@ module.exports = function (app, passport, dbProvider) {
         }
     });
 
-    app.post('/api/save', function (req, res) {
+    app.post('/api/save/:workspaceId', function (req, res) {
         var userId = getUserContext(req.user)['userId'];
         if (userId) {
+            var workspaceId = getWorkspaceId(req);
             var todoModel = req.body['todoModel'];
-            dbProvider.save(userId, todoModel, function (error, itemId) {
+            dbProvider.save(workspaceId, userId, todoModel, function (error, itemId) {
                 if (error) {
                     res.send({
-                        status: false,
-                        message: error
+                        status:false,
+                        message:error
                     });
                 } else {
                     res.send({
-                        status: true,
-                        message: 'Item[' + itemId + '] saved',
-                        data: {
-                            itemId: itemId
+                        status:true,
+                        message:'Item[' + itemId + '] saved',
+                        data:{
+                            itemId:itemId
                         }
                     });
                 }
@@ -106,20 +112,21 @@ module.exports = function (app, passport, dbProvider) {
         }
     });
 
-    app.post('/api/update', function (req, res) {
+    app.post('/api/update/:workspaceId', function (req, res) {
         var userId = getUserContext(req.user)['userId'];
         if (userId) {
+            var workspaceId = getWorkspaceId(req);
             var todoModels = req.body['todoModels'];
-            dbProvider.update(userId, todoModels, function (error) {
+            dbProvider.update(workspaceId, userId, todoModels, function (error) {
                 if (error) {
                     res.send({
-                        status: false,
-                        message: error
+                        status:false,
+                        message:error
                     });
                 } else {
                     res.send({
-                        status: true,
-                        message: '(' + todoModels.length + ') item(s) updated'
+                        status:true,
+                        message:'(' + todoModels.length + ') item(s) updated'
                     });
                 }
             });
@@ -128,20 +135,21 @@ module.exports = function (app, passport, dbProvider) {
         }
     });
 
-    app.post('/api/remove', function (req, res) {
+    app.post('/api/remove/:workspaceId', function (req, res) {
         var userId = getUserContext(req.user)['userId'];
         if (userId) {
+            var workspaceId = getWorkspaceId(req);
             var todoIds = req.body['todoIds'];
-            dbProvider.remove(userId, todoIds, function (error) {
+            dbProvider.remove(workspaceId, userId, todoIds, function (error) {
                 if (error) {
                     res.send({
-                        status: false,
-                        message: error
+                        status:false,
+                        message:error
                     });
                 } else {
                     res.send({
-                        status: true,
-                        message: 'Removed ' + todoIds.length + ' item(s)'
+                        status:true,
+                        message:'Removed ' + todoIds.length + ' item(s)'
                     });
                 }
             });
@@ -165,13 +173,10 @@ module.exports = function (app, passport, dbProvider) {
             dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
                 dbProvider.getWorkspace(workspaceId, function (workspace) {
                     res.render('todo.ejs', {
-                        userId: userId,
-                        displayName: userContext.displayName,
-                        provider: userContext.provider,
-                        workspace: {
-                            id: workspace['_id'].toString(),
-                            name: workspace.name
-                        }
+                        userId:userId,
+                        displayName:userContext.displayName,
+                        provider:userContext.provider,
+                        workspaceId:workspace['_id'].toString()
                     });
                 });
             })
@@ -189,56 +194,56 @@ module.exports = function (app, passport, dbProvider) {
     // show the login form
     app.get('/login', function (req, res) {
         res.render('login.ejs', {
-            message: req.flash('loginMessage')
+            message:req.flash('loginMessage')
         });
     });
 
     // process the login form
     app.post('/login', passport.authenticate('local-login', {
-        successRedirect: '/todo',
-        failureRedirect: '/login',
-        failureFlash: true
+        successRedirect:'/todo',
+        failureRedirect:'/login',
+        failureFlash:true
     }));
 
     // SIGNUP =================================
     // show the signup form
     app.get('/signup', function (req, res) {
         res.render('sign-up.ejs', {
-            message: req.flash('loginMessage')
+            message:req.flash('loginMessage')
         });
     });
 
     // process the signup form
     app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect: '/todo',
-        failureRedirect: '/signup',
-        failureFlash: true
+        successRedirect:'/todo',
+        failureRedirect:'/signup',
+        failureFlash:true
     }));
 
     // facebook -------------------------------
 
     // send to facebook to do the authentication
     app.get('/auth/facebook', passport.authenticate('facebook', {
-        scope: 'email'
+        scope:'email'
     }));
 
     // handle the callback after facebook has authenticated the user
     app.get('/auth/facebook/callback', passport.authenticate('facebook', {
-        successRedirect: '/todo',
-        failureRedirect: '/'
+        successRedirect:'/todo',
+        failureRedirect:'/'
     }));
 
     // twitter --------------------------------
 
     // send to twitter to do the authentication
     app.get('/auth/twitter', passport.authenticate('twitter', {
-        scope: 'email'
+        scope:'email'
     }));
 
     // handle the callback after twitter has authenticated the user
     app.get('/auth/twitter/callback', passport.authenticate('twitter', {
-        successRedirect: '/todo',
-        failureRedirect: '/'
+        successRedirect:'/todo',
+        failureRedirect:'/'
     }));
 
 
@@ -246,13 +251,13 @@ module.exports = function (app, passport, dbProvider) {
 
     // send to google to do the authentication
     app.get('/auth/google', passport.authenticate('google', {
-        scope: ['profile', 'email']
+        scope:['profile', 'email']
     }));
 
     // the callback after google has authenticated the user
     app.get('/auth/google/callback', passport.authenticate('google', {
-        successRedirect: '/todo',
-        failureRedirect: '/'
+        successRedirect:'/todo',
+        failureRedirect:'/'
     }));
 
 // =============================================================================
@@ -262,40 +267,40 @@ module.exports = function (app, passport, dbProvider) {
     // locally --------------------------------
     app.get('/connect/local', function (req, res) {
         res.render('connect-local.ejs', {
-            message: req.flash('loginMessage')
+            message:req.flash('loginMessage')
         });
     });
 
     app.post('/connect/local', passport.authenticate('local-signup', {
-        successRedirect: '/todo', // redirect to the secure profile section
-        failureRedirect: '/connect/local', // redirect back to the signup page if there is an error
-        failureFlash: true // allow flash messages
+        successRedirect:'/todo', // redirect to the secure profile section
+        failureRedirect:'/connect/local', // redirect back to the signup page if there is an error
+        failureFlash:true // allow flash messages
     }));
 
     // facebook -------------------------------
 
     // send to facebook to do the authentication
     app.get('/connect/facebook', passport.authorize('facebook', {
-        scope: 'email'
+        scope:'email'
     }));
 
     // handle the callback after facebook has authorized the user
     app.get('/connect/facebook/callback', passport.authorize('facebook', {
-        successRedirect: '/todo',
-        failureRedirect: '/'
+        successRedirect:'/todo',
+        failureRedirect:'/'
     }));
 
     // twitter --------------------------------
 
     // send to twitter to do the authentication
     app.get('/connect/twitter', passport.authorize('twitter', {
-        scope: 'email'
+        scope:'email'
     }));
 
     // handle the callback after twitter has authorized the user
     app.get('/connect/twitter/callback', passport.authorize('twitter', {
-        successRedirect: '/todo',
-        failureRedirect: '/'
+        successRedirect:'/todo',
+        failureRedirect:'/'
     }));
 
 
@@ -303,13 +308,13 @@ module.exports = function (app, passport, dbProvider) {
 
     // send to google to do the authentication
     app.get('/connect/google', passport.authorize('google', {
-        scope: ['profile', 'email']
+        scope:['profile', 'email']
     }));
 
     // the callback after google has authorized the user
     app.get('/connect/google/callback', passport.authorize('google', {
-        successRedirect: '/todo',
-        failureRedirect: '/'
+        successRedirect:'/todo',
+        failureRedirect:'/'
     }));
 
 // =============================================================================
