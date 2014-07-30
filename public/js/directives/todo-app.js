@@ -11,7 +11,6 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'workspaceProvider
                     return $scope.currentWorkspace['_id'];
                 }
 
-                $scope.showWorkspaces = false;
                 $scope.workspaces = [];
                 $scope.currentWorkspace = undefined;
 
