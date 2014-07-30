@@ -82,6 +82,10 @@ body {
     text-rendering: optimizeLegibility;
 }
 
+[manage-link] {
+    cursor: pointer;
+}
+
 #header {
     padding-top: 15px;
     border-radius: inherit;

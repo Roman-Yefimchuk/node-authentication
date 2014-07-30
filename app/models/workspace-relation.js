@@ -7,6 +7,11 @@ var workspaceRelationSchema = new Schema({
     },
     workspaceId: {
         type: String
+    },
+    permissions: {
+        //read-only, collection-manager or access-manager
+        //format: read-only|collection-manager|access-manager
+        type: String
     }
 });
 

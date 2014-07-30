@@ -166,7 +166,7 @@ module.exports = function (app, passport, dbProvider) {
             var userId = userContext.userId;
 
             var workspaceId = req.flash('workspaceId');
-            if (workspaceId) {
+            if (workspaceId && workspaceId.length > 0) {
                 res.render('todo.ejs', {
                     userId: userId,
                     displayName: userContext.displayName,

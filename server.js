@@ -2,9 +2,12 @@
 
 var express = require('express');
 var app = express();
-var port = 8080;
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
 var passport = require('passport');
 var flash = require('connect-flash');
+
+var port = 8080;
 
 {
     var path = require('path');
@@ -35,16 +38,10 @@ dbConnector.connect(function (dbProvider) {
 
     });
 
+    require('./app/sockets-handler')(io);
     require('./app/routes.js')(app, passport, dbProvider);
 
-    dbProvider.getAllWorkspaces(function (workspaces) {
-        console.log('find ' + workspaces.length + ' workspace(s)');
-        workspaces.forEach(function (workspace) {
-            console.log(workspace.name);
-        });
-    });
-
-    app.listen(port);
+    server.listen(port);
 
     console.log('The magic happens on port ' + port);
 });

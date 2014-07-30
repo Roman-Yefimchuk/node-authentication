@@ -1,11 +1,29 @@
 app.directive('todoApplication', ['$location', 'todoStorage', 'workspaceProvider', 'filterFilter',
     function ($location, todoStorage, workspaceProvider, filterFilter) {
         return {
-            restrict:'A',
-            scope:{
-                defaultWorkspaceId:'@'
+            restrict: 'A',
+            scope: {
+                defaultWorkspaceId: '@',
+                userId: '@'
             },
-            controller:function ($scope) {
+            controller: function ($scope) {
+
+                function initSocket() {
+                    var socket = io.connect('http://127.0.0.1:8080/');
+
+                    socket.emit('register_user', {
+                        userId: $scope.userId
+                    });
+
+                    socket.on('notification', function (data) {
+                        $.notify(data['message'], {
+                                position: "right bottom",
+                                className: data['type'],
+                                autoHideDelay: 2500
+                            }
+                        );
+                    });
+                }
 
                 function getWorkspaceId() {
                     return $scope.currentWorkspace['_id'];
@@ -31,7 +49,7 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'workspaceProvider
                         });
 
                         $scope.currentWorkspace = _.findWhere(workspaces, {
-                            _id:workspaceId
+                            _id: workspaceId
                         });
                     });
                 });
@@ -43,7 +61,7 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'workspaceProvider
                 $scope.$watch('todos', function () {
 
                     $scope.remainingCount = filterFilter($scope.todos, {
-                        completed:false
+                        completed: false
                     }).length;
 
                     $scope.doneCount = $scope.todos.length - $scope.remainingCount;
@@ -58,8 +76,8 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'workspaceProvider
 
                 $scope.$watch('location.path()', function (path) {
                     $scope.statusFilter = (path === '/active') ?
-                    { completed:false } : (path === '/completed') ?
-                    { completed:true } : null;
+                    { completed: false } : (path === '/completed') ?
+                    { completed: true } : null;
                 });
 
                 $scope.addTodo = function () {
@@ -69,13 +87,13 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'workspaceProvider
                     }
 
                     var item = {
-                        title:newTodo,
-                        completed:false
+                        title: newTodo,
+                        completed: false
                     };
 
                     todoStorage.save(getWorkspaceId(), {
-                        title:item.title,
-                        completed:item.completed
+                        title: item.title,
+                        completed: item.completed
                     }, function (itemId) {
                         item._id = itemId;
 
@@ -130,10 +148,10 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'workspaceProvider
                     $scope.todos.forEach(function (todo) {
                         if (todo.completed != done) {
                             todos.push({
-                                _id:todo._id,
-                                completed:done,
-                                title:todo.title,
-                                userId:todo.userId
+                                _id: todo._id,
+                                completed: done,
+                                title: todo.title,
+                                userId: todo.userId
                             });
                         }
                     });
@@ -144,6 +162,9 @@ app.directive('todoApplication', ['$location', 'todoStorage', 'workspaceProvider
                         });
                     });
                 };
+
+                $scope.manageWorkspace = function () {
+                }
 
                 $scope.logout = function () {
                     window.location = 'logout';
