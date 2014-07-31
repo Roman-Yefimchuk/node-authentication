@@ -1,1 +1,1 @@
-"C:\Program Files\MongoDB 2.6 Standard\bin\mongod.exe" --dbpath "C:\Users\Roman\Desktop\node-authentication\db"
+"C:\Program Files\MongoDB 2.6 Standard\bin\mongod.exe" --dbpath "D:\node-authentication\local_db"

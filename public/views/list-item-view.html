@@ -1,0 +1,19 @@
+<div>
+    <table width="100%">
+        <tr>
+            <td width="50%">
+                User ID: <b>{{ user.id }}</b>
+                User name: <b>{{ user.displayName }}</b>
+            </td>
+            <td width="50%">
+                <div style="float: right">
+                    <label><input type="checkbox" ng-model="permissions.readOnly"/>Read only</label>
+                    <br>
+                    <label><input type="checkbox" ng-model="permissions.collectionManager"/>Collection manager</label>
+                    <br>
+                    <label><input type="checkbox" ng-model="permissions.accessManager"/>Access manager</label>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>

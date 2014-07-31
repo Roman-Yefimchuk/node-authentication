@@ -1,0 +1,25 @@
+<div class='ng-modal' ng-show='show'>
+    <div class='ng-modal-overlay'>
+    </div>
+
+    <div class='ng-modal-dialog' ng-style='dialogStyle'>
+
+        <div class='ng-modal-dialog-content'>
+
+            <div dialog-title>
+                Workspace <span>{{ dialogTitle }}</span>
+            </div>
+
+            <div users-collection class="list-frame">
+                <ul ng-repeat="user in users" is-lats-item="{{ $last }}">
+                    <li list-item user="user">
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <button control ng-click="save()">Save</button>
+                <button control ng-click="cancel()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

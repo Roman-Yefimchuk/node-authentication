@@ -16,7 +16,7 @@ var port = 8080;
     app.use(static);
 }
 
-var dbConnector = require('./app/db-connector');
+var dbConnector = require('./app/db/db-connector');
 dbConnector.connect(function (dbProvider) {
 
     require('./config/passport')(passport); // pass passport for configuration

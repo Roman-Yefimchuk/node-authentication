@@ -1,4 +1,3 @@
-node_modules/
 .idea/
-db/
-*.log
+local_db/
+node_modules/

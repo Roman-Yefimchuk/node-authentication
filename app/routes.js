@@ -7,8 +7,45 @@ module.exports = function (app, passport, dbProvider) {
         return params.workspaceId;
     }
 
+    function getUserId(request) {
+        var params = request.params;
+        return params.userId;
+    }
+
+    app.get('/api/get-permitted-workspaces/:userId', function (req, res) {
+        var userId = getUserId(req);
+        dbProvider.getPermittedWorkspaces(userId, function (workspaces) {
+            res.send({
+                status: true,
+                message: 'Selected ' + workspaces.length + ' permitted workspaces(s)',
+                data: workspaces
+            });
+        })
+    });
+
+    app.get('/api/get-all-users', function (req, res) {
+        dbProvider.getAllUsers(function (users) {
+            res.send({
+                status: true,
+                message: 'Selected ' + users.length + ' users(s)',
+                data: users
+            });
+        })
+    });
+
     app.get('/api/get-all-workspaces', function (req, res) {
         dbProvider.getAllWorkspaces(function (workspaces) {
+            res.send({
+                status: true,
+                message: 'Selected ' + workspaces.length + ' workspace(s)',
+                data: workspaces
+            });
+        })
+    });
+
+    app.get('/api/get-workspaces/:userId', function (req, res) {
+        var userId = getUserId(req);
+        dbProvider.getWorkspaces(userId, function (workspaces) {
             res.send({
                 status: true,
                 message: 'Selected ' + workspaces.length + ' workspace(s)',
@@ -62,19 +99,12 @@ module.exports = function (app, passport, dbProvider) {
         var userId = getUserContext(req.user)['userId'];
         if (userId) {
             var workspaceId = getWorkspaceId(req);
-            dbProvider.getItems(workspaceId, userId, function (error, items) {
-                if (error) {
-                    res.send({
-                        status: false,
-                        message: error
-                    });
-                } else {
-                    res.send({
-                        status: true,
-                        message: 'Selected ' + items.length + ' item(s)',
-                        data: items
-                    });
-                }
+            dbProvider.getItems(workspaceId, userId, function (items) {
+                res.send({
+                    status: true,
+                    message: 'Selected ' + items.length + ' item(s)',
+                    data: items
+                });
             });
         } else {
             res.redirect('/');
@@ -86,21 +116,14 @@ module.exports = function (app, passport, dbProvider) {
         if (userId) {
             var workspaceId = getWorkspaceId(req);
             var todoModel = req.body['todoModel'];
-            dbProvider.save(workspaceId, userId, todoModel, function (error, itemId) {
-                if (error) {
-                    res.send({
-                        status: false,
-                        message: error
-                    });
-                } else {
-                    res.send({
-                        status: true,
-                        message: 'Item[' + itemId + '] saved',
-                        data: {
-                            itemId: itemId
-                        }
-                    });
-                }
+            dbProvider.save(workspaceId, userId, todoModel, function (itemId) {
+                res.send({
+                    status: true,
+                    message: 'Item[' + itemId + '] saved',
+                    data: {
+                        itemId: itemId
+                    }
+                });
             });
         } else {
             res.redirect('/');
@@ -112,18 +135,11 @@ module.exports = function (app, passport, dbProvider) {
         if (userId) {
             var workspaceId = getWorkspaceId(req);
             var todoModels = req.body['todoModels'];
-            dbProvider.update(workspaceId, userId, todoModels, function (error) {
-                if (error) {
-                    res.send({
-                        status: false,
-                        message: error
-                    });
-                } else {
-                    res.send({
-                        status: true,
-                        message: '(' + todoModels.length + ') item(s) updated'
-                    });
-                }
+            dbProvider.update(workspaceId, userId, todoModels, function () {
+                res.send({
+                    status: true,
+                    message: '(' + todoModels.length + ') item(s) updated'
+                });
             });
         } else {
             res.redirect('/');
@@ -135,18 +151,11 @@ module.exports = function (app, passport, dbProvider) {
         if (userId) {
             var workspaceId = getWorkspaceId(req);
             var todoIds = req.body['todoIds'];
-            dbProvider.remove(workspaceId, userId, todoIds, function (error) {
-                if (error) {
-                    res.send({
-                        status: false,
-                        message: error
-                    });
-                } else {
-                    res.send({
-                        status: true,
-                        message: 'Removed ' + todoIds.length + ' item(s)'
-                    });
-                }
+            dbProvider.remove(workspaceId, userId, todoIds, function () {
+                res.send({
+                    status: true,
+                    message: 'Removed ' + todoIds.length + ' item(s)'
+                });
             });
         } else {
             res.redirect('/');
@@ -175,13 +184,11 @@ module.exports = function (app, passport, dbProvider) {
                 });
             } else {
                 dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
-                    dbProvider.getWorkspace(workspaceId, function (workspace) {
-                        res.render('todo.ejs', {
-                            userId: userId,
-                            displayName: userContext.displayName,
-                            provider: userContext.provider,
-                            workspaceId: workspace['_id'].toString()
-                        });
+                    res.render('todo.ejs', {
+                        userId: userId,
+                        displayName: userContext.displayName,
+                        provider: userContext.provider,
+                        workspaceId: workspaceId
                     });
                 });
             }
