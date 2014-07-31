@@ -1,5 +1,4 @@
 var dbHelper = require('../db-helper');
-var Permissions = require('./permissions');
 
 module.exports = dbHelper.createModel('PermittedWorkspace', {
     workspaceId: {type: String},

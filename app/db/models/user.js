@@ -2,7 +2,6 @@ var bcrypt = require('bcrypt-nodejs');
 var dbHelper = require('../db-helper');
 
 var Workspace = require('./workspace');
-var Permissions = require('./permissions');
 var PermittedWorkspace = require('./permitted-workspace');
 
 module.exports = dbHelper.createModel('User', {

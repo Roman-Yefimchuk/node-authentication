@@ -6,7 +6,6 @@ module.exports = (function () {
     var Todo = require('./models/todo');
     var Workspace = require('./models/workspace');
     var PermittedWorkspace = require('./models/permitted-workspace');
-    var Permissions = require('./models/permissions');
 
     var dbProvider = {
         getItems: function (workspaceId, userId, callback) {
