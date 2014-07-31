@@ -1,6 +1,6 @@
-var modelBuilder = require('../model-builder');
+var dbHelper = require('../db-helper');
 
-module.exports = modelBuilder.createModel('Todo', {
+module.exports = dbHelper.createModel('Todo', {
     userId: {type: String},
     title: {type: String},
     completed: {type: Boolean},

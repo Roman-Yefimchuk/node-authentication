@@ -31,7 +31,7 @@
 
         <form action="/login" method="post" ng-controller="LoginController">
 
-            <div class="form-group">
+            <div class="form-group" ng-show="workspaces.length > 0">
                 <label>Select workspace</label>
                 <select ng-model="currentWorkspace"
                         ng-options="workspace.name for workspace in workspaces">

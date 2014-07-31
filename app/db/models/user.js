@@ -1,11 +1,11 @@
 var bcrypt = require('bcrypt-nodejs');
-var modelBuilder = require('../model-builder');
+var dbHelper = require('../db-helper');
 
 var Workspace = require('./workspace');
 var Permissions = require('./permissions');
 var PermittedWorkspace = require('./permitted-workspace');
 
-module.exports = modelBuilder.createModel('User', {
+module.exports = dbHelper.createModel('User', {
     local: {
         email: {type: String},
         password: {type: String}
@@ -29,16 +29,8 @@ module.exports = modelBuilder.createModel('User', {
         name: {type: String}
     },
     currentWorkspaceId: {type: String},
-    ownWorkspaces: {
-        type: [
-            {type: String}
-        ]
-    },
-    permittedWorkspaces: {
-        type: [
-            {type: PermittedWorkspace}
-        ]
-    }
+    ownWorkspaces: [String],
+    permittedWorkspaces: [PermittedWorkspace['schema']]
 }, function (schema) {
     schema.methods.generateHash = function (password) {
         return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);

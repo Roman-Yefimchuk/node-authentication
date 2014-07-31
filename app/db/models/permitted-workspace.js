@@ -1,7 +1,11 @@
-var modelBuilder = require('../model-builder');
+var dbHelper = require('../db-helper');
 var Permissions = require('./permissions');
 
-module.exports = modelBuilder.createModel('PermittedWorkspace', {
+module.exports = dbHelper.createModel('PermittedWorkspace', {
     workspaceId: {type: String},
-    permissions: [Permissions]
+    permissions: {
+        readOnly: {type: Boolean},
+        collectionManager: {type: Boolean},
+        accessManager: {type: Boolean}
+    }
 });

@@ -145,14 +145,14 @@ module.exports = (function () {
                     var permittedWorkspaces = model.permittedWorkspaces;
                     permittedWorkspaces.push(new PermittedWorkspace({
                         'workspaceId': workspaceId,
-                        'permissions': new Permissions({
+                        'permissions': {
                             'readOnly': true,
                             'collectionManager': true,
                             'accessManager': true
-                        })
+                        }
                     }));
 
-                    model.save(function (error) {
+                    model.save(function (error, model) {
                         if (error) {
                             throw error;
                         }

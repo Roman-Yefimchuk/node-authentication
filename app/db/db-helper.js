@@ -1,13 +1,20 @@
 var mongoose = require('mongoose');
+var Schema = mongoose['Schema'];
 
 module.exports = {
     createModel: function (modelName, obj, schemaBuilder) {
-        var schema = new mongoose.Schema(obj);
+        var schema = new Schema(obj);
 
         if (schemaBuilder) {
             schemaBuilder(schema);
         }
 
         return mongoose.model(modelName, schema);
+    },
+    getType: function (typeName) {
+        return {
+            type: Schema['Types']['ObjectId'],
+            ref: typeName
+        };
     }
 };

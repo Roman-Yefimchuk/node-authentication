@@ -1,6 +1,6 @@
-var modelBuilder = require('../model-builder');
+var dbHelper = require('../db-helper');
 
-module.exports = modelBuilder.createModel('Workspace', {
+module.exports = dbHelper.createModel('Workspace', {
     name: {type: String},
     creatorId: {type: String}
 });
