@@ -88,6 +88,12 @@ app.factory('apiProvider', ['$http', function ($http) {
                 method: 'GET',
                 url: '/api/get-all-users'
             }, callback);
+        },
+        getPermittedWorkspaces: function (callback) {
+            sendRequest({
+                method: 'GET',
+                url: '/api/get-permitted-workspaces'
+            }, callback);
         }
     };
 }]);

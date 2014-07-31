@@ -12,15 +12,19 @@ module.exports = function (app, passport, dbProvider) {
         return params.userId;
     }
 
-    app.get('/api/get-permitted-workspaces/:userId', function (req, res) {
-        var userId = getUserId(req);
-        dbProvider.getPermittedWorkspaces(userId, function (workspaces) {
-            res.send({
-                status: true,
-                message: 'Selected ' + workspaces.length + ' permitted workspaces(s)',
-                data: workspaces
+    app.get('/api/get-permitted-workspaces', function (req, res) {
+        var userId = getUserContext(req.user)['userId'];
+        if (userId) {
+            dbProvider.getPermittedWorkspaces(userId, function (workspaces) {
+                res.send({
+                    status: true,
+                    message: 'Selected ' + workspaces.length + ' permitted workspaces(s)',
+                    data: workspaces
+                });
             });
-        })
+        } else {
+            res.redirect('/');
+        }
     });
 
     app.get('/api/get-all-users', function (req, res) {
@@ -30,7 +34,7 @@ module.exports = function (app, passport, dbProvider) {
                 message: 'Selected ' + users.length + ' users(s)',
                 data: users
             });
-        })
+        });
     });
 
     app.get('/api/get-all-workspaces', function (req, res) {
@@ -40,7 +44,7 @@ module.exports = function (app, passport, dbProvider) {
                 message: 'Selected ' + workspaces.length + ' workspace(s)',
                 data: workspaces
             });
-        })
+        });
     });
 
     app.get('/api/get-workspaces/:userId', function (req, res) {
@@ -51,7 +55,7 @@ module.exports = function (app, passport, dbProvider) {
                 message: 'Selected ' + workspaces.length + ' workspace(s)',
                 data: workspaces
             });
-        })
+        });
     });
 
     app.get('/api/get-user-workspace', function (req, res) {
@@ -65,7 +69,7 @@ module.exports = function (app, passport, dbProvider) {
                         workspaceId: workspaceId
                     }
                 });
-            })
+            });
         } else {
             res.redirect('/');
         }

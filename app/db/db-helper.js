@@ -10,11 +10,5 @@ module.exports = {
         }
 
         return mongoose.model(modelName, schema);
-    },
-    getType: function (typeName) {
-        return {
-            type: Schema['Types']['ObjectId'],
-            ref: typeName
-        };
     }
 };

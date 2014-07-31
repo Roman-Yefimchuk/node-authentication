@@ -1,5 +1,6 @@
 module.exports = (function () {
 
+    var ObjectID = require('mongodb')['ObjectID'];
     var getUserContext = require('./../context-provider')['getUserContext'];
 
     var User = require('./models/user');
@@ -151,7 +152,7 @@ module.exports = (function () {
                         }
                     }));
 
-                    model.save(function (error, model) {
+                    model.save(function (error) {
                         if (error) {
                             throw error;
                         }
@@ -184,25 +185,46 @@ module.exports = (function () {
             });
         },
         getPermittedWorkspaces: function (userId, callback) {
-            /*            WorkspaceRelation.find({
-             'userId': userId,
-             '$or': [
-             {
-             'permissions.readOnly': true
-             },
-             {
-             'permissions.collectionManager': true
-             },
-             {
-             'permissions.accessManager': true
-             }
-             ]
-             }, function (error, workspaces) {
-             if (error) {
-             throw error;
-             }
-             callback(workspaces);
-             });*/
+            User.findById(userId, function (error, model) {
+                if (error) {
+                    throw error;
+                }
+
+                if (model) {
+                    var permittedWorkspaces = model.permittedWorkspaces;
+
+                    var workspaceIds = [];
+                    permittedWorkspaces.forEach(function (permittedWorkspace) {
+                        var id = permittedWorkspace.workspaceId;
+                        workspaceIds.push({
+                            '_id': new ObjectID(id)
+                        });
+                    });
+
+                    Workspace.find({
+                        '$or': workspaceIds
+                    }, function (error, workspaces) {
+                        if (error) {
+                            throw  error;
+                        }
+
+                        var result = [];
+
+                        for (var index = 0; index < workspaces.length; index++) {
+                            result.push({
+                                '_id': permittedWorkspaces[index].workspaceId,
+                                'name': workspaces[index].name,
+                                'creatorId': workspaces[index].creatorId,
+                                'permissions': permittedWorkspaces[index].permissions
+                            });
+                        }
+
+                        callback(result);
+                    });
+                } else {
+                    throw 'User not found';
+                }
+            });
         },
         getAllWorkspaces: function (callback) {
             Workspace.find(function (error, workspaces) {

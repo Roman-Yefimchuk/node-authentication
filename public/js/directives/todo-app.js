@@ -40,7 +40,7 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
                         autoHideDelay: 2500
                     });
 
-                    apiProvider.getAllWorkspaces(function (workspaces) {
+                    apiProvider.getPermittedWorkspaces(function (workspaces) {
                         $scope.workspaces = workspaces;
 
                         $scope.$watch('currentWorkspace', function (workspace) {
