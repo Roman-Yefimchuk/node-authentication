@@ -16,7 +16,7 @@ module.exports = (function () {
                 var permissions = permittedWorkspace.permissions;
                 return {
                     'readOnly': permissions.readOnly,
-                    'collectionManager': permissions.accessManager,
+                    'collectionManager': permissions.collectionManager,
                     'accessManager': permissions.accessManager
                 };
             }
