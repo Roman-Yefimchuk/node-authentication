@@ -8,11 +8,29 @@ module.exports = (function () {
     var Workspace = require('./models/workspace');
     var PermittedWorkspace = require('./models/permitted-workspace');
 
+    function getUserPermissionsForWorkspace(workspaceId, user) {
+        var permittedWorkspaces = user.permittedWorkspaces;
+        for (var index = 0; index < permittedWorkspaces.length; index++) {
+            var permittedWorkspace = permittedWorkspaces[index];
+            if (workspaceId == permittedWorkspace.workspaceId) {
+                var permissions = permittedWorkspace.permissions;
+                return {
+                    'readOnly': permissions.readOnly,
+                    'collectionManager': permissions.accessManager,
+                    'accessManager': permissions.accessManager
+                };
+            }
+        }
+        return {
+            'readOnly': false,
+            'collectionManager': false,
+            'accessManager': false
+        };
+    }
+
     var dbProvider = {
         getItems: function (workspaceId, userId, callback) {
-            Todo.find({
-                'workspaceId': workspaceId
-            }, function (error, items) {
+            Todo.find({'workspaceId': workspaceId}, function (error, items) {
                 if (error) {
                     throw error;
                 }
@@ -38,48 +56,59 @@ module.exports = (function () {
             });
         },
         update: function (workspaceId, userId, todoModels, callback) {
-            for (var modelIndex = 0; modelIndex < todoModels.length; modelIndex++) {
-                var todoModel = todoModels[modelIndex];
-                Todo.findById(todoModel['_id'], function (error, model) {
-                    if (error) {
-                        throw error;
-                    }
-
-                    model.title = todoModel.title;
-                    model.completed = todoModel.completed;
-                    model.save(function (error) {
+            var index = 0;
+            var next = function () {
+                if (index == todoModels.length) {
+                    callback();
+                } else {
+                    var todoModel = todoModels[index];
+                    Todo.findById(todoModel['_id'], function (error, model) {
                         if (error) {
                             throw error;
                         }
-                    });
-                });
-            }
 
-            callback();
-        },
-        remove: function (workspaceId, userId, todoIds, callback) {
-            for (var idIndex = 0; idIndex < todoIds.length; idIndex++) {
-                var itemId = todoIds[idIndex];
-                Todo.findById(itemId, function (error, model) {
-                    if (error) {
-                        throw  error;
-                    }
-
-                    if (model) {
-                        model.remove(function (error) {
+                        model.title = todoModel.title;
+                        model.completed = todoModel.completed;
+                        model.save(function (error) {
                             if (error) {
                                 throw error;
                             }
-                        });
-                    }
-                });
-            }
 
-            callback();
+                            index++;
+                            next();
+                        });
+                    });
+                }
+            };
+
+            next();
         },
-        setUserPermissionForWorkspace: function (userId, workspaceId, permissions, callback) {
-        },
-        getUserPermissionForWorkspace: function (userId, workspaceId, callback) {
+        remove: function (workspaceId, userId, todoIds, callback) {
+            var index = 0;
+            var next = function () {
+                if (index == todoIds.length) {
+                    callback();
+                } else {
+                    Todo.findById(todoIds[index], function (error, model) {
+                        if (error) {
+                            throw  error;
+                        }
+
+                        if (model) {
+                            model.remove(function (error) {
+                                if (error) {
+                                    throw error;
+                                }
+
+                                index++;
+                                next();
+                            });
+                        }
+                    });
+                }
+            };
+
+            next();
         },
         setUserWorkspaceId: function (userId, workspaceId, callback) {
             User.findById(userId, function (error, model) {
@@ -93,11 +122,14 @@ module.exports = (function () {
                     throw 'User not found';
                 }
 
-                model.save(function (error) {
+                model.save(function (error, model) {
                     if (error) {
                         throw error;
                     }
-                    callback();
+
+                    var permissions = getUserPermissionsForWorkspace(workspaceId, model);
+
+                    callback(permissions);
                 })
             });
         },
@@ -145,6 +177,7 @@ module.exports = (function () {
                     var permittedWorkspaces = model.permittedWorkspaces;
                     permittedWorkspaces.push(new PermittedWorkspace({
                         'workspaceId': workspaceId,
+                        'isOwn': true,
                         'permissions': {
                             'readOnly': true,
                             'collectionManager': true,
@@ -196,14 +229,10 @@ module.exports = (function () {
                     var workspaceIds = [];
                     permittedWorkspaces.forEach(function (permittedWorkspace) {
                         var id = permittedWorkspace.workspaceId;
-                        workspaceIds.push({
-                            '_id': new ObjectID(id)
-                        });
+                        workspaceIds.push({'_id': new ObjectID(id)});
                     });
 
-                    Workspace.find({
-                        '$or': workspaceIds
-                    }, function (error, workspaces) {
+                    Workspace.find({'$or': workspaceIds}, function (error, workspaces) {
                         if (error) {
                             throw  error;
                         }
@@ -231,6 +260,7 @@ module.exports = (function () {
                 if (error) {
                     throw error;
                 }
+
                 callback(workspaces);
             });
         },
@@ -239,6 +269,7 @@ module.exports = (function () {
                 if (error) {
                     throw error;
                 }
+
                 for (var userIndex = 0; userIndex < users.length; userIndex++) {
                     var userContext = getUserContext(users[userIndex]);
                     users[userIndex] = {
@@ -248,6 +279,114 @@ module.exports = (function () {
                 }
                 callback(users);
             });
+        },
+        getAllUsersWithPermissions: function (workspaceId, callback) {
+            User.find(function (error, users) {
+                if (error) {
+                    throw error;
+                }
+
+                var result = [];
+
+                for (var userIndex = 0; userIndex < users.length; userIndex++) {
+                    var user = users[userIndex];
+                    var userContext = getUserContext(user);
+
+
+                    result.push({
+                        id: userContext.userId,
+                        displayName: userContext.displayName,
+                        permissions: getUserPermissionsForWorkspace(workspaceId, user)
+                    });
+                }
+
+                callback(result);
+            });
+        },
+        setUsersPermissionsForWorkspace: function (workspaceId, collection, callback) {
+
+            function isAccessDenied(permissions) {
+                return !permissions.readOnly && !permissions.collectionManager && !permissions.accessManager;
+            }
+
+            function isAccessGranted(permissions) {
+                return !isAccessDenied(permissions);
+            }
+
+            var userIds = [];
+            collection.forEach(function (collectionItem) {
+                userIds.push({'_id': new ObjectID(collectionItem.userId)});
+            });
+
+            User.find({'$or': userIds}, function (error, users) {
+                if (error) {
+                    throw error;
+                }
+
+                function getWorkspaceContainer(permittedWorkspaces) {
+                    for (var workspaceIndex = 0; workspaceIndex < permittedWorkspaces.length; workspaceIndex++) {
+                        var workspace = permittedWorkspaces[workspaceIndex];
+                        if (workspace.workspaceId == workspaceId) {
+                            return {
+                                workspace: workspace,
+                                remove: function () {
+                                    permittedWorkspaces.splice(workspaceIndex, 1);
+                                }
+                            };
+                        }
+                    }
+                }
+
+                var index = 0;
+                var next = function () {
+                    if (users.length == index) {
+                        callback();
+                    } else {
+                        var permissions = collection[index].permissions;
+                        var model = users[index];
+                        var permittedWorkspaces = model.permittedWorkspaces;
+
+                        var workspaceContainer = getWorkspaceContainer(permittedWorkspaces);
+                        if (workspaceContainer) {
+                            var workspace = workspaceContainer.workspace;
+                            if (isAccessDenied(permissions)) {
+                                workspaceContainer.remove();
+                            } else {
+                                workspace.permissions = permissions;
+                            }
+
+                            model.save(function (error, model) {
+                                if (error) {
+                                    throw error;
+                                }
+
+                                index++;
+                                next();
+                            });
+                        } else {
+                            if (isAccessGranted(permissions)) {
+                                permittedWorkspaces.push(new PermittedWorkspace({
+                                    'workspaceId': workspaceId,
+                                    'permissions': permissions
+                                }));
+
+                                model.save(function (error, model) {
+                                    if (error) {
+                                        throw error;
+                                    }
+
+                                    index++;
+                                    next();
+                                });
+                            }
+                        }
+                    }
+                };
+
+                next();
+            });
+        },
+        getUserPermissionForWorkspace: function (userId, workspaceId, callback) {
         }
     };
 

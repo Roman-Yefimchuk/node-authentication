@@ -12,6 +12,38 @@ module.exports = function (app, passport, dbProvider) {
         return params.userId;
     }
 
+    app.post('/api/set-users-permissions-for-workspace/:workspaceId', function (req, res) {
+        var userId = getUserContext(req.user)['userId'];
+        if (userId) {
+            var workspaceId = getWorkspaceId(req);
+            var collection = req.body['collection'];
+            dbProvider.setUsersPermissionsForWorkspace(workspaceId, collection, function () {
+                res.send({
+                    status: true,
+                    message: 'Updated ' + collection.length + ' permission(s)'
+                });
+            });
+        } else {
+            res.redirect('/');
+        }
+    });
+
+    app.get('/api/get-all-users-with-permissions/:workspaceId', function (req, res) {
+        var userId = getUserContext(req.user)['userId'];
+        if (userId) {
+            var workspaceId = getWorkspaceId(req);
+            dbProvider.getAllUsersWithPermissions(workspaceId, function (workspaces) {
+                res.send({
+                    status: true,
+                    message: 'Selected ' + workspaces.length + ' permitted workspaces(s)',
+                    data: workspaces
+                });
+            });
+        } else {
+            res.redirect('/');
+        }
+    });
+
     app.get('/api/get-permitted-workspaces', function (req, res) {
         var userId = getUserContext(req.user)['userId'];
         if (userId) {
@@ -79,10 +111,11 @@ module.exports = function (app, passport, dbProvider) {
         var userId = getUserContext(req.user)['userId'];
         if (userId) {
             var workspaceId = getWorkspaceId(req);
-            dbProvider.setUserWorkspaceId(userId, workspaceId, function () {
+            dbProvider.setUserWorkspaceId(userId, workspaceId, function (permissions) {
                 res.send({
                     status: true,
-                    message: 'New workspace ID: ' + workspaceId
+                    message: 'New workspace ID: ' + workspaceId,
+                    data: permissions
                 });
             });
         } else {

@@ -30,7 +30,7 @@
             <select ng-model="currentWorkspace"
                     ng-options="workspace.name for workspace in workspaces">
             </select>
-            <b manage-link ng-click="manageWorkspace()">Manage workspace</b>
+            <b manage-link ng-click="manageWorkspace()" ng-show="permissions.accessManager">Manage workspace</b>
         </span>
         <a id="logout" ng-click="logout()"><b>Logout</b></a>
     </div>
@@ -41,21 +41,27 @@
 
             <h2>{{ userName }}</h2>
 
-            <form id="todo-form" ng-submit="addTodo()">
+            <form id="todo-form" ng-submit="addTodo()" ng-show="permissions.collectionManager">
                 <input id="new-todo" placeholder="What needs to be done?" ng-model="newTodo" autofocus
                        autocomplete="off">
             </form>
+
         </header>
-        <section id="main" ng-show="todos.length">
-            <input id="toggle-all" type="checkbox" ng-model="allChecked" ng-click="markAll(allChecked)">
+        <section id="main" ng-show="todos.length"
+                 ng-class="{'read-only' : permissions.readOnly && !permissions.collectionManager && !permissions.accessManager}">
+            <input id="toggle-all" type="checkbox" ng-model="allChecked" ng-click="markAll(allChecked)"
+                   ng-show="permissions.collectionManager">
             <label for="toggle-all">Mark all as complete</label>
             <ul id="todo-list">
                 <li ng-repeat="todo in todos | filter:statusFilter"
                     ng-class="{completed: todo.completed, editing: todo == editedTodo}">
                     <div class="view">
-                        <input class="toggle" type="checkbox" ng-model="todo.completed" ng-change="mark(todo)">
+                        <input class="toggle" type="checkbox" ng-model="todo.completed" ng-change="mark(todo)"
+                               ng-show="permissions.collectionManager">
                         <label ng-dblclick="editTodo(todo)">{{todo.title}}</label>
-                        <button class="destroy" ng-click="removeTodo(todo)"></button>
+                        <button class="destroy" ng-click="removeTodo(todo)"
+                                ng-show="permissions.collectionManager">
+                        </button>
                     </div>
                     <form ng-submit="doneEditing(todo)">
                         <input class="edit" ng-model="todo.title" todo-blur="doneEditing(todo)"
@@ -64,7 +70,7 @@
                 </li>
             </ul>
         </section>
-        <footer id="footer" ng-show="todos.length" ng-cloak>
+        <footer id="footer" ng-show="todos.length && permissions.collectionManager" ng-cloak>
 				<span id="todo-count"><strong>{{remainingCount}}</strong>
 					<ng-pluralize count="remainingCount"
                                   when="{ one: 'item left', other: 'items left' }">
@@ -88,7 +94,7 @@
 
     </section>
 
-    <footer id="info" ng-show="todos.length > 0">
+    <footer id="info" ng-show="todos.length > 0 && permissions.collectionManager">
         <p>Double-click to edit a todo</p>
     </footer>
 

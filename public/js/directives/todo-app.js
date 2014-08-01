@@ -31,6 +31,26 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
 
                 $scope.workspaces = [];
                 $scope.currentWorkspace = undefined;
+                $scope.permissions = {
+                    readOnly: false,
+                    collectionManager: false,
+                    accessManager: false
+                };
+
+                $scope.canReadOnly = function () {
+                    var permissions = $scope.permissions;
+                    return permissions.readOnly && !permissions.collectionManager && !permissions.accessManager;
+                };
+
+                $scope.canManageCollection = function () {
+                    var permissions = $scope.permissions;
+                    return permissions.collectionManager && !permissions.accessManager;
+                };
+
+                $scope.canManageAccess = function () {
+                    var permissions = $scope.permissions;
+                    return permissions.accessManager;
+                };
 
                 $scope.$watch('defaultWorkspaceId', function (workspaceId) {
 
@@ -47,7 +67,8 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
                             if (workspace) {
                                 var workspaceId = getWorkspaceId();
 
-                                apiProvider.setUserWorkspace(workspaceId, function () {
+                                apiProvider.setUserWorkspace(workspaceId, function (permissions) {
+                                    $scope.permissions = permissions;
                                     apiProvider.items(workspaceId, function (items) {
                                         $scope.todos = items;
                                     });
@@ -110,7 +131,9 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
                 };
 
                 $scope.editTodo = function (todo) {
-                    $scope.editedTodo = todo;
+                    if ($scope.permissions.collectionManager) {
+                        $scope.editedTodo = todo;
+                    }
                 };
 
                 $scope.doneEditing = function (todo) {

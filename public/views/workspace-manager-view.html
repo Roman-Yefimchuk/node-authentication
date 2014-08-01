@@ -17,7 +17,7 @@
                 </ul>
             </div>
             <div>
-                <button control ng-click="save()">Save</button>
+                <button control ng-click="save()" ng-disabled="users.length == 0">Save</button>
                 <button control ng-click="cancel()">Close</button>
             </div>
         </div>

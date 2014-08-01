@@ -31,45 +31,33 @@ app.factory('apiProvider', ['$http', function ($http) {
             }, callback);
         },
         save: function (workspaceId, todoModel, callback) {
-            if (todoModel) {
-                sendRequest({
-                    method: 'POST',
-                    url: '/api/save/' + workspaceId,
-                    data: {
-                        todoModel: todoModel
-                    }
-                }, function (data) {
-                    callback(data.itemId);
-                });
-            } else {
-                console.log('empty request');
-            }
+            sendRequest({
+                method: 'POST',
+                url: '/api/save/' + workspaceId,
+                data: {
+                    todoModel: todoModel
+                }
+            }, function (data) {
+                callback(data.itemId);
+            });
         },
         update: function (workspaceId, todoModels, callback) {
-            if (todoModels && todoModels.length) {
-                sendRequest({
-                    method: 'POST',
-                    url: '/api/update/' + workspaceId,
-                    data: {
-                        todoModels: todoModels
-                    }
-                }, callback);
-            } else {
-                console.log('empty request');
-            }
+            sendRequest({
+                method: 'POST',
+                url: '/api/update/' + workspaceId,
+                data: {
+                    todoModels: todoModels
+                }
+            }, callback);
         },
         remove: function (workspaceId, todoIds, callback) {
-            if (todoIds && todoIds.length) {
-                sendRequest({
-                    method: 'POST',
-                    url: '/api/remove/' + workspaceId,
-                    data: {
-                        todoIds: todoIds
-                    }
-                }, callback);
-            } else {
-                console.log('empty request');
-            }
+            sendRequest({
+                method: 'POST',
+                url: '/api/remove/' + workspaceId,
+                data: {
+                    todoIds: todoIds
+                }
+            }, callback);
         },
         getAllWorkspaces: function (callback) {
             sendRequest({
@@ -93,6 +81,21 @@ app.factory('apiProvider', ['$http', function ($http) {
             sendRequest({
                 method: 'GET',
                 url: '/api/get-permitted-workspaces'
+            }, callback);
+        },
+        getAllUsersWithPermissions: function (workspaceId, callback) {
+            sendRequest({
+                method: 'GET',
+                url: '/api/get-all-users-with-permissions/' + workspaceId
+            }, callback);
+        },
+        setUsersPermissionsForWorkspace: function (workspaceId, collection, callback) {
+            sendRequest({
+                method: 'POST',
+                url: '/api/set-users-permissions-for-workspace/' + workspaceId,
+                data: {
+                    collection: collection
+                }
             }, callback);
         }
     };

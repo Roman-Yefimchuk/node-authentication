@@ -18,21 +18,13 @@ app.directive('managerDialog', ['$rootScope', 'apiProvider', function ($rootScop
 
             $rootScope.$on('openWorkspaceManager', function (event, appScope) {
                 var userId = appScope['userId'];
-                $scope.dialogTitle = appScope['currentWorkspace'].name;
-                apiProvider.getAllUsers(function (users) {
+                var workspace = appScope['currentWorkspace'];
+                $scope.dialogTitle = workspace.name;
+                $scope.workspaceId = workspace['_id'];
+                apiProvider.getAllUsersWithPermissions(workspace['_id'], function (users) {
                     $scope.users = users.filter(function (user) {
                         return user.id != userId;
                     });
-
-                    {
-                        $scope.users.forEach(function (user) {
-                            user.permissions = {
-                                readOnly: true,
-                                collectionManager: false,
-                                accessManager: true
-                            };
-                        });
-                    }
 
                     originalCollection = angular.copy($scope.users);
 
@@ -41,12 +33,31 @@ app.directive('managerDialog', ['$rootScope', 'apiProvider', function ($rootScop
             });
 
             $scope.save = function () {
-                $scope.show = false;
-            }
+                var collection = [];
+                var users = $scope.users;
+
+                for (var index = 0; index < users.length; index++) {
+                    var user = users[index];
+                    if (!angular.equals(user.permissions, originalCollection[index].permissions)) {
+                        collection.push({
+                            userId: user.id,
+                            permissions: user.permissions
+                        });
+                    }
+                }
+
+                if (collection.length > 0) {
+                    apiProvider.setUsersPermissionsForWorkspace($scope.workspaceId, collection, function () {
+                        $scope.show = false;
+                    });
+                } else {
+                    $scope.show = false;
+                }
+            };
 
             $scope.cancel = function () {
                 $scope.show = false;
-            }
+            };
         },
         link: function (scope, element, attrs) {
             scope.dialogStyle = {};

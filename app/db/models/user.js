@@ -29,7 +29,8 @@ module.exports = dbHelper.createModel('User', {
     },
     currentWorkspaceId: {type: String},
     ownWorkspaces: [String],
-    permittedWorkspaces: [PermittedWorkspace['schema']]
+    permittedWorkspaces: [PermittedWorkspace['schema']],
+    registeredDate: {type: Date, 'default': Date.now}
 }, function (schema) {
     schema.methods.generateHash = function (password) {
         return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
