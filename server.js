@@ -39,7 +39,8 @@ dbConnector.connect(function (dbProvider) {
     });
 
     require('./app/sockets-handler')(io);
-    require('./app/routes.js')(app, passport, dbProvider);
+    require('./app/routes')(app, passport, dbProvider);
+    require('./app/services')(app, dbProvider);
 
     server.listen(port);
 

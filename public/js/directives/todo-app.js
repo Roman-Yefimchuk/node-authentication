@@ -37,21 +37,6 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
                     accessManager: false
                 };
 
-                $scope.canReadOnly = function () {
-                    var permissions = $scope.permissions;
-                    return permissions.readOnly && !permissions.collectionManager && !permissions.accessManager;
-                };
-
-                $scope.canManageCollection = function () {
-                    var permissions = $scope.permissions;
-                    return permissions.collectionManager && !permissions.accessManager;
-                };
-
-                $scope.canManageAccess = function () {
-                    var permissions = $scope.permissions;
-                    return permissions.accessManager;
-                };
-
                 $scope.$watch('defaultWorkspaceId', function (workspaceId) {
 
                     $.notify("Hello " + $scope.userName + "!", {
@@ -67,8 +52,10 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
                             if (workspace) {
                                 var workspaceId = getWorkspaceId();
 
-                                apiProvider.setUserWorkspace(workspaceId, function (permissions) {
-                                    $scope.permissions = permissions;
+                                apiProvider.setUserWorkspace(workspaceId, function (data) {
+                                    $scope.permissions = data.permissions;
+                                    $scope.isOwnWorkspace = data.isOwnWorkspace;
+
                                     apiProvider.items(workspaceId, function (items) {
                                         $scope.todos = items;
                                     });

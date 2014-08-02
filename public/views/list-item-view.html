@@ -5,7 +5,12 @@
                 User ID: <b>{{ user.id }}</b>
                 User name: <b>{{ user.displayName }}</b>
             </td>
-            <td width="50%">
+            <td width="20%">
+                <div style="text-align: center" ng-show="user.isCreator">
+                    <img src="/images/user.png" width="30px" height="30px" title="Creator of this workspace">
+                </div>
+            </td>
+            <td width="30%">
                 <div style="float: right">
                     <label><input type="checkbox" ng-model="permissions.readOnly"/>Read only</label>
                     <br>

@@ -28,6 +28,17 @@ module.exports = (function () {
         };
     }
 
+    function isCreator(workspaceId, user) {
+        var permittedWorkspaces = user.permittedWorkspaces;
+        for (var index = 0; index < permittedWorkspaces.length; index++) {
+            var permittedWorkspace = permittedWorkspaces[index];
+            if (workspaceId == permittedWorkspace.workspaceId) {
+                return permittedWorkspace.isOwn;
+            }
+        }
+        return false;
+    }
+
     var dbProvider = {
         getItems: function (workspaceId, userId, callback) {
             Todo.find({'workspaceId': workspaceId}, function (error, items) {
@@ -128,8 +139,9 @@ module.exports = (function () {
                     }
 
                     var permissions = getUserPermissionsForWorkspace(workspaceId, model);
+                    var isOwnWorkspace = isCreator(workspaceId, model);
 
-                    callback(permissions);
+                    callback(permissions, isOwnWorkspace);
                 })
             });
         },
@@ -296,7 +308,8 @@ module.exports = (function () {
                     result.push({
                         id: userContext.userId,
                         displayName: userContext.displayName,
-                        permissions: getUserPermissionsForWorkspace(workspaceId, user)
+                        permissions: getUserPermissionsForWorkspace(workspaceId, user),
+                        isCreator: isCreator(workspaceId, user)
                     });
                 }
 
