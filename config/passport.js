@@ -6,11 +6,9 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 var User = require('../app/db/models/user');
 
 var configAuth = require('./auth');
-
-var dbProvider = require('../app/db/db-provider');
 var getUserContext = require('../app/context-provider')['getUserContext'];
 
-module.exports = function (passport) {
+module.exports = function (passport, dbProvider) {
 
     function addNewUser(user, done) {
         var userContext = getUserContext(user);

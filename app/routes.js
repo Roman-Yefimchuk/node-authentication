@@ -1,4 +1,4 @@
-module.exports = function (app, passport, dbProvider) {
+module.exports = function (app, passport, dbProvider, developmentMode) {
 
     var getUserContext = require('./context-provider')['getUserContext'];
 
@@ -14,22 +14,25 @@ module.exports = function (app, passport, dbProvider) {
 
             var userId = userContext.userId;
 
-            var workspaceId = req.flash('workspaceId');
-            if (workspaceId && workspaceId.length > 0) {
+            if (developmentMode) {
+                console.log('render index page for user: ' + userId);
+            }
+
+            function renderView(workspaceId) {
                 res.render('todo.ejs', {
                     userId: userId,
                     displayName: userContext.displayName,
                     provider: userContext.provider,
                     workspaceId: workspaceId
                 });
+            }
+
+            var workspaceId = req.flash('workspaceId');
+            if (workspaceId && workspaceId.length > 0) {
+                renderView(workspaceId);
             } else {
                 dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
-                    res.render('todo.ejs', {
-                        userId: userId,
-                        displayName: userContext.displayName,
-                        provider: userContext.provider,
-                        workspaceId: workspaceId
-                    });
+                    renderView(workspaceId);
                 });
             }
         }

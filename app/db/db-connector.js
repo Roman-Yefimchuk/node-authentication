@@ -2,7 +2,7 @@ var mongoose = require('mongoose');
 var dbConfig = require('../../config/database');
 
 module.exports = {
-    connect: function (callback) {
+    connect: function (callback, developmentMode) {
         mongoose.connect(dbConfig['url']);
 
         var db = mongoose.connection;
@@ -14,7 +14,7 @@ module.exports = {
         db.once('open', function () {
             console.log("Connected to DB!");
 
-            var dbProvider = require('./db-provider');
+            var dbProvider = require('./db-provider')(developmentMode);
             callback(dbProvider);
         });
     }

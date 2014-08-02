@@ -1,7 +1,6 @@
-module.exports = function (app, dbProvider) {
+module.exports = function (app, dbProvider, serviceProvider) {
 
     var getUserContext = require('./context-provider')['getUserContext'];
-    var serviceProvider = require('./service-provider')(app);
 
     function getParam(paramName, request) {
         var params = request.params;

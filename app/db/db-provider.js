@@ -1,4 +1,4 @@
-module.exports = (function () {
+module.exports = function (developmentMode) {
 
     var ObjectID = require('mongodb')['ObjectID'];
     var getUserContext = require('./../context-provider')['getUserContext'];
@@ -39,7 +39,7 @@ module.exports = (function () {
         return false;
     }
 
-    var dbProvider = {
+    return {
         getItems: function (workspaceId, userId, callback) {
             Todo.find({'workspaceId': workspaceId}, function (error, items) {
                 if (error) {
@@ -80,6 +80,10 @@ module.exports = (function () {
 
                         model.title = todoModel.title;
                         model.completed = todoModel.completed;
+                        model.lastModifyInfo = {
+                            date: Date.now(),
+                            userId: userId
+                        };
                         model.save(function (error) {
                             if (error) {
                                 throw error;
@@ -156,13 +160,6 @@ module.exports = (function () {
                 } else {
                     throw 'Workspace not found';
                 }
-
-                model.save(function (error) {
-                    if (error) {
-                        throw error;
-                    }
-                    callback();
-                })
             });
         },
         addWorkspace: function (name, creatorId, callback) {
@@ -190,6 +187,7 @@ module.exports = (function () {
                     permittedWorkspaces.push(new PermittedWorkspace({
                         'workspaceId': workspaceId,
                         'isOwn': true,
+                        'isDefault': true,
                         'permissions': {
                             'readOnly': true,
                             'collectionManager': true,
@@ -249,14 +247,26 @@ module.exports = (function () {
                             throw  error;
                         }
 
+                        function getWorkspace(permittedWorkspace) {
+                            for (var index = 0; index < workspaces.length; index++) {
+                                var workspace = workspaces[index];
+                                var workspaceId = workspace['_id'].toString();
+                                if (workspaceId == permittedWorkspace.workspaceId) {
+                                    return workspace;
+                                }
+                            }
+                        }
+
                         var result = [];
 
                         for (var index = 0; index < workspaces.length; index++) {
+                            var permittedWorkspace = permittedWorkspaces[index];
+                            var workspace = getWorkspace(permittedWorkspace);
                             result.push({
-                                '_id': permittedWorkspaces[index].workspaceId,
-                                'name': workspaces[index].name,
-                                'creatorId': workspaces[index].creatorId,
-                                'permissions': permittedWorkspaces[index].permissions
+                                '_id': permittedWorkspace.workspaceId,
+                                'name': workspace.name,
+                                'creatorId': workspace.creatorId,
+                                'permissions': permittedWorkspace.permissions
                             });
                         }
 
@@ -402,6 +412,4 @@ module.exports = (function () {
         getUserPermissionForWorkspace: function (userId, workspaceId, callback) {
         }
     };
-
-    return dbProvider;
-})();
+};

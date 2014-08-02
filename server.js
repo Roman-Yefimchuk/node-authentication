@@ -16,10 +16,24 @@ var port = 8080;
     app.use(static);
 }
 
+function isDevelopmentMode() {
+    var args = process['argv'];
+    if (args.length > 2) {
+        if (args[2] == 'development-mode') {
+            console.log('Server started in [development] mode');
+            return true;
+        }
+    }
+    console.log('Server started in [standard] mode');
+    return false;
+}
+
+var developmentMode = isDevelopmentMode();
+
 var dbConnector = require('./app/db/db-connector');
 dbConnector.connect(function (dbProvider) {
 
-    require('./config/passport')(passport); // pass passport for configuration
+    require('./config/passport')(passport, dbProvider); // pass passport for configuration
 
     app.configure(function () {
 
@@ -38,11 +52,13 @@ dbConnector.connect(function (dbProvider) {
 
     });
 
-    require('./app/sockets-handler')(io);
-    require('./app/routes')(app, passport, dbProvider);
-    require('./app/services')(app, dbProvider);
+    require('./app/sockets-handler')(io, developmentMode);
+    require('./app/routes')(app, passport, dbProvider, developmentMode);
+
+    var serviceProvider = require('./app/service-provider')(app, developmentMode);
+    require('./app/services')(app, dbProvider, serviceProvider);
 
     server.listen(port);
 
     console.log('The magic happens on port ' + port);
-});
+}, developmentMode);

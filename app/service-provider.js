@@ -1,4 +1,4 @@
-module.exports = function (app) {
+module.exports = function (app, developmentMode) {
 
     function handleResult(response, result) {
         if (result) {
