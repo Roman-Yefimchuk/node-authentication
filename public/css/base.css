@@ -25,7 +25,7 @@ body {
     line-height: 1.4em;
     background: #eaeaea url('bg.png');
     color: #4d4d4d;
-    width: 550px;
+    width: 650px;
     margin: 0 auto;
     -webkit-font-smoothing: antialiased;
     -moz-font-smoothing: antialiased;
@@ -353,7 +353,7 @@ label[for='toggle-all'] {
     padding: 0 10px;
 }
 
-#provider {
+#workspace-header {
     color: rgb(235, 235, 235);
     z-index: 5000;
     float: left;
@@ -581,4 +581,23 @@ button {
 
 .read-only {
     margin-top: 8px;
+}
+
+#permitted-workspaces {
+    height: 21px;
+    margin: 2px;
+}
+
+#users-count {
+    cursor: pointer;
+}
+
+.lock {
+    text-align: center;
+    width: 648px;
+    height: 58px;
+    background-color: #B6ADAD;
+    opacity: 0.9;
+    position: absolute;
+    z-index: 10;
 }

@@ -18,7 +18,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
                 console.log('render index page for user: ' + userId);
             }
 
-            function renderView(workspaceId) {
+            function renderHomePage(workspaceId) {
                 res.render('todo.ejs', {
                     userId: userId,
                     displayName: userContext.displayName,
@@ -29,10 +29,10 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
 
             var workspaceId = req.flash('workspaceId');
             if (workspaceId && workspaceId.length > 0) {
-                renderView(workspaceId);
+                renderHomePage(workspaceId);
             } else {
                 dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
-                    renderView(workspaceId);
+                    renderHomePage(workspaceId);
                 });
             }
         }

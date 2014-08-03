@@ -39,6 +39,50 @@ module.exports = function (developmentMode) {
         return false;
     }
 
+    function addWorkspace(name, creatorId, isDefault, callback) {
+        var workspace = new Workspace({
+            'name': name,
+            'creatorId': creatorId
+        });
+
+        workspace.save(function (error, model) {
+            if (error) {
+                throw error;
+            }
+
+            var workspaceId = model['_id'].toString();
+
+            User.findById(creatorId, function (error, model) {
+                if (error) {
+                    throw error;
+                }
+
+                var ownWorkspaces = model.ownWorkspaces;
+                ownWorkspaces.push(workspaceId);
+
+                var permittedWorkspaces = model.permittedWorkspaces;
+                permittedWorkspaces.push(new PermittedWorkspace({
+                    'workspaceId': workspaceId,
+                    'isOwn': true,
+                    'isDefault': isDefault,
+                    'permissions': {
+                        'readOnly': true,
+                        'collectionManager': true,
+                        'accessManager': true
+                    }
+                }));
+
+                model.save(function (error) {
+                    if (error) {
+                        throw error;
+                    }
+
+                    callback(workspaceId);
+                });
+            });
+        });
+    }
+
     return {
         getItems: function (workspaceId, userId, callback) {
             Todo.find({'workspaceId': workspaceId}, function (error, items) {
@@ -162,57 +206,11 @@ module.exports = function (developmentMode) {
                 }
             });
         },
-        addWorkspace: function (name, creatorId, callback) {
-            var workspace = new Workspace({
-                'name': name,
-                'creatorId': creatorId
-            });
-
-            workspace.save(function (error, model) {
-                if (error) {
-                    throw error;
-                }
-
-                var workspaceId = model['_id'].toString();
-
-                User.findById(creatorId, function (error, model) {
-                    if (error) {
-                        throw error;
-                    }
-
-                    var ownWorkspaces = model.ownWorkspaces;
-                    ownWorkspaces.push(workspaceId);
-
-                    var permittedWorkspaces = model.permittedWorkspaces;
-                    permittedWorkspaces.push(new PermittedWorkspace({
-                        'workspaceId': workspaceId,
-                        'isOwn': true,
-                        'isDefault': true,
-                        'permissions': {
-                            'readOnly': true,
-                            'collectionManager': true,
-                            'accessManager': true
-                        }
-                    }));
-
-                    model.save(function (error) {
-                        if (error) {
-                            throw error;
-                        }
-
-                        callback(workspaceId);
-                    });
-                });
-            });
+        createDefaultWorkspace: function (name, creatorId, callback) {
+            addWorkspace(name, creatorId, true, callback);
         },
-        getWorkspace: function (workspaceId, callback) {
-            Workspace.findById(workspaceId, function (error, model) {
-                if (error) {
-                    throw error;
-                }
-
-                callback(model);
-            });
+        createWorkspace: function (name, creatorId, callback) {
+            addWorkspace(name, creatorId, false, callback);
         },
         getWorkspaces: function (creatorId, callback) {
             User.findById(creatorId, function (error, model) {

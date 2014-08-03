@@ -3,6 +3,7 @@ app.directive('managerDialog', ['$rootScope', 'apiProvider', function ($rootScop
         restrict: 'E',
         replace: true,
         templateUrl: '/views/workspace-manager-view.html',
+        scope: {},
         controller: function ($scope) {
             $scope.show = false;
             $scope.users = [];

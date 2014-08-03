@@ -1,5 +1,13 @@
-app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$rootScope',
-    function ($location, apiProvider, filterFilter, $rootScope) {
+app.directive('todoApplication', [
+
+    '$location',
+    'apiProvider',
+    'socketProvider',
+    'notificationProvider',
+    'filterFilter',
+    '$rootScope',
+
+    function ($location, apiProvider, socketProvider, notificationProvider, filterFilter, $rootScope) {
         return {
             restrict: 'A',
             scope: {
@@ -9,26 +17,11 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
             },
             controller: function ($scope) {
 
-                function initSocket() {
-                    var socket = io.connect('http://127.0.0.1:8080/');
-
-                    socket.emit('register_user', {
-                        userId: $scope.userId
-                    });
-
-                    socket.on('notification', function (data) {
-                        $.notify(data['message'], {
-                            position: "right bottom",
-                            className: data['type'],
-                            autoHideDelay: 2500
-                        });
-                    });
-                }
-
                 function getWorkspaceId() {
                     return $scope.currentWorkspace['_id'];
                 }
 
+                $scope.usersCount = 4;
                 $scope.workspaces = [];
                 $scope.currentWorkspace = undefined;
                 $scope.permissions = {
@@ -37,13 +30,27 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
                     accessManager: false
                 };
 
+                $scope.canReadOnly = function () {
+                    var permissions = $scope.permissions;
+                    if (permissions.readOnly && !permissions.collectionManager) {
+                        return true;
+                    }
+                    return !permissions.collectionManager;
+                };
+
+                $scope.canManageCollection = function () {
+                    var permissions = $scope.permissions;
+                    return permissions.collectionManager;
+                };
+
+                $scope.canManageAccess = function () {
+                    var permissions = $scope.permissions;
+                    return permissions.accessManager;
+                };
+
                 $scope.$watch('defaultWorkspaceId', function (workspaceId) {
 
-                    $.notify("Hello " + $scope.userName + "!", {
-                        position: "right bottom",
-                        className: 'info',
-                        autoHideDelay: 2500
-                    });
+                    notificationProvider.info("Hello " + $scope.userName + "!");
 
                     apiProvider.getPermittedWorkspaces(function (workspaces) {
                         $scope.workspaces = workspaces;
@@ -157,7 +164,7 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
 
                 $scope.mark = function (todo) {
                     apiProvider.update(getWorkspaceId(), [todo]);
-                }
+                };
 
                 $scope.markAll = function (done) {
                     var todos = [];
@@ -182,7 +189,15 @@ app.directive('todoApplication', ['$location', 'apiProvider', 'filterFilter', '$
 
                 $scope.manageWorkspace = function () {
                     $rootScope.$emit('openWorkspaceManager', $scope);
-                }
+                };
+
+                $scope.showUsers = function () {
+                    $rootScope.$emit('openUsersDialog', $scope);
+                };
+
+                $scope.isItemLocked = function (itemId) {
+                    return false;
+                };
 
                 $scope.logout = function () {
                     window.location = 'logout';

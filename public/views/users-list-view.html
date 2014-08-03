@@ -7,7 +7,7 @@
         <div class='ng-modal-dialog-content'>
 
             <div dialog-title>
-                Workspace <span>{{ dialogTitle }}</span>
+                Here <span>{{ users.length }}</span> user(s)
             </div>
 
             <div users-collection class="list-frame">
@@ -17,8 +17,7 @@
                 </ul>
             </div>
             <div>
-                <button control ng-click="save()" ng-disabled="users.length == 0">Save</button>
-                <button control ng-click="cancel()">Cancel</button>
+                <button control ng-click="close()">Close</button>
             </div>
         </div>
     </div>

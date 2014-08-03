@@ -23,7 +23,7 @@ module.exports = function (passport, dbProvider) {
 
             var userId = userContext.userId;
 
-            dbProvider.addWorkspace(workspaceName, userId, function (workspaceId) {
+            dbProvider.createDefaultWorkspace(workspaceName, userId, function (workspaceId) {
                 dbProvider.setUserWorkspaceId(userId, workspaceId, function () {
                     done(null, user);
                 })

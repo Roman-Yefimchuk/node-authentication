@@ -25,15 +25,29 @@
     <manager-dialog width='600px' height='522px'>
     </manager-dialog>
 
+    <users-dialog width='600px' height='522px'>
+    </users-dialog>
+
     <div>
-        <span id="provider">Logged via <b><%= provider %></b> in
-            <select ng-model="currentWorkspace"
+        <span id="workspace-header">
+
+            <span id="users-count" ng-click="showUsers()">
+                {{ usersCount }} <img align="center" src="/images/users.png" width="18px" height="18px">
+            </span>
+
+            <span>
+                Logged via <b><%= provider %></b> in
+            <select id="permitted-workspaces" ng-model="currentWorkspace"
                     ng-options="workspace.name for workspace in workspaces">
             </select>
-            <b manage-link ng-click="manageWorkspace()" ng-show="permissions.accessManager">Manage workspace</b>
+
+            <b manage-link ng-click="manageWorkspace()" ng-show="canManageAccess()">Manage workspace</b>
+
             <span ng-show="isOwnWorkspace">
                 <img align="center" src="/images/user.png" width="18px" height="18px">
             </span>
+            </span>
+
         </span>
         <a id="logout" ng-click="logout()"><b>Logout</b></a>
     </div>
@@ -44,7 +58,7 @@
 
             <h2>{{ userName }}</h2>
 
-            <form id="todo-form" ng-submit="addTodo()" ng-show="permissions.collectionManager">
+            <form id="todo-form" ng-submit="addTodo()" ng-show="canManageCollection()">
 
                 <input id="new-todo" placeholder="What needs to be done?" ng-model="newTodo" autofocus
                        autocomplete="off">
@@ -54,27 +68,33 @@
         </header>
 
         <section id="main" ng-show="todos.length"
-                 ng-class="{'read-only' : permissions.readOnly && !permissions.collectionManager && !permissions.accessManager}">
+                 ng-class="{'read-only' : canReadOnly()}">
 
             <input id="toggle-all" type="checkbox" ng-model="allChecked" ng-click="markAll(allChecked)"
-                   ng-show="permissions.collectionManager">
+                   ng-show="canManageCollection()">
 
             <label for="toggle-all">Mark all as complete</label>
 
             <ul id="todo-list">
 
                 <li ng-repeat="todo in todos | filter:statusFilter"
-                    ng-class="{completed: todo.completed, editing: todo == editedTodo}">
+                    ng-class="{completed: todo.completed, editing: todo == editedTodo}"
+                    style="position: relative">
+
+                    <div class="lock" ng-show="isItemLocked('{{ todo._id }}')">
+                        <span id="users-count" ng-click="showUsers()" style="vertical-align: -webkit-baseline-middle;">
+                            <img align="center" src="/images/lock.png" width="58px" height="58px"> Locked
+                        </span>
+                    </div>
 
                     <div class="view">
-
                         <input class="toggle" type="checkbox" ng-model="todo.completed" ng-change="mark(todo)"
-                               ng-show="permissions.collectionManager">
+                               ng-show="canManageCollection()">
 
                         <label ng-dblclick="editTodo(todo)">{{todo.title}}</label>
 
                         <button class="destroy" ng-click="removeTodo(todo)"
-                                ng-show="permissions.collectionManager">
+                                ng-show="canManageCollection()">
                         </button>
 
                     </div>
@@ -89,7 +109,7 @@
             </ul>
         </section>
 
-        <footer id="footer" ng-show="todos.length && permissions.collectionManager" ng-cloak>
+        <footer id="footer" ng-show="todos.length && canManageCollection()" ng-cloak>
 				<span id="todo-count"><strong>{{remainingCount}}</strong>
 					<ng-pluralize count="remainingCount"
                                   when="{ one: 'item left', other: 'items left' }">
@@ -116,7 +136,7 @@
 
     </section>
 
-    <footer id="info" ng-show="todos.length > 0 && permissions.collectionManager">
+    <footer id="info" ng-show="todos.length > 0 && canManageCollection()">
         <p>Double-click to edit a todo</p>
     </footer>
 
@@ -133,9 +153,12 @@
 <script type="text/javascript" src="js/directives/todo-focus.js"></script>
 <script type="text/javascript" src="js/directives/todo-app.js"></script>
 <script type="text/javascript" src="js/directives/manager-dialog.js"></script>
+<script type="text/javascript" src="js/directives/users-dialog.js"></script>
 <script type="text/javascript" src="js/directives/list-item.js"></script>
 
 <script type="text/javascript" src="js/services/api-provider.js"></script>
+<script type="text/javascript" src="js/services/socket-provider.js"></script>
+<script type="text/javascript" src="js/services/notification-provider.js"></script>
 
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
 
