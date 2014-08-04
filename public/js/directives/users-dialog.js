@@ -6,10 +6,24 @@ app.directive('usersDialog', ['$rootScope', 'apiProvider', function ($rootScope,
         scope: {},
         controller: function ($scope) {
             $scope.show = false;
-            $scope.users = [];
+            $scope.presentUsers = [];
+
+            $scope.$watch('show', function (value) {
+                if (!value) {
+                    $scope.presentUsers = [];
+                }
+            });
 
             $rootScope.$on('openUsersDialog', function (event, appScope) {
-                $scope.show = true;
+                var presentUsers = appScope['presentUsers'];
+                if (presentUsers.length > 0) {
+                    apiProvider.getUsers(presentUsers, function (users) {
+                        $scope.presentUsers = users;
+                        $scope.show = true;
+                    });
+                } else {
+                    $scope.show = true;
+                }
             });
 
             $scope.close = function () {

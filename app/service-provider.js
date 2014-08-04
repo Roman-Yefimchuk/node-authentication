@@ -1,11 +1,17 @@
 module.exports = function (app, developmentMode) {
 
+    function send(response, data) {
+        process.nextTick(function () {
+            response.send(data);
+        });
+    }
+
     function handleResult(response, result) {
         if (result) {
             switch (typeof(result)) {
                 case 'string':
                 {
-                    response.send({
+                    send(response, {
                         status: true,
                         message: result
                     });
@@ -21,13 +27,13 @@ module.exports = function (app, developmentMode) {
                     var message = result.message;
                     var data = result.data;
                     if (data) {
-                        response.send({
+                        send(response, {
                             status: true,
                             message: message,
                             data: data
                         });
                     } else {
-                        response.send({
+                        send(response, {
                             status: true,
                             message: message
                         });
@@ -36,7 +42,7 @@ module.exports = function (app, developmentMode) {
                 }
             }
         } else {
-            response.send({
+            send(response, {
                 status: false,
                 message: 'Empty result'
             });
@@ -62,7 +68,7 @@ module.exports = function (app, developmentMode) {
                     handleResult(response, result);
                 });
             }, function (e) {
-                response.send({
+                send(response, {
                     status: false,
                     message: e
                 });

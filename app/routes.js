@@ -18,21 +18,26 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
                 console.log('render index page for user: ' + userId);
             }
 
-            function renderHomePage(workspaceId) {
+            function renderHomePage(workspaceId, defaultWorkspaceId) {
                 res.render('todo.ejs', {
                     userId: userId,
                     displayName: userContext.displayName,
                     provider: userContext.provider,
-                    workspaceId: workspaceId
+                    workspaceId: workspaceId,
+                    defaultWorkspaceId: defaultWorkspaceId
                 });
             }
 
             var workspaceId = req.flash('workspaceId');
             if (workspaceId && workspaceId.length > 0) {
-                renderHomePage(workspaceId);
+                dbProvider.getDefaultWorkspace(userId, function (defaultWorkspaceId) {
+                    renderHomePage(workspaceId, defaultWorkspaceId);
+                });
             } else {
                 dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
-                    renderHomePage(workspaceId);
+                    dbProvider.getDefaultWorkspace(userId, function (defaultWorkspaceId) {
+                        renderHomePage(workspaceId, defaultWorkspaceId);
+                    });
                 });
             }
         }

@@ -21,15 +21,15 @@
 </head>
 <body>
 <div class="container" ng-cloak>
-    <div class="col-sm-6 col-sm-offset-3">
+    <div class="col-sm-6 col-sm-offset-3" ng-controller="SingUpController">
 
-        <h1><span class="fa fa-sign-in"></span> Sign Up</h1>
+        <h1><span class="fa fa-sign-in" ng-click="quickSingUp()"></span> Sign Up</h1>
 
         <% if (message.length > 0) { %>
         <div class="alert alert-danger"><%= message %></div>
         <% } %>
 
-        <form action="/signup" method="post" ng-controller="SingUpController">
+        <form action="/signup" method="post">
             <div class="form-group" ng-class="{ 'has-error' : !isEmailValid }">
                 <label>Email</label>
                 <input type="text" class="form-control" name="email" ng-model="email">
@@ -45,7 +45,6 @@
         <hr>
 
         <p>Already have an account? <a href="/login">Login</a></p>
-
         <p>Or go <a href="/">home</a>.</p>
     </div>
 </div>

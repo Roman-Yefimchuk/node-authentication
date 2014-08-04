@@ -10,5 +10,14 @@ app.controller('SingUpController', [ '$scope',
         $scope.$watch('email', function (value) {
             $scope.isEmailValid = emailPattern.test(value);
         });
+
+        $scope.quickSingUp = function () {
+            $scope.email = 'roman@gmail.com';
+            $scope.password = 'qwerty';
+
+            $scope.$watch('email', function () {
+                $('[action="/signup"]').submit();
+            });
+        }
     }
 ]);

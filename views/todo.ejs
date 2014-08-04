@@ -18,7 +18,8 @@
 <body ng-cloak>
 
 <div todo-application
-     default-workspace-id="<%= workspaceId %>"
+     default-workspace-id="<%= defaultWorkspaceId %>"
+     workspace-id="<%= workspaceId %>"
      user-id="<%= userId %>"
      user-name="<%= displayName %>">
 
@@ -31,8 +32,8 @@
     <div>
         <span id="workspace-header">
 
-            <span id="users-count" ng-click="showUsers()">
-                {{ usersCount }} <img align="center" src="/images/users.png" width="18px" height="18px">
+            <span id="present-users-count" ng-click="showUsers()">
+                {{ presentUsers.length }} <img align="center" src="/images/users.png" width="18px" height="18px">
             </span>
 
             <span>
@@ -81,7 +82,7 @@
                     ng-class="{completed: todo.completed, editing: todo == editedTodo}"
                     style="position: relative">
 
-                    <div class="lock" ng-show="isItemLocked('{{ todo._id }}')">
+                    <div class="lock" ng-show="isItemLocked(todo['_id'])">
                         <span id="users-count" ng-click="showUsers()" style="vertical-align: -webkit-baseline-middle;">
                             <img align="center" src="/images/lock.png" width="58px" height="58px"> Locked
                         </span>

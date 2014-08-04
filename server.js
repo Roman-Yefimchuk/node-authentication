@@ -52,7 +52,7 @@ dbConnector.connect(function (dbProvider) {
 
     });
 
-    require('./app/sockets-handler')(io, developmentMode);
+    require('./app/sockets-handler')(io, dbProvider, developmentMode);
     require('./app/routes')(app, passport, dbProvider, developmentMode);
 
     var serviceProvider = require('./app/service-provider')(app, developmentMode);

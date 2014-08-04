@@ -11,5 +11,14 @@ app.controller('LoginController', ['$scope', 'apiProvider',
 
         $scope.email = "";
         $scope.password = "";
+
+        $scope.quickLogin = function () {
+            $scope.email = 'roman@gmail.com';
+            $scope.password = 'qwerty';
+
+            $scope.$watch('email', function () {
+                $('[action="/login"]').submit();
+            });
+        }
     }
 ]);

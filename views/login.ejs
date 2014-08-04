@@ -21,15 +21,15 @@
 </head>
 <body>
 <div class="container" ng-cloak>
-    <div class="col-sm-6 col-sm-offset-3">
+    <div class="col-sm-6 col-sm-offset-3" ng-controller="LoginController">
 
-        <h1><span class="fa fa-sign-in"></span> Login</h1>
+        <h1><span class="fa fa-sign-in" ng-click="quickLogin()"></span> Login</h1>
 
         <% if (message.length > 0) { %>
         <div class="alert alert-danger"><%= message %></div>
         <% } %>
 
-        <form action="/login" method="post" ng-controller="LoginController">
+        <form action="/login" method="post">
 
             <div class="form-group" ng-show="workspaces.length > 0">
                 <label>Select workspace</label>

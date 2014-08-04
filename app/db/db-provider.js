@@ -1,5 +1,7 @@
 module.exports = function (developmentMode) {
 
+    var _ = require('underscore');
+
     var ObjectID = require('mongodb')['ObjectID'];
     var getUserContext = require('./../context-provider')['getUserContext'];
 
@@ -225,6 +227,83 @@ module.exports = function (developmentMode) {
                 }
             });
         },
+        getWorkspace: function (workspaceId, callback) {
+            Workspace.findById(workspaceId, function (error, model) {
+                if (error) {
+                    throw error;
+                }
+
+                if (model) {
+                    callback(model);
+                } else {
+                    throw 'Workspace not found';
+                }
+            });
+        },
+        getDefaultWorkspace: function (userId, callback) {
+            User.findById(userId, function (error, model) {
+                if (error) {
+                    throw error;
+                }
+
+                if (model) {
+                    var permittedWorkspaces = model.permittedWorkspaces;
+
+                    for (var index = 0; index < permittedWorkspaces.length; index++) {
+                        var permittedWorkspace = permittedWorkspaces[index];
+                        if (permittedWorkspace.isDefault) {
+                            var workspaceId = permittedWorkspace.workspaceId;
+                            callback(workspaceId);
+                        }
+                    }
+                } else {
+                    throw 'User not found';
+                }
+            });
+        },
+        getUser: function (userId, callback) {
+            User.findById(userId, function (error, model) {
+                if (error) {
+                    throw error;
+                }
+
+                if (model) {
+                    var userContext = getUserContext(model);
+                    callback({
+                        id: userContext.userId,
+                        displayName: userContext.displayName
+                    });
+                } else {
+                    throw 'User not found';
+                }
+            });
+        },
+        getUsers: function (ids, callback) {
+
+            var userIds = [];
+            ids.forEach(function (id) {
+                userIds.push({'_id': new ObjectID(id)});
+            });
+
+            User.find({'$or': userIds}, function (error, users) {
+                if (error) {
+                    throw error;
+                }
+
+                var result = [];
+
+                users.forEach(function (user) {
+                    var userContext = getUserContext(user);
+
+                    result.push({
+                        id: userContext.userId,
+                        displayName: userContext.displayName
+                    });
+                });
+
+                callback(result);
+            });
+        },
         getPermittedWorkspaces: function (userId, callback) {
             User.findById(userId, function (error, model) {
                 if (error) {
@@ -399,6 +478,9 @@ module.exports = function (developmentMode) {
                                     index++;
                                     next();
                                 });
+                            } else {
+                                index++;
+                                next();
                             }
                         }
                     }

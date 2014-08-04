@@ -1,13 +1,13 @@
-li[list-item] {
+li[item] {
     list-style-type: none;
     padding: 10px;
 }
 
-ul[is-lats-item='false'] > li[list-item] {
+ul[is-lats-item='false'] > li[item] {
     border-bottom: 1px solid #dddddd;
 }
 
-li[list-item]:hover {
+li[item]:hover {
     background-color: #EFF7FF;
     cursor: pointer;
 }

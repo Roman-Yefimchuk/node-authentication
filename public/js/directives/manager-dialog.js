@@ -20,8 +20,11 @@ app.directive('managerDialog', ['$rootScope', 'apiProvider', function ($rootScop
             $rootScope.$on('openWorkspaceManager', function (event, appScope) {
                 var userId = appScope['userId'];
                 var workspace = appScope['currentWorkspace'];
+
+                $scope.appScope = appScope;
                 $scope.dialogTitle = workspace.name;
                 $scope.workspaceId = workspace['_id'];
+
                 apiProvider.getAllUsersWithPermissions(workspace['_id'], function (users) {
                     $scope.users = users.filter(function (user) {
                         return user.id != userId;
@@ -49,6 +52,9 @@ app.directive('managerDialog', ['$rootScope', 'apiProvider', function ($rootScop
 
                 if (collection.length > 0) {
                     apiProvider.setUsersPermissionsForWorkspace($scope.workspaceId, collection, function () {
+                        var socketConnection = $scope.appScope['socketConnection'];
+                        socketConnection.permissionsChanged(collection);
+
                         $scope.show = false;
                     });
                 } else {

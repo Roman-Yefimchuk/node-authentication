@@ -12,6 +12,7 @@ app.directive('todoApplication', [
             restrict: 'A',
             scope: {
                 defaultWorkspaceId: '@',
+                workspaceId: '@',
                 userId: '@',
                 userName: '@'
             },
@@ -21,13 +22,93 @@ app.directive('todoApplication', [
                     return $scope.currentWorkspace['_id'];
                 }
 
-                $scope.usersCount = 4;
+                function changeNotification(userId, messageBuilder, type) {
+                    if (!type) {
+                        type = 'info';
+                    }
+
+                    apiProvider.getUser(userId, function (user) {
+                        var userName = user.displayName;
+
+                        var message = messageBuilder(userName);
+                        notificationProvider.notify(message, type);
+                    });
+                }
+
+                function permissionsChangeNotification(userId, workspaceId, messageBuilder, type) {
+                    if (!type) {
+                        type = 'info';
+                    }
+
+                    apiProvider.getUser(userId, function (user) {
+                        var userName = user.displayName;
+
+                        apiProvider.getWorkspace(workspaceId, function (workspace) {
+                            var workspaceName = workspace.name;
+
+                            var message = messageBuilder(userName, workspaceName);
+                            notificationProvider.notify(message, type);
+                        });
+                    });
+                }
+
+                $scope.presentUsers = [];
                 $scope.workspaces = [];
                 $scope.currentWorkspace = undefined;
                 $scope.permissions = {
                     readOnly: false,
                     collectionManager: false,
                     accessManager: false
+                };
+
+                $scope.updatePermissions = function (userId, workspaceId, permissions) {
+                    permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
+
+                        if (_.findWhere($scope.workspaces, { '_id': workspaceId })) {
+                            if (getWorkspaceId() == workspaceId) {
+                                $scope.permissions = permissions;
+                            }
+                        } else {
+                            apiProvider.getWorkspace(workspaceId, function (workspace) {
+                                $scope.workspaces.push(workspace);
+                            });
+                        }
+
+                        return "User " + userName + " updated you permissions for workspace " + workspaceName;
+                    });
+                };
+
+                $scope.closeAccess = function (userId, workspaceId) {
+                    permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
+
+                        $scope.workspaces = _.filter($scope.workspaces, function (workspace) {
+                            return workspace['_id'] != workspaceId;
+                        });
+
+                        if (getWorkspaceId() == workspaceId) {
+                            $scope.currentWorkspace = _.findWhere($scope.workspaces, {
+                                _id: $scope.defaultWorkspaceId
+                            });
+                        }
+
+                        return "User " + userName + " closed access for you to workspace " + workspaceName;
+                    }, 'warning');
+                };
+
+                $scope.userJoined = function (userId, callback) {
+                    apiProvider.getUser(userId, function (user) {
+                        $scope.presentUsers.push(userId);
+                        callback(user);
+                    });
+                };
+
+                $scope.userHasLeft = function (userId, callback) {
+                    apiProvider.getUser(userId, function (user) {
+                        $scope.presentUsers = $scope.presentUsers.filter(function (value) {
+                            return value != userId;
+                        });
+                        callback(user);
+                    });
                 };
 
                 $scope.canReadOnly = function () {
@@ -48,7 +129,10 @@ app.directive('todoApplication', [
                     return permissions.accessManager;
                 };
 
-                $scope.$watch('defaultWorkspaceId', function (workspaceId) {
+                $scope.$watch('workspaceId', function (workspaceId) {
+
+                    var socketConnection = socketProvider.openCollection('http://127.0.0.1:8080/', $scope, workspaceId);
+                    $scope.socketConnection = socketConnection;
 
                     notificationProvider.info("Hello " + $scope.userName + "!");
 
@@ -60,6 +144,10 @@ app.directive('todoApplication', [
                                 var workspaceId = getWorkspaceId();
 
                                 apiProvider.setUserWorkspace(workspaceId, function (data) {
+
+                                    socketConnection.changedWorkspace();
+                                    socketConnection.updatePresentUsers();
+
                                     $scope.permissions = data.permissions;
                                     $scope.isOwnWorkspace = data.isOwnWorkspace;
 
@@ -102,6 +190,43 @@ app.directive('todoApplication', [
                     { completed: true } : null;
                 });
 
+                $scope.addedItem = function (userId, item) {
+                    changeNotification(userId, function (userName) {
+
+                        $scope.todos.push(item);
+
+                        return "User " + userName + " added item";
+                    });
+                };
+
+                $scope.updatedItems = function (userId, items) {
+                    changeNotification(userId, function (userName) {
+
+                        _.forEach(items, function (item) {
+
+                            var todo = _.findWhere($scope.todos, {
+                                '_id': item['_id']
+                            });
+
+                            todo.title = item.title;
+                            todo.completed = item.completed;
+                        });
+
+                        return "User " + userName + " updated " + items.length + " item(s)";
+                    });
+                };
+
+                $scope.removedItems = function (userId, itemIds) {
+                    changeNotification(userId, function (userName) {
+
+                        $scope.todos = _.filter($scope.todos, function (todo) {
+                            return !_.contains(itemIds, todo['_id']);
+                        });
+
+                        return "User " + userName + " removed " + itemIds.length + " item(s)";
+                    });
+                };
+
                 $scope.addTodo = function () {
                     var newTodo = $scope.newTodo.trim();
                     if (!newTodo.length) {
@@ -121,6 +246,9 @@ app.directive('todoApplication', [
 
                         $scope.todos.push(item);
                         $scope.newTodo = '';
+
+                        var socketConnection = $scope.socketConnection;
+                        socketConnection.addedItem(item);
                     });
                 };
 
@@ -137,13 +265,19 @@ app.directive('todoApplication', [
                     if (!todo.title) {
                         $scope.removeTodo(todo);
                     } else {
-                        apiProvider.update(getWorkspaceId(), [todo]);
+                        apiProvider.update(getWorkspaceId(), [todo], function () {
+                            var socketConnection = $scope.socketConnection;
+                            socketConnection.updatedItems([todo]);
+                        });
                     }
                 };
 
                 $scope.removeTodo = function (todo) {
                     apiProvider.remove(getWorkspaceId(), [todo['_id']], function () {
                         $scope.todos.splice($scope.todos.indexOf(todo), 1);
+
+                        var socketConnection = $scope.socketConnection;
+                        socketConnection.removedItems([todo['_id']]);
                     });
                 };
 
@@ -159,11 +293,17 @@ app.directive('todoApplication', [
                         $scope.todos = $scope.todos.filter(function (val) {
                             return !val.completed;
                         });
+
+                        var socketConnection = $scope.socketConnection;
+                        socketConnection.removedItems(ids);
                     });
                 };
 
                 $scope.mark = function (todo) {
-                    apiProvider.update(getWorkspaceId(), [todo]);
+                    apiProvider.update(getWorkspaceId(), [todo], function () {
+                        var socketConnection = $scope.socketConnection;
+                        socketConnection.updatedItems([todo]);
+                    });
                 };
 
                 $scope.markAll = function (done) {
@@ -184,6 +324,9 @@ app.directive('todoApplication', [
                         $scope.todos.forEach(function (todo) {
                             todo.completed = done;
                         });
+
+                        var socketConnection = $scope.socketConnection;
+                        socketConnection.updatedItems(todos);
                     });
                 };
 

@@ -17,6 +17,49 @@ module.exports = function (app, dbProvider, serviceProvider) {
         }
     }
 
+    serviceProvider.get('/api/get-default-workspace/:userId', function (request, response, resultCallback) {
+        var userId = getParam('userId', request);
+        dbProvider.getDefaultWorkspace(userId, function (workspaceId) {
+            resultCallback({
+                message: 'Selected default workspace[' + workspaceId + ']',
+                data: {
+                    workspaceId: workspaceId
+                }
+            });
+        });
+    });
+
+    serviceProvider.get('/api/get-workspace/:workspaceId', function (request, response, resultCallback) {
+        var workspaceId = getParam('workspaceId', request);
+        dbProvider.getWorkspace(workspaceId, function (workspace) {
+            resultCallback({
+                message: 'Selected workspace: ' + workspace.name,
+                data: workspace
+            });
+        });
+    });
+
+    serviceProvider.get('/api/get-user/:userId', function (request, response, resultCallback) {
+        var userId = getParam('userId', request);
+        dbProvider.getUser(userId, function (user) {
+            resultCallback({
+                message: 'Selected user: ' + user.displayName,
+                data: user
+            });
+        });
+    });
+
+    serviceProvider.post('/api/get-users', function (request, response, resultCallback) {
+        var userId = getUserId(request);
+        var ids = request.body['ids'];
+        dbProvider.getUsers(ids, function (users) {
+            resultCallback({
+                message: 'Selected ' + users.length + ' user(s)',
+                data: users
+            });
+        });
+    });
+
     serviceProvider.post('/api/set-users-permissions-for-workspace/:workspaceId', function (request, response, resultCallback) {
         var userId = getUserId(request);
         var workspaceId = getParam('workspaceId', request);
