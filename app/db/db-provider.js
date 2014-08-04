@@ -403,6 +403,34 @@ module.exports = function (developmentMode) {
                 callback(result);
             });
         },
+        isAccessGrantedForWorkspace: function (userId, workspaceId, callback) {
+            User.findById(userId, function (error, model) {
+                if (error) {
+                    throw  error;
+                }
+
+                if (model) {
+
+                    function isAccessGranted(permittedWorkspaces) {
+                        for (var index = 0; index < permittedWorkspaces.length; index++) {
+                            var permittedWorkspace = permittedWorkspaces[index];
+                            if (permittedWorkspace.workspaceId == workspaceId) {
+                                var permissions = permittedWorkspace.permissions;
+                                if (permissions.readOnly || permissions.collectionManager || permissions.accessManager) {
+                                    return true;
+                                }
+                            }
+                        }
+                        return false;
+                    }
+
+                    var permittedWorkspaces = model.permittedWorkspaces;
+                    callback(isAccessGranted(permittedWorkspaces));
+                } else {
+                    throw 'User not found';
+                }
+            });
+        },
         setUsersPermissionsForWorkspace: function (workspaceId, collection, callback) {
 
             function isAccessDenied(permissions) {

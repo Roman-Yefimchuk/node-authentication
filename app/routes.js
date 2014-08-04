@@ -18,20 +18,35 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
                 console.log('render index page for user: ' + userId);
             }
 
-            function renderHomePage(workspaceId, defaultWorkspaceId) {
+            function renderHomePage(workspaceId, defaultWorkspaceId, externalNotification) {
                 res.render('todo.ejs', {
                     userId: userId,
                     displayName: userContext.displayName,
                     provider: userContext.provider,
                     workspaceId: workspaceId,
-                    defaultWorkspaceId: defaultWorkspaceId
+                    defaultWorkspaceId: defaultWorkspaceId,
+                    externalNotification: externalNotification
                 });
             }
 
             var workspaceId = req.flash('workspaceId');
             if (workspaceId && workspaceId.length > 0) {
-                dbProvider.getDefaultWorkspace(userId, function (defaultWorkspaceId) {
-                    renderHomePage(workspaceId, defaultWorkspaceId);
+                workspaceId = workspaceId[0];
+                dbProvider.isAccessGrantedForWorkspace(userId, workspaceId, function (isAccessGranted) {
+                    dbProvider.getDefaultWorkspace(userId, function (defaultWorkspaceId) {
+                        if (isAccessGranted) {
+                            renderHomePage(workspaceId, defaultWorkspaceId);
+                        } else {
+                            dbProvider.getWorkspace(workspaceId, function (workspace) {
+                                var workspaceName = workspace.name;
+
+                                renderHomePage(defaultWorkspaceId, defaultWorkspaceId, {
+                                    type: 'warning',
+                                    message: 'Access to workspace ' + workspaceName + ' closed'
+                                });
+                            });
+                        }
+                    });
                 });
             } else {
                 dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
@@ -69,7 +84,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
     // show the signup form
     app.get('/signup', function (req, res) {
         res.render('sign-up.ejs', {
-            message: req.flash('loginMessage')
+            message: req.flash('signupMessage')
         });
     });
 

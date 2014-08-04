@@ -6,6 +6,7 @@ var PermittedWorkspace = require('./permitted-workspace');
 
 module.exports = dbHelper.createModel('User', {
     local: {
+        name: {type: String},
         email: {type: String},
         password: {type: String}
     },

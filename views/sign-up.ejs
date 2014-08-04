@@ -29,22 +29,42 @@
         <div class="alert alert-danger"><%= message %></div>
         <% } %>
 
-        <form action="/signup" method="post">
-            <div class="form-group" ng-class="{ 'has-error' : !isEmailValid }">
-                <label>Email</label>
-                <input type="text" class="form-control" name="email" ng-model="email">
-            </div>
-            <div class="form-group" ng-class="{ 'has-error' : password.length < 6 }">
-                <label>Password</label>
-                <input type="password" class="form-control" name="password" ng-model="password">
+        <form action="/signup" method="post" autocomplete="off">
+
+            <div class="form-group" ng-class="{ 'has-error' : !isNameValid() }">
+                <label>Name</label>
+                <input type="text" class="form-control" name="name" ng-model="name"
+                       autocomplete="off">
             </div>
 
-            <button type="submit" class="btn btn-warning btn-lg" ng-disabled="!isEmailValid">Sign Up</button>
+            <div class="form-group" ng-class="{ 'has-error' : !isEmailValid() }">
+                <label>Email</label>
+                <input type="text" class="form-control" name="email" ng-model="email"
+                       autocomplete="off">
+            </div>
+
+            <div class="form-group" ng-class="{ 'has-error' : !isPasswordValid() }">
+                <label>Password</label>
+                <input type="password" class="form-control" name="password" ng-model="password"
+                       autocomplete="off">
+            </div>
+
+            <div class="form-group" ng-class="{ 'has-error' : !isPasswordValid() }">
+                <label>Confirm password</label>
+                <input type="password" class="form-control" ng-model="confirmedPassword"
+                       autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn btn-warning btn-lg"
+                    ng-disabled="!isEmailValid() || !isPasswordValid()">
+                Sign Up
+            </button>
         </form>
 
         <hr>
 
         <p>Already have an account? <a href="/login">Login</a></p>
+
         <p>Or go <a href="/">home</a>.</p>
     </div>
 </div>

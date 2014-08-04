@@ -29,6 +29,13 @@
     <users-dialog width='600px' height='522px'>
     </users-dialog>
 
+    <% if(externalNotification) { %>
+    <external-notification
+            type="<%= externalNotification.type %>"
+            message="<%= externalNotification.message %>">
+    </external-notification>
+    <% } %>
+
     <div>
         <span id="workspace-header">
 
@@ -156,6 +163,9 @@
 <script type="text/javascript" src="js/directives/manager-dialog.js"></script>
 <script type="text/javascript" src="js/directives/users-dialog.js"></script>
 <script type="text/javascript" src="js/directives/list-item.js"></script>
+<% if(externalNotification) { %>
+<script type="text/javascript" src="js/directives/external-notification.js"></script>
+<% } %>
 
 <script type="text/javascript" src="js/services/api-provider.js"></script>
 <script type="text/javascript" src="js/services/socket-provider.js"></script>

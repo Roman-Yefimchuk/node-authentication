@@ -98,6 +98,7 @@ module.exports = function (passport, dbProvider) {
 
                 if (req.user) {
                     var user = req.user;
+                    user.local.name = req.body['name'];
                     user.local.email = email;
                     user.local.password = user.generateHash(password);
 
@@ -110,6 +111,7 @@ module.exports = function (passport, dbProvider) {
                 } else {
                     var newUser = new User();
 
+                    newUser.local.name = req.body['name'];
                     newUser.local.email = email;
                     newUser.local.password = newUser.generateHash(password);
 

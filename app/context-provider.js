@@ -5,7 +5,7 @@ module.exports = {
             if (user) {
                 if (user.local && user.local.email) {
                     return {
-                        displayName: user.local.email,
+                        displayName: user.local.name,
                         provider: 'local'
                     };
                 }

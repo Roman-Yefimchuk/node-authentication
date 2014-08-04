@@ -38,12 +38,12 @@
                 </select>
             </div>
 
-            <div class="form-group">
+            <div class="form-group" ng-class="{ 'has-error' : !isEmailValid() }">
                 <label>Email</label>
                 <input type="text" class="form-control" name="email" ng-model="email">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" ng-class="{ 'has-error' : !isPasswordValid() }">
                 <label>Password</label>
                 <input type="password" class="form-control" name="password" ng-model="password">
             </div>
