@@ -1,21 +1,24 @@
-var mongoose = require('mongoose');
-var databaseConfig = require('../../config/database-config');
-
 module.exports = {
     connect: function (callback, developmentMode) {
-        mongoose.connect(databaseConfig['url']);
 
-        var db = mongoose['connection'];
+        var databaseConfig = require('../../config/database-config');
 
-        db.on('error', function (err) {
-            console.log('connection error: ' + err.message);
+        var Oriento = require('oriento');
+
+        var server = Oriento({
+            host: databaseConfig.host,
+            port: databaseConfig.port,
+            username: databaseConfig.server_username,
+            password: databaseConfig.server_password
         });
 
-        db.once('open', function () {
-            console.log("Connected to DB!");
-
-            var dbProvider = require('./db-provider')(developmentMode);
-            callback(dbProvider);
+        var db = server.use({
+            name: databaseConfig.db_name,
+            username: databaseConfig.db_username,
+            password: databaseConfig.db_password
         });
+
+        var dbProvider = require('./db-provider')(db, developmentMode);
+        callback(dbProvider);
     }
 };
