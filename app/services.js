@@ -1,17 +1,14 @@
 module.exports = function (app, dbProvider, serviceProvider) {
 
-    var getUserContext = require('./context-provider')['getUserContext'];
-
     function getParam(paramName, request) {
         var params = request.params;
         return params[paramName];
     }
 
     function getUserId(request) {
-        var user = request.user;
-        var userId = getUserContext(user)['userId'];
-        if (userId) {
-            return userId;
+        var userAccount = request.user;
+        if (userAccount && userAccount.isAuthenticated()) {
+            return userAccount.userId;
         } else {
             throw 'Access denied';
         }

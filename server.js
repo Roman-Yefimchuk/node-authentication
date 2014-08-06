@@ -33,7 +33,7 @@ var developmentMode = isDevelopmentMode();
 var dbConnector = require('./app/db/db-connector');
 dbConnector.connect(function (dbProvider) {
 
-    require('./config/passport')(passport, dbProvider); // pass passport for configuration
+    require('./app/providers/authorization-provider')(passport, dbProvider); // pass passport for configuration
 
     app.configure(function () {
 
@@ -55,7 +55,7 @@ dbConnector.connect(function (dbProvider) {
     require('./app/sockets-handler')(io, dbProvider, developmentMode);
     require('./app/routes')(app, passport, dbProvider, developmentMode);
 
-    var serviceProvider = require('./app/service-provider')(app, developmentMode);
+    var serviceProvider = require('./app/providers/services-provider')(app, developmentMode);
     require('./app/services')(app, dbProvider, serviceProvider);
 
     server.listen(port);

@@ -1,11 +1,14 @@
 <div>
     <table width="100%">
         <tr>
-            <td width="50%">
+            <td width="55%">
                 User ID: <b>{{ user.id }}</b>
+                <br>
                 User name: <b>{{ user.displayName }}</b>
+                <br>
+                Registered date: <b>{{ user.registeredDate }}</b>
             </td>
-            <td width="20%">
+            <td width="15%">
                 <div style="text-align: center" ng-show="user.isCreator">
                     <img src="/images/user.png" width="30px" height="30px" title="Creator of this workspace">
                 </div>
