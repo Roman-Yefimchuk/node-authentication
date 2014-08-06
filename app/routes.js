@@ -33,7 +33,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
             if (workspaceId && workspaceId.length > 0) {
                 workspaceId = workspaceId[0];
                 dbProvider.isAccessGrantedForWorkspace(userId, workspaceId, function (isAccessGranted) {
-                    dbProvider.getDefaultWorkspace(userId, function (defaultWorkspaceId) {
+                    dbProvider.getDefaultWorkspaceId(userId, function (defaultWorkspaceId) {
                         if (isAccessGranted) {
                             renderHomePage(workspaceId, defaultWorkspaceId);
                         } else {
@@ -50,7 +50,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
                 });
             } else {
                 dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
-                    dbProvider.getDefaultWorkspace(userId, function (defaultWorkspaceId) {
+                    dbProvider.getDefaultWorkspaceId(userId, function (defaultWorkspaceId) {
                         renderHomePage(workspaceId, defaultWorkspaceId);
                     });
                 });

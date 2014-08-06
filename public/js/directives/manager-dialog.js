@@ -23,9 +23,9 @@ app.directive('managerDialog', ['$rootScope', 'apiProvider', function ($rootScop
 
                 $scope.appScope = appScope;
                 $scope.dialogTitle = workspace.name;
-                $scope.workspaceId = workspace['_id'];
+                $scope.workspaceId = workspace.id;
 
-                apiProvider.getAllUsersWithPermissions(workspace['_id'], function (users) {
+                apiProvider.getAllUsersWithPermissions(workspace.id, function (users) {
                     $scope.users = users.filter(function (user) {
                         return user.id != userId;
                     });

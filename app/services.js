@@ -17,9 +17,9 @@ module.exports = function (app, dbProvider, serviceProvider) {
         }
     }
 
-    serviceProvider.get('/api/get-default-workspace/:userId', function (request, response, resultCallback) {
+    serviceProvider.get('/api/get-default-workspace-id/:userId', function (request, response, resultCallback) {
         var userId = getParam('userId', request);
-        dbProvider.getDefaultWorkspace(userId, function (workspaceId) {
+        dbProvider.getDefaultWorkspaceId(userId, function (workspaceId) {
             resultCallback({
                 message: 'Selected default workspace[' + workspaceId + ']',
                 data: {

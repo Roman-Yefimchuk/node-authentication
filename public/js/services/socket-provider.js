@@ -19,7 +19,7 @@ app.factory('socketProvider', [
                 }
 
                 function getWorkspaceId() {
-                    return $scope.currentWorkspace['_id'];
+                    return $scope.currentWorkspace['id'];
                 }
 
                 onCommand('user_connected', function (data) {

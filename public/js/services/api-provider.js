@@ -4,6 +4,20 @@ app.factory('apiProvider', [
 
     function ($http) {
 
+        function traceResponse(params, response) {
+            console.log('URL[' + params.method + '] -> ' + params.url);
+            if (params.method == 'POST') {
+                console.log('payload ->');
+                console.log(params.data);
+            }
+            if (response.data) {
+                console.log('response ->');
+                console.log(response.data);
+            } else {
+                console.log('empty response');
+            }
+        }
+
         function sendRequest(params, callback) {
             var request = $http(params);
 
@@ -15,8 +29,18 @@ app.factory('apiProvider', [
             request.success(function (response) {
                 if (response.status) {
                     if (response.data) {
+
+                        {
+                            traceResponse(params, response);
+                        }
+
                         callback(response.data);
                     } else {
+
+                        {
+                            traceResponse(params, response);
+                        }
+
                         callback({});
                     }
                     console.log(response.message);
@@ -131,10 +155,10 @@ app.factory('apiProvider', [
                     url: '/api/get-workspace/' + workspaceId
                 }, callback);
             },
-            getDefaultWorkspace: function (userId, callback) {
+            getDefaultWorkspaceId: function (userId, callback) {
                 sendRequest({
                     method: 'GET',
-                    url: '/api/get-default-workspace/' + userId
+                    url: '/api/get-default-workspace-id/' + userId
                 }, callback);
             }
         };

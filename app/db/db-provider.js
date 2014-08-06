@@ -10,6 +10,10 @@ module.exports = function (developmentMode) {
     var Workspace = require('./models/workspace');
     var PermittedWorkspace = require('./models/permitted-workspace');
 
+    function extractId(entity) {
+        return entity['_id'].toString();
+    }
+
     function getUserPermissionsForWorkspace(workspaceId, user) {
         var permittedWorkspaces = user.permittedWorkspaces;
         for (var index = 0; index < permittedWorkspaces.length; index++) {
@@ -52,7 +56,7 @@ module.exports = function (developmentMode) {
                 throw error;
             }
 
-            var workspaceId = model['_id'].toString();
+            var workspaceId = extractId(model);
 
             User.findById(creatorId, function (error, model) {
                 if (error) {
@@ -87,28 +91,43 @@ module.exports = function (developmentMode) {
 
     return {
         getItems: function (workspaceId, userId, callback) {
-            Todo.find({'workspaceId': workspaceId}, function (error, items) {
+            Todo.find({
+                'workspaceId': workspaceId
+            }, function (error, items) {
                 if (error) {
                     throw error;
                 }
 
-                callback(items);
+                var result = [];
+
+                _.forEach(items, function (item) {
+                    result.push({
+                        id: extractId(item),
+                        creatorId: item.creatorId,
+                        title: item.title,
+                        completed: item.completed,
+                        workspaceId: item.workspaceId,
+                        createdDate: item.createdDate
+                    });
+                });
+
+                callback(result);
             });
         },
         save: function (workspaceId, userId, todoModel, callback) {
             var todo = new Todo({
                 'workspaceId': workspaceId,
-                'userId': userId,
+                'creatorId': userId,
                 'title': todoModel.title,
                 'completed': todoModel.completed
             });
 
-            todo.save(function (error, model) {
+            todo.save(function (error, item) {
                 if (error) {
                     throw error;
                 }
 
-                var itemId = model['_id'].toString();
+                var itemId = extractId(item);
                 callback(itemId);
             });
         },
@@ -119,17 +138,14 @@ module.exports = function (developmentMode) {
                     callback();
                 } else {
                     var todoModel = todoModels[index];
-                    Todo.findById(todoModel['_id'], function (error, model) {
+                    Todo.findById(todoModel.id, function (error, model) {
                         if (error) {
                             throw error;
                         }
 
                         model.title = todoModel.title;
                         model.completed = todoModel.completed;
-                        model.lastModifyInfo = {
-                            date: Date.now(),
-                            userId: userId
-                        };
+
                         model.save(function (error) {
                             if (error) {
                                 throw error;
@@ -202,7 +218,8 @@ module.exports = function (developmentMode) {
                 }
 
                 if (model) {
-                    callback(model.currentWorkspaceId);
+                    var workspaceId = model.currentWorkspaceId;
+                    callback(workspaceId);
                 } else {
                     throw 'Workspace not found';
                 }
@@ -221,26 +238,32 @@ module.exports = function (developmentMode) {
                 }
 
                 if (model) {
-                    callback(model.ownWorkspaces);
+                    var workspaces = model.ownWorkspaces;
+                    callback(workspaces);
                 } else {
                     throw 'User not found';
                 }
             });
         },
         getWorkspace: function (workspaceId, callback) {
-            Workspace.findById(workspaceId, function (error, model) {
+            Workspace.findById(workspaceId, function (error, workspace) {
                 if (error) {
                     throw error;
                 }
 
-                if (model) {
-                    callback(model);
+                if (workspace) {
+                    callback({
+                        id: extractId(workspace),
+                        name: workspace.name,
+                        creatorId: workspace.creatorId,
+                        createdDate: workspace.createdDate
+                    });
                 } else {
                     throw 'Workspace not found';
                 }
             });
         },
-        getDefaultWorkspace: function (userId, callback) {
+        getDefaultWorkspaceId: function (userId, callback) {
             User.findById(userId, function (error, model) {
                 if (error) {
                     throw error;
@@ -262,16 +285,17 @@ module.exports = function (developmentMode) {
             });
         },
         getUser: function (userId, callback) {
-            User.findById(userId, function (error, model) {
+            User.findById(userId, function (error, user) {
                 if (error) {
                     throw error;
                 }
 
-                if (model) {
-                    var userContext = getUserContext(model);
+                if (user) {
+                    var userContext = getUserContext(user);
                     callback({
                         id: userContext.userId,
-                        displayName: userContext.displayName
+                        displayName: userContext.displayName,
+                        registeredDate: user.registeredDate
                     });
                 } else {
                     throw 'User not found';
@@ -281,23 +305,28 @@ module.exports = function (developmentMode) {
         getUsers: function (ids, callback) {
 
             var userIds = [];
-            ids.forEach(function (id) {
-                userIds.push({'_id': new ObjectID(id)});
+            _.forEach(ids, function (id) {
+                userIds.push({
+                    '_id': new ObjectID(id)
+                });
             });
 
-            User.find({'$or': userIds}, function (error, users) {
+            User.find({
+                '$or': userIds
+            }, function (error, users) {
                 if (error) {
                     throw error;
                 }
 
                 var result = [];
 
-                users.forEach(function (user) {
+                _.forEach(users, function (user) {
                     var userContext = getUserContext(user);
 
                     result.push({
                         id: userContext.userId,
-                        displayName: userContext.displayName
+                        displayName: userContext.displayName,
+                        registeredDate: user.registeredDate
                     });
                 });
 
@@ -305,21 +334,25 @@ module.exports = function (developmentMode) {
             });
         },
         getPermittedWorkspaces: function (userId, callback) {
-            User.findById(userId, function (error, model) {
+            User.findById(userId, function (error, user) {
                 if (error) {
                     throw error;
                 }
 
-                if (model) {
-                    var permittedWorkspaces = model.permittedWorkspaces;
+                if (user) {
+                    var permittedWorkspaces = user.permittedWorkspaces;
 
                     var workspaceIds = [];
-                    permittedWorkspaces.forEach(function (permittedWorkspace) {
+                    _.forEach(permittedWorkspaces, function (permittedWorkspace) {
                         var id = permittedWorkspace.workspaceId;
-                        workspaceIds.push({'_id': new ObjectID(id)});
+                        workspaceIds.push({
+                            '_id': new ObjectID(id)
+                        });
                     });
 
-                    Workspace.find({'$or': workspaceIds}, function (error, workspaces) {
+                    Workspace.find({
+                        '$or': workspaceIds
+                    }, function (error, workspaces) {
                         if (error) {
                             throw  error;
                         }
@@ -327,7 +360,7 @@ module.exports = function (developmentMode) {
                         function getWorkspace(permittedWorkspace) {
                             for (var index = 0; index < workspaces.length; index++) {
                                 var workspace = workspaces[index];
-                                var workspaceId = workspace['_id'].toString();
+                                var workspaceId = extractId(workspace);
                                 if (workspaceId == permittedWorkspace.workspaceId) {
                                     return workspace;
                                 }
@@ -340,10 +373,11 @@ module.exports = function (developmentMode) {
                             var permittedWorkspace = permittedWorkspaces[index];
                             var workspace = getWorkspace(permittedWorkspace);
                             result.push({
-                                '_id': permittedWorkspace.workspaceId,
-                                'name': workspace.name,
-                                'creatorId': workspace.creatorId,
-                                'permissions': permittedWorkspace.permissions
+                                id: permittedWorkspace.workspaceId,
+                                name: workspace.name,
+                                creatorId: workspace.creatorId,
+                                createdDate: workspace.createdDate,
+                                permissions: permittedWorkspace.permissions
                             });
                         }
 
@@ -360,7 +394,18 @@ module.exports = function (developmentMode) {
                     throw error;
                 }
 
-                callback(workspaces);
+                var result = [];
+
+                _.forEach(workspaces, function (workspace) {
+                    result.push({
+                        id: extractId(workspace),
+                        name: workspace.name,
+                        creatorId: workspace.creatorId,
+                        createdDate: workspace.createdDate
+                    });
+                });
+
+                callback(result);
             });
         },
         getAllUsers: function (callback) {
@@ -369,14 +414,18 @@ module.exports = function (developmentMode) {
                     throw error;
                 }
 
-                for (var userIndex = 0; userIndex < users.length; userIndex++) {
+                var result = [];
+
+                _.forEach(users, function (user) {
                     var userContext = getUserContext(users[userIndex]);
-                    users[userIndex] = {
+                    result.push({
                         id: userContext.userId,
-                        displayName: userContext.displayName
-                    };
-                }
-                callback(users);
+                        displayName: userContext.displayName,
+                        registeredDate: user.registeredDate
+                    });
+                });
+
+                callback(result);
             });
         },
         getAllUsersWithPermissions: function (workspaceId, callback) {
@@ -387,10 +436,8 @@ module.exports = function (developmentMode) {
 
                 var result = [];
 
-                for (var userIndex = 0; userIndex < users.length; userIndex++) {
-                    var user = users[userIndex];
+                _.forEach(users, function (user) {
                     var userContext = getUserContext(user);
-
 
                     result.push({
                         id: userContext.userId,
@@ -398,7 +445,7 @@ module.exports = function (developmentMode) {
                         permissions: getUserPermissionsForWorkspace(workspaceId, user),
                         isCreator: isCreator(workspaceId, user)
                     });
-                }
+                });
 
                 callback(result);
             });
@@ -442,11 +489,15 @@ module.exports = function (developmentMode) {
             }
 
             var userIds = [];
-            collection.forEach(function (collectionItem) {
-                userIds.push({'_id': new ObjectID(collectionItem.userId)});
+            _.forEach(collection, function (collectionItem) {
+                userIds.push({
+                    '_id': new ObjectID(collectionItem.userId)
+                });
             });
 
-            User.find({'$or': userIds}, function (error, users) {
+            User.find({
+                '$or': userIds
+            }, function (error, users) {
                 if (error) {
                     throw error;
                 }

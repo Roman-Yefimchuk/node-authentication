@@ -1,11 +1,11 @@
 var mongoose = require('mongoose');
-var dbConfig = require('../../config/database');
+var databaseConfig = require('../../config/database-config');
 
 module.exports = {
     connect: function (callback, developmentMode) {
-        mongoose.connect(dbConfig['url']);
+        mongoose.connect(databaseConfig['url']);
 
-        var db = mongoose.connection;
+        var db = mongoose['connection'];
 
         db.on('error', function (err) {
             console.log('connection error: ' + err.message);

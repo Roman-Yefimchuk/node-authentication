@@ -19,7 +19,7 @@ app.directive('todoApplication', [
             controller: function ($scope) {
 
                 function getWorkspaceId() {
-                    return $scope.currentWorkspace['_id'];
+                    return $scope.currentWorkspace['id'];
                 }
 
                 function changeNotification(userId, messageBuilder, type) {
@@ -64,7 +64,7 @@ app.directive('todoApplication', [
                 $scope.updatePermissions = function (userId, workspaceId, permissions) {
                     permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
 
-                        if (_.findWhere($scope.workspaces, { '_id': workspaceId })) {
+                        if (_.findWhere($scope.workspaces, { id: workspaceId })) {
                             if (getWorkspaceId() == workspaceId) {
                                 $scope.permissions = permissions;
                             }
@@ -82,12 +82,12 @@ app.directive('todoApplication', [
                     permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
 
                         $scope.workspaces = _.filter($scope.workspaces, function (workspace) {
-                            return workspace['_id'] != workspaceId;
+                            return workspace.id != workspaceId;
                         });
 
                         if (getWorkspaceId() == workspaceId) {
                             $scope.currentWorkspace = _.findWhere($scope.workspaces, {
-                                _id: $scope.defaultWorkspaceId
+                                id: $scope.defaultWorkspaceId
                             });
                         }
 
@@ -159,7 +159,7 @@ app.directive('todoApplication', [
                         });
 
                         $scope.currentWorkspace = _.findWhere(workspaces, {
-                            _id: workspaceId
+                            id: workspaceId
                         });
                     });
                 });
@@ -205,7 +205,7 @@ app.directive('todoApplication', [
                         _.forEach(items, function (item) {
 
                             var todo = _.findWhere($scope.todos, {
-                                '_id': item['_id']
+                                id: item.id
                             });
 
                             todo.title = item.title;
@@ -220,7 +220,7 @@ app.directive('todoApplication', [
                     changeNotification(userId, function (userName) {
 
                         $scope.todos = _.filter($scope.todos, function (todo) {
-                            return !_.contains(itemIds, todo['_id']);
+                            return !_.contains(itemIds, todo.id);
                         });
 
                         return "User " + userName + " removed " + itemIds.length + " item(s)";
@@ -242,7 +242,7 @@ app.directive('todoApplication', [
                         title: item.title,
                         completed: item.completed
                     }, function (itemId) {
-                        item._id = itemId;
+                        item.id = itemId;
 
                         $scope.todos.push(item);
                         $scope.newTodo = '';
@@ -273,11 +273,11 @@ app.directive('todoApplication', [
                 };
 
                 $scope.removeTodo = function (todo) {
-                    apiProvider.remove(getWorkspaceId(), [todo['_id']], function () {
+                    apiProvider.remove(getWorkspaceId(), [todo.id], function () {
                         $scope.todos.splice($scope.todos.indexOf(todo), 1);
 
                         var socketConnection = $scope.socketConnection;
-                        socketConnection.removedItems([todo['_id']]);
+                        socketConnection.removedItems([todo.id]);
                     });
                 };
 
@@ -285,7 +285,7 @@ app.directive('todoApplication', [
                     var ids = [];
                     $scope.todos.forEach(function (todo) {
                         if (todo.completed) {
-                            ids.push(todo['_id']);
+                            ids.push(todo.id);
                         }
                     });
 
@@ -312,7 +312,7 @@ app.directive('todoApplication', [
                     $scope.todos.forEach(function (todo) {
                         if (todo.completed != done) {
                             todos.push({
-                                _id: todo._id,
+                                id: todo.id,
                                 completed: done,
                                 title: todo.title,
                                 userId: todo.userId

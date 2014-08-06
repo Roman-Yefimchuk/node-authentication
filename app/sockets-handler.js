@@ -140,21 +140,23 @@ module.exports = function (io, dbProvider, developmentMode) {
                             'userId': socketSession.userId
                         });
 
-                        var permissions = collectionItem.permissions;
+                        if (collectionItem) {
+                            var permissions = collectionItem.permissions;
 
-                        if (isAccessDenied(permissions)) {
-                            socketSession.sendCommand('permissions_changed', {
-                                userId: userId,
-                                workspaceId: workspaceId,
-                                access: false
-                            });
-                        } else {
-                            socketSession.sendCommand('permissions_changed', {
-                                userId: userId,
-                                workspaceId: workspaceId,
-                                access: true,
-                                permissions: permissions
-                            });
+                            if (isAccessDenied(permissions)) {
+                                socketSession.sendCommand('permissions_changed', {
+                                    userId: userId,
+                                    workspaceId: workspaceId,
+                                    access: false
+                                });
+                            } else {
+                                socketSession.sendCommand('permissions_changed', {
+                                    userId: userId,
+                                    workspaceId: workspaceId,
+                                    access: true,
+                                    permissions: permissions
+                                });
+                            }
                         }
                     }
                 });

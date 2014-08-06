@@ -5,7 +5,7 @@ var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
 var User = require('../app/db/models/user');
 
-var configAuth = require('./auth');
+var authorizationConfig = require('./authorization-config');
 var getUserContext = require('../app/context-provider')['getUserContext'];
 
 module.exports = function (passport, dbProvider) {
@@ -125,9 +125,9 @@ module.exports = function (passport, dbProvider) {
     // FACEBOOK ================================================================
     // =========================================================================
     passport.use(new FacebookStrategy({
-        clientID: configAuth.facebookAuth.clientID,
-        clientSecret: configAuth.facebookAuth.clientSecret,
-        callbackURL: configAuth.facebookAuth.callbackURL,
+        clientID: authorizationConfig.facebookAuth.clientID,
+        clientSecret: authorizationConfig.facebookAuth.clientSecret,
+        callbackURL: authorizationConfig.facebookAuth.callbackURL,
         passReqToCallback: true
     }, function (req, token, refreshToken, profile, done) {
 
@@ -192,9 +192,9 @@ module.exports = function (passport, dbProvider) {
     // TWITTER =================================================================
     // =========================================================================
     passport.use(new TwitterStrategy({
-        consumerKey: configAuth.twitterAuth.consumerKey,
-        consumerSecret: configAuth.twitterAuth.consumerSecret,
-        callbackURL: configAuth.twitterAuth.callbackURL,
+        consumerKey: authorizationConfig.twitterAuth.consumerKey,
+        consumerSecret: authorizationConfig.twitterAuth.consumerSecret,
+        callbackURL: authorizationConfig.twitterAuth.callbackURL,
         passReqToCallback: true
     }, function (req, token, tokenSecret, profile, done) {
 
@@ -258,9 +258,9 @@ module.exports = function (passport, dbProvider) {
     // GOOGLE ==================================================================
     // =========================================================================
     passport.use(new GoogleStrategy({
-        clientID: configAuth.googleAuth.clientID,
-        clientSecret: configAuth.googleAuth.clientSecret,
-        callbackURL: configAuth.googleAuth.callbackURL,
+        clientID: authorizationConfig.googleAuth.clientID,
+        clientSecret: authorizationConfig.googleAuth.clientSecret,
+        callbackURL: authorizationConfig.googleAuth.callbackURL,
         passReqToCallback: true
     }, function (req, token, refreshToken, profile, done) {
 
