@@ -1,11 +1,17 @@
-var bcrypt = require('bcrypt-nodejs');
+var bCrypt = require('bcrypt-nodejs');
 
 module.exports = {
     generateHash: function (password) {
-        return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+        return bCrypt.hashSync(password, bCrypt.genSaltSync(8), null);
     },
     validPassword: function (userAccount, password) {
         var userEncryptedPassword = userAccount.password;
-        return bcrypt.compareSync(password, userEncryptedPassword);
+        return bCrypt.compareSync(password, userEncryptedPassword);
+    },
+    decodeBase64: function (encoded) {
+        return new Buffer(encoded || '', 'base64').toString('utf8');
+    },
+    encodeBase64: function (unencoded) {
+        return new Buffer(unencoded || '').toString('base64');
     }
 };

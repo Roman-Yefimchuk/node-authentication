@@ -1,102 +1,121 @@
-module.exports = function (developmentMode) {
+module.exports = function (db, developmentMode) {
 
     var asyncCycle = require('../utils/async-cycle');
+    var security = require('../utils/security');
 
     var _ = require('underscore');
 
-    var ObjectID = require('mongodb')['ObjectID'];
+    var ObjectID = null;
 
-    var UserAccount = require('./models/user-account');
-    var User = require('./models/user');
-    var Todo = require('./models/todo');
-    var Workspace = require('./models/workspace');
-    var PermittedWorkspace = require('./models/permitted-workspace');
+    var UserAccount = null;
+    var User = null;
+    var Todo = null;
+    var Workspace = null;
+    var PermittedWorkspace = null;
 
+    //TODO: done
     function extractId(entity) {
-        return entity['_id'].toString();
+        return entity['@rid'].toString();
     }
 
-    function getUserPermissionsForWorkspace(workspaceId, user) {
-        var permittedWorkspaces = user.permittedWorkspaces;
-        for (var index = 0; index < permittedWorkspaces.length; index++) {
-            var permittedWorkspace = permittedWorkspaces[index];
-            if (workspaceId == permittedWorkspace.workspaceId) {
-                var permissions = permittedWorkspace.permissions;
-                return {
-                    'readOnly': permissions.readOnly,
-                    'collectionManager': permissions.collectionManager,
-                    'accessManager': permissions.accessManager
-                };
+    //TODO: done
+    function encodeId(entity) {
+        var id = extractId(entity);
+        return security.encodeBase64(id);
+    }
+
+    //TODO: done
+    function decodeId(id) {
+        return security.decodeBase64(id);
+    }
+
+    //TODO: done
+    function getUserPermissionsForWorkspace(userId, workspaceId, callback) {
+        var queryRequest = db.query("SELECT * FROM PermittedWorkspace WHERE userId = :userId", {
+            params: {
+                userId: userId
             }
-        }
-        return {
-            'readOnly': false,
-            'collectionManager': false,
-            'accessManager': false
-        };
-    }
-
-    function isCreator(workspaceId, user) {
-        var permittedWorkspaces = user.permittedWorkspaces;
-        for (var index = 0; index < permittedWorkspaces.length; index++) {
-            var permittedWorkspace = permittedWorkspaces[index];
-            if (workspaceId == permittedWorkspace.workspaceId) {
-                return permittedWorkspace.isOwn;
-            }
-        }
-        return false;
-    }
-
-    function addWorkspace(name, creatorId, isDefault, callback) {
-        var workspace = new Workspace({
-            'name': name,
-            'creatorId': creatorId
         });
-
-        workspace.save(function (error, model) {
-            if (error) {
-                throw error;
-            }
-
-            var workspaceId = extractId(model);
-
-            User.findById(creatorId, function (error, model) {
-                if (error) {
-                    throw error;
+        queryRequest.then(function (results) {
+            var permittedWorkspaces = results;
+            for (var index = 0; index < permittedWorkspaces.length; index++) {
+                var permittedWorkspace = permittedWorkspaces[index];
+                if (workspaceId == permittedWorkspace.workspaceId) {
+                    callback({
+                        'readOnly': permittedWorkspace.readOnly,
+                        'collectionManager': permittedWorkspace.collectionManager,
+                        'accessManager': permittedWorkspace.accessManager
+                    });
                 }
-
-                var ownWorkspaces = model.ownWorkspaces;
-                ownWorkspaces.push(workspaceId);
-
-                var permittedWorkspaces = model.permittedWorkspaces;
-                permittedWorkspaces.push(new PermittedWorkspace({
-                    'workspaceId': workspaceId,
-                    'isOwn': true,
-                    'isDefault': isDefault,
-                    'permissions': {
-                        'readOnly': true,
-                        'collectionManager': true,
-                        'accessManager': true
-                    }
-                }));
-
-                model.save(function (error) {
-                    if (error) {
-                        throw error;
-                    }
-
-                    callback(workspaceId);
-                });
+            }
+            callback({
+                'readOnly': false,
+                'collectionManager': false,
+                'accessManager': false
             });
         });
     }
 
-    function getUserAccount(accountId, callback) {
-        UserAccount.findById(accountId, function (error, userAccount) {
-            if (error) {
-                throw error;
+    //TODO: done
+    function isCreator(userId, workspaceId, callback) {
+        var queryRequest = db.query("SELECT * FROM PermittedWorkspace WHERE userId = :userId", {
+            params: {
+                userId: userId
             }
+        });
+        queryRequest.then(function (results) {
+            var permittedWorkspaces = results;
+            for (var index = 0; index < permittedWorkspaces.length; index++) {
+                var permittedWorkspace = permittedWorkspaces[index];
+                if (workspaceId == permittedWorkspace.workspaceId) {
+                    callback(permittedWorkspace.isOwn);
+                }
+            }
+            callback(false);
+        });
+    }
 
+    //TODO: done
+    function addWorkspace(name, creatorId, isDefault, callback) {
+        var queryRequest = db.query("INSERT INTO Workspace (name, creatorId, createDate) " +
+            "VALUES (:name, :creatorId, :createDate)", {
+            params: {
+                name: name,
+                creatorId: creatorId,
+                createDate: _.now()
+            }
+        });
+        queryRequest.then(function (results) {
+            var workspace = results[0];
+            var workspaceId = encodeId(workspace);
+
+            var queryRequest = db.query("INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, " +
+                "readOnly, collectionManager, accessManager) VALUES (:userId, :workspaceId, :isOwn, :isDefault, " +
+                ":readOnly, :collectionManager, :accessManager)", {
+                params: {
+                    userId: creatorId,
+                    workspaceId: workspaceId,
+                    isOwn: true,
+                    isDefault: isDefault,
+                    readOnly: true,
+                    collectionManager: true,
+                    accessManager: true
+                }
+            });
+            queryRequest.then(function (results) {
+                callback(workspaceId);
+            });
+        });
+    }
+
+    //TODO: done
+    function getUserAccount(accountId, callback) {
+        var queryRequest = db.query("SELECT * FROM UserAccount WHERE @rid = :accountId", {
+            params: {
+                accountId: decodeId(accountId)
+            }
+        });
+        queryRequest.then(function (userAccount) {
             if (userAccount) {
                 callback({
                     userId: userAccount.userId,
@@ -114,6 +133,41 @@ module.exports = function (developmentMode) {
         });
     }
 
+    //TODO: done
+    function formatParams(data, options) {
+        var result = '';
+        var mode = options && options.mode;
+        var excludedKeys = options && options.excludedKeys;
+
+        _.forEach(data, function (value, key) {
+            if (!_.contains(excludedKeys, key)) {
+                if (result.length > 0) {
+                    result += ', ';
+                }
+                switch (mode) {
+                    case 'keys':
+                    {
+                        result += key;
+                        break;
+                    }
+                    case 'values':
+                    {
+                        result += ':' + key;
+                        break;
+                    }
+                    default :
+                    {
+                        result += key + ' = :' + key;
+                        break;
+                    }
+                }
+            }
+        });
+
+        return result;
+    }
+
+    //TODO: done
     function wrapAccountUser(userAccount) {
         if (userAccount) {
             return {
@@ -146,11 +200,12 @@ module.exports = function (developmentMode) {
                         }
                     });
 
-                    userAccount.save(function (error, userAccount) {
-                        if (error) {
-                            failureCallback(error);
-                        }
+                    var queryRequest = db.query("UPDATE UserAccount SET " + formatParams(accountData) +
+                        " WHERE @rid = " + extractId(userAccount), {
+                        params: accountData
+                    });
 
+                    queryRequest.then(function (userAccount) {
                         successCallback(wrapAccountUser(userAccount));
                     });
                 }
@@ -159,12 +214,12 @@ module.exports = function (developmentMode) {
     }
 
     var dbProvider = {
+
+        //TODO: done
         createUser: function (data, callback) {
 
             var successCallback = callback.success;
             var failureCallback = callback.failure;
-
-            var userAccount = new UserAccount();
 
             try {
                 _.forEach([
@@ -176,9 +231,7 @@ module.exports = function (developmentMode) {
                     'authorizationProvider',
                     'registeredDate'
                 ], function (key) {
-                    if (key in data) {
-                        userAccount[key] = data[key];
-                    } else {
+                    if (!(key in data)) {
                         throw "Missing property '" + key + "'";
                     }
                 });
@@ -186,25 +239,40 @@ module.exports = function (developmentMode) {
                 failureCallback(e);
             }
 
-            userAccount.save(function (error, userAccount) {
-                if (error) {
-                    failureCallback(error);
+            var queryRequest = db.query("INSERT INTO UserAccount (genericId, displayName, password, email, token, " +
+                "authorizationProvider, registeredDate) VALUES (:genericId, :displayName, :password, :email, " +
+                ":token, :authorizationProvider, :registeredDate)", {
+                params: {
+                    genericId: data.genericId,
+                    displayName: data.displayName,
+                    password: data.password,
+                    email: data.email,
+                    token: data.token,
+                    authorizationProvider: data.authorizationProvider,
+                    registeredDate: data.registeredDate
                 }
+            });
+            queryRequest.then(function (results) {
+                var userAccount = results[0];
 
-                var user = new User();
-                user.accountId = extractId(userAccount);
-
-                user.save(function (error, user) {
-                    if (error) {
-                        failureCallback(error);
+                var queryRequest = db.query("INSERT INTO User (accountId) VALUES (:accountId)", {
+                    params: {
+                        accountId: encodeId(userAccount)
                     }
+                });
+                queryRequest.then(function (results) {
+                    var user = results[0];
+                    var userId = encodeId(user);
 
-                    userAccount.userId = extractId(user);
-                    userAccount.save(function (error, userAccount) {
-                        if (error) {
-                            failureCallback(error);
+                    userAccount.userId = userId;
+
+                    var queryRequest = db.query("UPDATE UserAccount SET userId = :userId WHERE @rid = :id", {
+                        params: {
+                            userId: userId,
+                            id: extractId(userAccount)
                         }
-
+                    });
+                    queryRequest.then(function (counts) {
                         var userId = userAccount.userId;
                         var workspaceName = userAccount.displayName + '[' + userAccount.authorizationProvider + ']';
 
@@ -217,38 +285,42 @@ module.exports = function (developmentMode) {
                 });
             });
         },
+
+        //TODO: done
         findUser: function (genericId, callback) {
 
             var successCallback = callback.success;
             var failureCallback = callback.failure;
 
-            UserAccount.findOne({
-                genericId: genericId
-            }, function (error, userAccount) {
-                if (error) {
-                    failureCallback(error);
+            var queryRequest = db.query("SELECT * FROM UserAccount WHERE genericId = :genericId", {
+                params: {
+                    genericId: genericId
                 }
-
-                if (userAccount) {
-                    successCallback(wrapAccountUser(userAccount));
+            });
+            queryRequest.then(function (results) {
+                if (results.length > 0) {
+                    successCallback(wrapAccountUser(results[0]));
                 } else {
                     successCallback();
                 }
             });
         },
+
+        //TODO: done
         getItems: function (workspaceId, userId, callback) {
-            Todo.find({
-                'workspaceId': workspaceId
-            }, function (error, items) {
-                if (error) {
-                    throw error;
+            var queryRequest = db.query("SELECT * FROM Todo WHERE workspaceId = :workspaceId", {
+                params: {
+                    workspaceId: workspaceId
                 }
+            });
+            queryRequest.then(function (results) {
+                var items = results;
 
                 var result = [];
 
                 _.forEach(items, function (item) {
                     result.push({
-                        id: extractId(item),
+                        id: encodeId(item),
                         creatorId: item.creatorId,
                         title: item.title,
                         completed: item.completed,
@@ -260,19 +332,20 @@ module.exports = function (developmentMode) {
                 callback(result);
             });
         },
+
+        //TODO: done
         save: function (workspaceId, userId, todoModel, callback) {
-            var todo = new Todo({
-                'workspaceId': workspaceId,
-                'creatorId': userId,
-                'title': todoModel.title,
-                'completed': todoModel.completed
-            });
-
-            todo.save(function (error, item) {
-                if (error) {
-                    throw error;
+            var queryRequest = db.query("INSERT INTO Todo (workspaceId, creatorId, title, completed) VALUES (" +
+                ":workspaceId, :creatorId, :title, :completed)", {
+                params: {
+                    workspaceId: workspaceId,
+                    creatorId: userId,
+                    title: todoModel.title,
+                    completed: todoModel.completed
                 }
-
+            });
+            queryRequest.then(function (results) {
+                var item = results[0];
                 var itemId = extractId(item);
                 callback(itemId);
             });
@@ -320,73 +393,87 @@ module.exports = function (developmentMode) {
                 callback();
             });
         },
-        setUserWorkspaceId: function (userId, workspaceId, callback) {
-            User.findById(userId, function (error, model) {
-                if (error) {
-                    throw error;
-                }
 
-                if (model) {
-                    model.currentWorkspaceId = workspaceId;
+        //TODO: done
+        setUserWorkspaceId: function (userId, workspaceId, callback) {
+            var queryRequest = db.query("UPDATE User SET currentWorkspaceId = :currentWorkspaceId WHERE @rid = :id", {
+                params: {
+                    currentWorkspaceId: workspaceId,
+                    id: decodeId(userId)
+                }
+            });
+            queryRequest.then(function (counts) {
+                if (counts > 0) {
+                    getUserPermissionsForWorkspace(userId, workspaceId, function (permissions) {
+                        isCreator(userId, workspaceId, function (isCreator) {
+                            callback(permissions, isCreator);
+                        })
+                    });
                 } else {
                     throw 'User not found';
                 }
-
-                model.save(function (error, model) {
-                    if (error) {
-                        throw error;
-                    }
-
-                    var permissions = getUserPermissionsForWorkspace(workspaceId, model);
-                    var isOwnWorkspace = isCreator(workspaceId, model);
-
-                    callback(permissions, isOwnWorkspace);
-                })
             });
         },
-        getUserWorkspaceId: function (userId, callback) {
-            User.findById(userId, function (error, model) {
-                if (error) {
-                    throw error;
-                }
 
-                if (model) {
-                    var workspaceId = model.currentWorkspaceId;
+        //TODO: done
+        getUserWorkspaceId: function (userId, callback) {
+            var queryRequest = db.query("SELECT currentWorkspaceId FROM User WHERE @rid = :id", {
+                params: {
+                    id: decodeId(userId)
+                }
+            });
+            queryRequest.then(function (results) {
+                if (results.length > 0) {
+                    var user = results[0];
+                    var workspaceId = user.currentWorkspaceId;
                     callback(workspaceId);
                 } else {
-                    throw 'Workspace not found';
+                    throw 'User not found';
                 }
             });
         },
+
+        //TODO: done
         createDefaultWorkspace: function (name, creatorId, callback) {
             addWorkspace(name, creatorId, true, callback);
         },
+
+        //TODO: done
         createWorkspace: function (name, creatorId, callback) {
             addWorkspace(name, creatorId, false, callback);
         },
-        getWorkspaces: function (creatorId, callback) {
-            User.findById(creatorId, function (error, model) {
-                if (error) {
-                    throw error;
-                }
 
-                if (model) {
-                    var workspaces = model.ownWorkspaces;
-                    callback(workspaces);
-                } else {
-                    throw 'User not found';
+        //TODO: done
+        getWorkspaces: function (userId, callback) {
+            var queryRequest = db.query("SELECT workspaceId FROM OwnWorkspace WHERE userId = :userId", {
+                params: {
+                    userId: userId
                 }
             });
-        },
-        getWorkspace: function (workspaceId, callback) {
-            Workspace.findById(workspaceId, function (error, workspace) {
-                if (error) {
-                    throw error;
-                }
+            queryRequest.then(function (results) {
 
-                if (workspace) {
+                var result = [];
+
+                _.forEach(results, function (workspaceId) {
+                    result.push(workspaceId);
+                });
+
+                callback(result);
+            });
+        },
+
+        //TODO: done
+        getWorkspace: function (workspaceId, callback) {
+            var queryRequest = db.query("SELECT * FROM Workspace WHERE @rid = :workspaceId", {
+                params: {
+                    workspaceId: workspaceId
+                }
+            });
+            queryRequest.then(function (results) {
+                if (results.length > 0) {
+                    var workspace = results[0];
                     callback({
-                        id: extractId(workspace),
+                        id: workspaceId,
                         name: workspace.name,
                         creatorId: workspace.creatorId,
                         createdDate: workspace.createdDate
@@ -396,15 +483,17 @@ module.exports = function (developmentMode) {
                 }
             });
         },
+
+        //TODO: done
         getDefaultWorkspaceId: function (userId, callback) {
-            User.findById(userId, function (error, model) {
-                if (error) {
-                    throw error;
+            var queryRequest = db.query("SELECT * FROM PermittedWorkspace WHERE userId = :userId", {
+                params: {
+                    userId: userId
                 }
-
-                if (model) {
-                    var permittedWorkspaces = model.permittedWorkspaces;
-
+            });
+            queryRequest.then(function (results) {
+                if (results.length > 0) {
+                    var permittedWorkspaces = results;
                     for (var index = 0; index < permittedWorkspaces.length; index++) {
                         var permittedWorkspace = permittedWorkspaces[index];
                         if (permittedWorkspace.isDefault) {
@@ -499,7 +588,7 @@ module.exports = function (developmentMode) {
                         function getWorkspace(permittedWorkspace) {
                             for (var index = 0; index < workspaces.length; index++) {
                                 var workspace = workspaces[index];
-                                var workspaceId = extractId(workspace);
+                                var workspaceId = encodeId(workspace);
                                 if (workspaceId == permittedWorkspace.workspaceId) {
                                     return workspace;
                                 }
@@ -527,17 +616,18 @@ module.exports = function (developmentMode) {
                 }
             });
         },
+
+        //TODO: done
         getAllWorkspaces: function (callback) {
-            Workspace.find(function (error, workspaces) {
-                if (error) {
-                    throw error;
-                }
+            var queryRequest = db.query("SELECT * FROM Workspace");
+            queryRequest.then(function (results) {
+                var workspaces = results;
 
                 var result = [];
 
                 _.forEach(workspaces, function (workspace) {
                     result.push({
-                        id: extractId(workspace),
+                        id: encodeId(workspace),
                         name: workspace.name,
                         creatorId: workspace.creatorId,
                         createdDate: workspace.createdDate
