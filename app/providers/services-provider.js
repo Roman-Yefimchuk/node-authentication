@@ -2,7 +2,7 @@ module.exports = function (app, developmentMode) {
 
     function send(response, data) {
         process.nextTick(function () {
-            response.send(data);
+            response.send(JSON.stringify(data));
         });
     }
 

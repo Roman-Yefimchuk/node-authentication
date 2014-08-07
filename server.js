@@ -37,6 +37,11 @@ dbConnector.connect(function (dbProvider) {
 
     app.configure(function () {
 
+/*        app.use(function(err, req, res, next){
+            console.error(err.stack);
+            res.send(500, 'Something broke!');
+        });*/
+
         // set up our express application
         app.use(express.logger('dev')); // log every request to the console
         app.use(express.cookieParser()); // read cookies (needed for auth)

@@ -5,7 +5,6 @@ app.factory('apiProvider', [
     function ($http) {
 
         function traceResponse(params, response) {
-            console.log('URL[' + params.method + '] -> ' + params.url);
             if (params.method == 'POST') {
                 console.log('payload ->');
                 console.log(params.data);
@@ -19,6 +18,8 @@ app.factory('apiProvider', [
         }
 
         function sendRequest(params, callback) {
+            console.log('URL[' + params.method + '] -> ' + params.url);
+
             var request = $http(params);
 
             if (!callback) {
