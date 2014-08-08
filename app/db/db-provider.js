@@ -303,7 +303,7 @@ module.exports = function (db, developmentMode) {
                 }
             }).then(function (results) {
                 var item = results[0];
-                var itemId = extractId(item);
+                var itemId = encodeId(item);
                 callback(itemId);
             });
         },
