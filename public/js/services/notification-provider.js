@@ -1,3 +1,5 @@
+"use strict";
+
 app.factory('notificationProvider', function () {
 
     function showNotification(message, type) {

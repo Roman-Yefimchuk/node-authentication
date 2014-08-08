@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function (array, nextCallback, completedCallback) {
     var index = 0;
     var next = function () {

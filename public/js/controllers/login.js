@@ -1,3 +1,5 @@
+"use strict";
+
 app.controller('LoginController', ['$scope', 'apiProvider',
     function LoginController($scope, apiProvider) {
 

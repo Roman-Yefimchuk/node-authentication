@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = {
     'facebookAuth':{
         'clientID':'825915494093970',

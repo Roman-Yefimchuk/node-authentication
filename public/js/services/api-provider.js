@@ -1,3 +1,5 @@
+"use strict";
+
 app.factory('apiProvider', [
 
     '$http',

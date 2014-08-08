@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function (app, dbProvider, serviceProvider) {
 
     function getParam(paramName, request) {

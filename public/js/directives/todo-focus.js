@@ -1,3 +1,5 @@
+"use strict";
+
 app.directive('todoFocus', ['$timeout', function ($timeout) {
     return function (scope, elem, attrs) {
         scope.$watch(attrs.todoFocus, function (newValue) {

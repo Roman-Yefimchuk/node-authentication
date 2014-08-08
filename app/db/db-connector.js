@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = {
     connect: function (callback, developmentMode) {
 

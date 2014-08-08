@@ -1,3 +1,5 @@
+"use strict";
+
 app.controller('SingUpController', [ '$scope',
     function SingUpController($scope) {
 

@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function (db, developmentMode) {
 
     var asyncCycle = require('../utils/async-cycle');
