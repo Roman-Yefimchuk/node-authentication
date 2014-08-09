@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require('underscore');
 var dbHelper = require('../db-helper');
 
 module.exports = dbHelper.createModel('Todo', {
@@ -7,5 +8,5 @@ module.exports = dbHelper.createModel('Todo', {
     title: {type: String},
     completed: {type: Boolean},
     workspaceId: {type: String},
-    createdDate: {type: Number, 'default': Date.now}
+    createdDate: {type: Number, 'default': _.now}
 });

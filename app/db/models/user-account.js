@@ -1,5 +1,6 @@
 "use strict";
 
+var _ = require('underscore');
 var dbHelper = require('../db-helper');
 
 module.exports = dbHelper.createModel('UserAccount', {
@@ -10,5 +11,5 @@ module.exports = dbHelper.createModel('UserAccount', {
     email: {type: String},
     token: {type: String},
     authorizationProvider: {type: String},
-    registeredDate: {type: Number, 'default': Date.now}
+    registeredDate: {type: Number, 'default': _.now}
 });

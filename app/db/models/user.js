@@ -1,6 +1,5 @@
 "use strict";
 
-var bcrypt = require('bcrypt-nodejs');
 var dbHelper = require('../db-helper');
 
 var Workspace = require('./workspace');

@@ -5,6 +5,7 @@ var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy = require('passport-twitter').Strategy;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
+var _ = require('underscore');
 var security = require('../utils/security');
 var authorizationConfig = require('./../../config/authorization-config');
 
@@ -108,7 +109,7 @@ module.exports = function (passport, dbProvider) {
                             email: email,
                             token: generateToken(),
                             authorizationProvider: 'local',
-                            registeredDate: Date.now()
+                            registeredDate: _.now()
                         }, {
                             success: function (userAccount) {
                                 done(null, userAccount);
@@ -170,7 +171,7 @@ module.exports = function (passport, dbProvider) {
                                 email: provider.email,
                                 token: provider.token,
                                 authorizationProvider: provider.name,
-                                registeredDate: Date.now()
+                                registeredDate: _.now()
                             }, {
                                 success: function (userAccount) {
                                     done(null, userAccount);
