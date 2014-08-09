@@ -29,30 +29,30 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
                 });
             };
 
-            var workspaceId = req.flash('workspaceId');
-            if (workspaceId && workspaceId.length > 0) {
-                workspaceId = workspaceId[0];
+            var checkWorkspace = function (workspaceId) {
                 dbProvider.isAccessGrantedForWorkspace(userId, workspaceId, function (isAccessGranted) {
                     dbProvider.getDefaultWorkspaceId(userId, function (defaultWorkspaceId) {
                         if (isAccessGranted) {
                             renderHomePage(workspaceId, defaultWorkspaceId);
                         } else {
                             dbProvider.getWorkspace(workspaceId, function (workspace) {
-                                var workspaceName = workspace.name;
-
                                 renderHomePage(defaultWorkspaceId, defaultWorkspaceId, {
                                     type: 'warning',
-                                    message: 'Access to workspace ' + workspaceName + ' closed'
+                                    message: 'Access to workspace ' + workspace.name + ' closed'
                                 });
                             });
                         }
                     });
                 });
+            };
+
+            var workspaceId = req.flash('workspaceId');
+            if (workspaceId && workspaceId.length > 0) {
+                workspaceId = workspaceId[0];
+                checkWorkspace(workspaceId);
             } else {
                 dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
-                    dbProvider.getDefaultWorkspaceId(userId, function (defaultWorkspaceId) {
-                        renderHomePage(workspaceId, defaultWorkspaceId);
-                    });
+                    checkWorkspace(workspaceId);
                 });
             }
         } else {
@@ -120,7 +120,10 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
     // google ---------------------------------
 
     app.get('/auth/google', passport.authenticate('google', {
-        scope: ['profile', 'email']
+        scope: [
+            'profile',
+            'email'
+        ]
     }));
 
     app.get('/auth/google/callback', passport.authenticate('google', {
@@ -170,7 +173,10 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
     // google ---------------------------------
 
     app.get('/connect/google', passport.authorize('google', {
-        scope: ['profile', 'email']
+        scope: [
+            'profile',
+            'email'
+        ]
     }));
 
     app.get('/connect/google/callback', passport.authorize('google', {

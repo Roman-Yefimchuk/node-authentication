@@ -540,8 +540,7 @@ module.exports = function (db, developmentMode) {
         getAllWorkspaces: function (callback) {
             db.query("" +
                 "SELECT * " +
-                "FROM Workspace" +
-                "", {
+                "FROM Workspace", {
             }).then(function (results) {
                 var workspaces = results;
 
@@ -562,8 +561,7 @@ module.exports = function (db, developmentMode) {
         getAllUsers: function (callback) {
             db.query("" +
                 "SELECT userId, displayName, registeredDate " +
-                "FROM UserAccount" +
-                "", {
+                "FROM UserAccount", {
             }).then(function (results) {
                 var usersAccount = results;
 
@@ -585,8 +583,7 @@ module.exports = function (db, developmentMode) {
         getAllUsersWithPermissions: function (workspaceId, callback) {
             db.query("" +
                 "SELECT userId, displayName, registeredDate " +
-                "FROM UserAccount" +
-                "", {
+                "FROM UserAccount", {
             }).then(function (results) {
                 var usersAccount = results;
 
