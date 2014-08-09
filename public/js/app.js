@@ -1,5 +1,7 @@
-var app = angular.module('todomvc', []);
+"use strict";
+
+var app = angular.module('node-authentication', []);
 
 $(document).ready(function () {
-    angular.bootstrap(document, ['todomvc']);
+    angular.bootstrap(document, ['node-authentication']);
 });

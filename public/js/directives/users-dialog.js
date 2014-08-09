@@ -1,3 +1,5 @@
+"use strict";
+
 app.directive('usersDialog', ['$rootScope', 'apiProvider', function ($rootScope, apiProvider) {
     return {
         restrict: 'E',

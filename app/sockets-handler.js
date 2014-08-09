@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function (io, dbProvider, developmentMode) {
 
     var socketsSession = {};

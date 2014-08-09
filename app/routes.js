@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function (app, passport, dbProvider, developmentMode) {
 
     var _ = require('underscore');
@@ -16,7 +18,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
                 console.log('render index page for user: ' + userId);
             }
 
-            function renderHomePage(workspaceId, defaultWorkspaceId, externalNotification) {
+            var renderHomePage = function (workspaceId, defaultWorkspaceId, externalNotification) {
                 res.render('todo.ejs', {
                     userId: userId,
                     displayName: userAccount.displayName,
@@ -25,7 +27,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
                     defaultWorkspaceId: defaultWorkspaceId,
                     externalNotification: externalNotification
                 });
-            }
+            };
 
             var workspaceId = req.flash('workspaceId');
             if (workspaceId && workspaceId.length > 0) {

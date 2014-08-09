@@ -1,3 +1,5 @@
+"use strict";
+
 app.directive('listItem', function () {
     return {
         scope: {

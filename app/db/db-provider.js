@@ -1,3 +1,5 @@
+"use strict";
+
 module.exports = function (developmentMode) {
 
     var asyncCycle = require('../utils/async-cycle');
@@ -607,7 +609,7 @@ module.exports = function (developmentMode) {
 
                 if (model) {
 
-                    function isAccessGranted(permittedWorkspaces) {
+                    var isAccessGranted = function (permittedWorkspaces) {
                         for (var index = 0; index < permittedWorkspaces.length; index++) {
                             var permittedWorkspace = permittedWorkspaces[index];
                             if (permittedWorkspace.workspaceId == workspaceId) {
@@ -618,7 +620,7 @@ module.exports = function (developmentMode) {
                             }
                         }
                         return false;
-                    }
+                    };
 
                     var permittedWorkspaces = model.permittedWorkspaces;
                     callback(isAccessGranted(permittedWorkspaces));

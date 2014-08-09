@@ -1,3 +1,5 @@
+"use strict";
+
 var dbHelper = require('../db-helper');
 
 module.exports = dbHelper.createModel('PermittedWorkspace', {
