@@ -168,6 +168,8 @@ module.exports = function (db, developmentMode) {
                         params: accountData
                     }).then(function (userAccount) {
                         successCallback(wrapAccountUser(userAccount));
+                    }).catch(function (error) {
+                        failureCallback(error);
                     });
                 }
             };
@@ -240,10 +242,16 @@ module.exports = function (db, developmentMode) {
                         dbProvider.createDefaultWorkspace(workspaceName, userId, function (workspaceId) {
                             dbProvider.setUserWorkspaceId(userId, workspaceId, function () {
                                 successCallback(wrapAccountUser(userAccount));
-                            })
+                            });
                         });
+                    }).catch(function (error) {
+                        failureCallback(error);
                     });
+                }).catch(function (error) {
+                    failureCallback(error);
                 });
+            }).catch(function (error) {
+                failureCallback(error);
             });
         },
         findUser: function (genericId, callback) {
@@ -264,6 +272,8 @@ module.exports = function (db, developmentMode) {
                 } else {
                     successCallback();
                 }
+            }).catch(function (error) {
+                failureCallback(error);
             });
         },
         getItems: function (workspaceId, userId, callback) {

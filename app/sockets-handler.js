@@ -11,19 +11,29 @@ module.exports = function (io, dbProvider, developmentMode) {
             return socketsSession[socket.id];
         }
 
-        function createSession(userId, workspaceId) {
-            socketsSession[socket.id] = {
-                userId: userId,
-                workspaceId: workspaceId,
-                sendCommand: function (command, data) {
-                    socket.emit(command, data);
-                },
-                close: function () {
-                    delete socketsSession[socket.id];
-                    socket.disconnect();
-                }
+        var createSession = (function () {
+
+            var closedCounter = 0;
+
+            return function (userId, workspaceId) {
+                socketsSession[socket.id] = {
+                    userId: userId,
+                    workspaceId: workspaceId,
+                    sendCommand: function (command, data) {
+                        socket.emit(command, data);
+                    },
+                    close: function () {
+                        delete socketsSession[socket.id];
+                        socket.disconnect();
+
+                        if (++closedCounter > 100) {
+                            socketsSession = _.compact(socketsSession);
+                            closedCounter = 0;
+                        }
+                    }
+                };
             };
-        }
+        })();
 
         function sendBroadcast(command, data, workspaceId) {
             var currentSocketSession = getSession();

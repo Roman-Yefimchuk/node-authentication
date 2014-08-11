@@ -40,17 +40,15 @@ app.directive('managerDialog', ['$rootScope', 'apiProvider', function ($rootScop
 
             $scope.save = function () {
                 var collection = [];
-                var users = $scope.users;
 
-                for (var index = 0; index < users.length; index++) {
-                    var user = users[index];
+                _.forEach($scope.users, function (user, index) {
                     if (!angular.equals(user.permissions, originalCollection[index].permissions)) {
                         collection.push({
                             userId: user.id,
                             permissions: user.permissions
                         });
                     }
-                }
+                });
 
                 if (collection.length > 0) {
                     apiProvider.setUsersPermissionsForWorkspace($scope.workspaceId, collection, function () {

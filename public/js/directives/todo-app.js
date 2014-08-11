@@ -16,8 +16,10 @@ app.directive('todoApplication', [
                 defaultWorkspaceId: '@',
                 workspaceId: '@',
                 userId: '@',
-                userName: '@'
+                userName: '@',
+                authorizationProvider: '@'
             },
+            templateUrl: '/views/todo-view.html',
             controller: function ($scope) {
 
                 function getWorkspaceId() {
