@@ -17,6 +17,10 @@ app.controller('LoginController', ['$scope', 'apiProvider',
         $scope.email = "";
         $scope.password = "";
 
+        $scope.chooseWorkspace = function (workspace) {
+            $scope.currentWorkspace = workspace;
+        };
+
         $scope.isEmailValid = function () {
             return emailPattern.test($scope['email']);
         };

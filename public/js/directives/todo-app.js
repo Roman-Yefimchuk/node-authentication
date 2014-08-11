@@ -16,8 +16,10 @@ app.directive('todoApplication', [
                 defaultWorkspaceId: '@',
                 workspaceId: '@',
                 userId: '@',
-                userName: '@'
+                userName: '@',
+                authorizationProvider: '@'
             },
+            templateUrl: '/views/todo-view.html',
             controller: function ($scope) {
 
                 function getWorkspaceId() {
@@ -129,6 +131,10 @@ app.directive('todoApplication', [
                 $scope.canManageAccess = function () {
                     var permissions = $scope.permissions;
                     return permissions.accessManager;
+                };
+
+                $scope.setWorkspace = function (workspace) {
+                    $scope.currentWorkspace = workspace;
                 };
 
                 $scope.$watch('workspaceId', function (workspaceId) {
@@ -285,7 +291,7 @@ app.directive('todoApplication', [
 
                 $scope.clearDoneTodos = function () {
                     var ids = [];
-                    $scope.todos.forEach(function (todo) {
+                    _.forEach($scope.todos, function (todo) {
                         if (todo.completed) {
                             ids.push(todo.id);
                         }
@@ -311,7 +317,7 @@ app.directive('todoApplication', [
                 $scope.markAll = function (done) {
                     var todos = [];
 
-                    $scope.todos.forEach(function (todo) {
+                    _.forEach($scope.todos, function (todo) {
                         if (todo.completed != done) {
                             todos.push({
                                 id: todo.id,
@@ -323,7 +329,7 @@ app.directive('todoApplication', [
                     });
 
                     apiProvider.update(getWorkspaceId(), todos, function () {
-                        $scope.todos.forEach(function (todo) {
+                        _.forEach($scope.todos, function (todo) {
                             todo.completed = done;
                         });
 
@@ -342,6 +348,9 @@ app.directive('todoApplication', [
 
                 $scope.isItemLocked = function (itemId) {
                     return false;
+                };
+
+                $scope.editProfile = function () {
                 };
 
                 $scope.logout = function () {
