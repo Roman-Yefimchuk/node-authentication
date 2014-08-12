@@ -72,8 +72,14 @@
 <script type="text/javascript" src="libs/js/jquery.js"></script>
 <script type="text/javascript" src="libs/js/angular.js"></script>
 
-<script type="text/javascript" src="js/app.js"></script>
-<script type="text/javascript" src="js/controllers/sing-up.js"></script>
+<script type="text/javascript" src="client/modules/sing-up/sing-up-module.js"></script>
+<script type="text/javascript" src="client/modules/sing-up/controllers/sing-up-controller.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        angular.bootstrap(document, ['sing-up']);
+    });
+</script>
 
 </body>
 </html>

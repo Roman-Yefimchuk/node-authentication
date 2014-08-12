@@ -1,5 +1,3 @@
-// server.js
-
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
@@ -33,27 +31,24 @@ var developmentMode = isDevelopmentMode();
 var dbConnector = require('./app/db/db-connector');
 dbConnector.connect(function (dbProvider) {
 
-    require('./app/providers/authorization-provider')(passport, dbProvider); // pass passport for configuration
+    require('./app/providers/authorization-provider')(passport, dbProvider);
 
     app.configure(function () {
 
-/*        app.use(function(err, req, res, next){
-            console.error(err.stack);
-            res.send(500, 'Something broke!');
-        });*/
+        app.use(express.logger('dev'));
+        app.use(express.cookieParser());
+        app.use(express.bodyParser());
 
-        // set up our express application
-        app.use(express.logger('dev')); // log every request to the console
-        app.use(express.cookieParser()); // read cookies (needed for auth)
-        app.use(express.bodyParser()); // get information from html forms
+        app.set('view engine', 'ejs');
 
-        app.set('view engine', 'ejs'); // set up ejs for templating
+        var secret = require('./app/utils/security');
+        app.use(express.session({
+            secret: secret.randomString()
+        }));
 
-        // required for passport
-        app.use(express.session({ secret: 'ilovescotchscotchyscotchscotch' })); // session secret
         app.use(passport.initialize());
-        app.use(passport.session()); // persistent login sessions
-        app.use(flash()); // use connect-flash for flash messages stored in session
+        app.use(passport.session());
+        app.use(flash());
 
     });
 

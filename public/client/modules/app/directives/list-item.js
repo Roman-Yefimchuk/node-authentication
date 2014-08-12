@@ -10,6 +10,6 @@ app.directive('listItem', function () {
                 $scope.permissions = user.permissions;
             });
         },
-        templateUrl: '/views/list-item-view.html'
+        templateUrl: '/client/views/list-item-view.html'
     };
 });

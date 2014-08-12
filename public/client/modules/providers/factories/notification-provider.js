@@ -1,6 +1,6 @@
 "use strict";
 
-app.factory('notificationProvider', function () {
+providers.factory('notificationProvider', function () {
 
     function showNotification(message, type) {
         $.notify(message, {

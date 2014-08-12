@@ -1,13 +1,11 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Login</title>
 
-    <title>Node Authentication</title>
-
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="libs/font-awesome/css/font-awesome.css">
 
     <style>
         body {
@@ -18,9 +16,11 @@
             display: none;
         }
     </style>
+
 </head>
 <body>
 <div class="container" ng-cloak>
+
     <div class="col-sm-6 col-sm-offset-3" ng-controller="LoginController">
 
         <h1><span class="fa fa-sign-in" ng-click="quickLogin()"></span> Login</h1>
@@ -32,10 +32,25 @@
         <form action="/login" method="post">
 
             <div class="form-group" ng-show="workspaces.length > 0">
+
                 <label>Select workspace</label>
-                <select ng-model="currentWorkspace"
-                        ng-options="workspace.name for workspace in workspaces">
-                </select>
+
+                <br>
+
+                <div class="btn-group" dropdown is-open="workspaceDropdown.isOpen">
+
+                    <button type="button" class="btn btn-primary dropdown-toggle">
+                        {{ currentWorkspace.name }} <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        <li>
+                            <a href ng-repeat="workspace in workspaces" ng-click="chooseWorkspace(workspace)">
+                                {{ workspace.name }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
             </div>
 
             <div class="form-group" ng-class="{ 'has-error' : !isEmailValid() }">
@@ -63,14 +78,23 @@
         <p>Or go <a href="/">home</a>.</p>
 
     </div>
+
 </div>
 
 <script type="text/javascript" src="libs/js/jquery.js"></script>
 <script type="text/javascript" src="libs/js/angular.js"></script>
+<script type="text/javascript" src="libs/bootstrap/js/ui-bootstrap-tpls.js"></script>
 
-<script type="text/javascript" src="js/app.js"></script>
-<script type="text/javascript" src="js/services/api-provider.js"></script>
-<script type="text/javascript" src="js/controllers/login.js"></script>
+<script type="text/javascript" src="client/modules/login/login-module.js"></script>
+<script type="text/javascript" src="client/modules/login/controllers/login-controller.js"></script>
+<script type="text/javascript" src="client/modules/providers/providers-module.js"></script>
+<script type="text/javascript" src="client/modules/providers/factories/api-provider.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        angular.bootstrap(document, ['login']);
+    });
+</script>
 
 </body>
 </html>

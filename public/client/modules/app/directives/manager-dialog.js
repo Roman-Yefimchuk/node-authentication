@@ -4,7 +4,7 @@ app.directive('managerDialog', ['$rootScope', 'apiProvider', function ($rootScop
     return {
         restrict: 'E',
         replace: true,
-        templateUrl: '/views/workspace-manager-view.html',
+        templateUrl: '/client/views/workspace-manager-view.html',
         scope: {},
         controller: function ($scope) {
             $scope.show = false;

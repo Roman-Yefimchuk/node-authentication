@@ -1,7 +1,10 @@
 "use strict";
 
-app.controller('SingUpController', [ '$scope',
-    function SingUpController($scope) {
+singUp.controller('SingUpController', [
+
+    '$scope',
+
+    function ($scope) {
 
         var emailPattern = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
         var passwordPattern = /^(([a-z]|[A-Z]|[0-9]|\u005F)+){6}$/;

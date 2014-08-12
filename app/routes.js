@@ -19,7 +19,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
             }
 
             var renderHomePage = function (workspaceId, defaultWorkspaceId, externalNotification) {
-                res.render('todo.ejs', {
+                res.render('home.ejs', {
                     userId: userId,
                     displayName: userAccount.displayName,
                     authorizationProvider: userAccount.authorizationProvider,

@@ -1,6 +1,6 @@
 "use strict";
 
-app.factory('apiProvider', [
+providers.factory('apiProvider', [
 
     '$http',
 

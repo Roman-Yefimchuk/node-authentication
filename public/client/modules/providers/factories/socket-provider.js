@@ -1,6 +1,6 @@
 "use strict";
 
-app.factory('socketProvider', [
+providers.factory('socketProvider', [
 
     'notificationProvider',
 

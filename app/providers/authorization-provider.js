@@ -70,14 +70,7 @@ module.exports = function (passport, dbProvider) {
         process.nextTick(function () {
 
             function generateToken() {
-                var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
-                var length = 64;
-
-                var str = '';
-                for (var index = 0; index < length; index++) {
-                    str += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                return str;
+                return security.randomString();
             }
 
             dbProvider.findUser(email, {

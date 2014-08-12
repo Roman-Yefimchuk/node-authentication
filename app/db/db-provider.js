@@ -166,7 +166,7 @@ module.exports = function (db, developmentMode) {
                         "SET " + formatParams(accountData) + " " +
                         "WHERE @rid = " + extractId(userAccount), {
                         params: accountData
-                    }).then(function (userAccount) {
+                    }).then(function (results) {
                         successCallback(wrapAccountUser(userAccount));
                     }).catch(function (error) {
                         failureCallback(error);
