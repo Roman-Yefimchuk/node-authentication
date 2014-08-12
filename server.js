@@ -7,13 +7,6 @@ var flash = require('connect-flash');
 
 var port = 8080;
 
-{
-    var path = require('path');
-    var name = path.join(__dirname, 'public');
-    var static = express.static(name);
-    app.use(static);
-}
-
 function isDevelopmentMode() {
     var args = process['argv'];
     if (args.length > 2) {
@@ -50,6 +43,40 @@ dbConnector.connect(function (dbProvider) {
         app.use(passport.session());
         app.use(flash());
 
+        {
+            app.use(app.router);
+
+            var path = require('path');
+            var name = path.join(__dirname, 'public');
+            var static = express.static(name);
+            app.use(static);
+
+            app.use(function (req, res, next) {
+                res.status(404);
+
+                if (req.accepts('html')) {
+                    res.render('page-not-found.ejs', {
+                        requestUrl: req.url
+                    });
+                } else {
+                    if (req.accepts('json')) {
+                        res.send({
+                            status: false,
+                            message: ' Page ' + req.url + ' not found'
+                        });
+                    } else {
+                        res.type('txt').send('Not found');
+                    }
+                }
+            });
+
+            app.use(function (err, req, res, next) {
+                res.status(err.status || 500);
+                res.render('internal-server-error.ejs', {
+                    error: err
+                });
+            });
+        }
     });
 
     require('./app/sockets-handler')(io, dbProvider, developmentMode);
@@ -61,4 +88,5 @@ dbConnector.connect(function (dbProvider) {
     server.listen(port);
 
     console.log('The magic happens on port ' + port);
+
 }, developmentMode);
