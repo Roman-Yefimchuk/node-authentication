@@ -54,15 +54,17 @@ dbConnector.connect(function (dbProvider) {
             app.use(function (req, res, next) {
                 res.status(404);
 
+                var url = decodeURIComponent(req.url);
+
                 if (req.accepts('html')) {
                     res.render('page-not-found.ejs', {
-                        requestUrl: req.url
+                        requestUrl: url
                     });
                 } else {
                     if (req.accepts('json')) {
                         res.send({
                             status: false,
-                            message: ' Page ' + req.url + ' not found'
+                            message: ' Page ' + url + ' not found'
                         });
                     } else {
                         res.type('txt').send('Not found');
