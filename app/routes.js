@@ -8,6 +8,10 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
         res.render('index.ejs');
     });
 
+    app.get('/tree-view', function (req, res) {
+        res.render('tree-view.ejs');
+    });
+
     app.get('/todo', function (req, res) {
         var userAccount = req.user;
         if (userAccount && userAccount.isAuthenticated()) {

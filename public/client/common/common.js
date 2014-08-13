@@ -1,3 +1,5 @@
+"use strict";
+
 String.prototype.format = function (args) {
     var value = this;
     for (var key in args) {
