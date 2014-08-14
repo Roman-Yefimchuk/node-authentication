@@ -1,121 +1,116 @@
 .tree_selected_item {
     background: #F8951D;
     cursor: pointer;
-    height: 28px;
-    max-height: 28px;
+    height: 32px;
+    max-height: 32px;
     padding-left: 5px;
     padding-right: 5px;
 }
 
 .tree_plus_0 {
-    background-image: url("plus_0.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") -224px -32px;
+    width: 32px;
+    height: 32px;
     float: left;
     cursor: pointer;
 }
 
 .tree_plus_1 {
-    background-image: url("plus_1.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") -160px -32px;
+    width: 32px;
+    height: 32px;
     float: left;
     cursor: pointer;
 }
 
 .tree_plus_2 {
-    background-image: url("plus_2.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") 0 -32px;
+    width: 32px;
+    height: 32px;
     float: left;
     cursor: pointer;
 }
 
 .tree_plus_3 {
-    background-image: url("plus_3.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") -96px -32px;
+    width: 32px;
+    height: 32px;
     float: left;
     cursor: pointer;
 }
 
 .tree_minus_0 {
-    background-image: url("minus_0.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") -256px -32px;
+    width: 32px;
+    height: 32px;
     float: left;
     cursor: pointer;
 }
 
 .tree_minus_1 {
-    background-image: url("minus_1.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") -192px -32px;
+    width: 32px;
+    height: 32px;
     float: left;
     cursor: pointer;
 }
 
 .tree_minus_2 {
-    background-image: url("minus_2.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") -32px -32px;
+    width: 32px;
+    height: 32px;
     float: left;
     cursor: pointer;
 }
 
 .tree_minus_3 {
-    background-image: url("minus_3.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") -128px -32px;
+    width: 32px;
+    height: 32px;
     float: left;
     cursor: pointer;
 }
 
-.tree_item_icon {
-    background-image: url("org_icon.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+.tree_icon_directory {
+    background: url("tree-sprite.png") -256px -0px;
+    width: 32px;
+    height: 32px;
+    float: left;
+}
+
+.tree_icon_file {
+    background: url("tree-sprite.png") -32px 0;
+    width: 32px;
+    height: 32px;
     float: left;
 }
 
 .tree_line_1 {
-    background-image: url("line_1.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") 0 0;
+    width: 32px;
+    height: 32px;
     float: left;
 }
 
 .tree_line_2 {
-    background-image: url("line_2.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") -64px 0;
+    width: 32px;
+    height: 32px;
     float: left;
 }
 
 .tree_line_3 {
-    background-image: url("line_3.png");
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
+    background: url("tree-sprite.png") -64px -32px;
+    width: 32px;
+    height: 32px;
     float: left;
 }
 
 .tree_item {
-    height: 28px;
+    height: 32px;
     cursor: pointer;
     display: inline-block;
-    line-height: 28px;
+    line-height: 32px;
     margin-left: 5px;
     margin-right: 5px;
 }
@@ -125,11 +120,11 @@
 }
 
 .tree_node {
-    height: 28px;
+    height: 32px;
 }
 
 .tree_space {
-    height: 28px;
-    width: 28px;
+    height: 32px;
+    width: 32px;
     float: left;
 }

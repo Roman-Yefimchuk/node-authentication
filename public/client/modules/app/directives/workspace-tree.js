@@ -29,60 +29,9 @@ tree.directive("workspaceTree", [
                     {
                         id: randomString(),
                         name: randomString(),
-                        childrenQuantity: 10,
-                        children: [
-                            {
-                                id: randomString(),
-                                name: randomString(),
-                                childrenQuantity: 10,
-                                children: []
-                            },
-                            {
-                                id: randomString(),
-                                name: randomString(),
-                                childrenQuantity: 10,
-                                children: [
-                                    {
-                                        id: randomString(),
-                                        name: randomString(),
-                                        childrenQuantity: 10,
-                                        children: []
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        id: randomString(),
-                        name: randomString(),
+                        type: 'file',
                         childrenQuantity: 10,
                         children: []
-                    },
-                    {
-                        id: randomString(),
-                        name: randomString(),
-                        childrenQuantity: 10,
-                        children: [
-                            {
-                                id: randomString(),
-                                name: randomString(),
-                                childrenQuantity: 10,
-                                children: [
-                                    {
-                                        id: randomString(),
-                                        name: randomString(),
-                                        childrenQuantity: 10,
-                                        children: []
-                                    }
-                                ]
-                            },
-                            {
-                                id: randomString(),
-                                name: randomString(),
-                                childrenQuantity: 10,
-                                children: []
-                            }
-                        ]
                     }
                 ];
 
@@ -94,6 +43,7 @@ tree.directive("workspaceTree", [
                         id: randomString(),
                         name: randomString(),
                         childrenQuantity: 10,
+                        type: 'directory',
                         children: []
                     });
                     $scope.updateTree();
@@ -141,6 +91,7 @@ tree.directive("workspaceTree", [
                                 return {
                                     id: id,
                                     name: node.name,
+                                    type: node.type,
                                     childrenQuantity: node.childrenQuantity,
                                     hierarchyLevel: hierarchyLevel,
                                     parent: parent,
@@ -252,12 +203,11 @@ tree.directive("workspaceTree", [
                                 '<span class="tree_item" ' +
                                 '      ng-click="onItemClick(items[\'{id}\'])" ' +
                                 '      ng-class="{tree_selected_item : isItemSelected(items[\'{id}\'])}">' +
-                                '      {name}' +
+                                '      {{ items[\'{id}\'].name }}' +
                                 '</span>';
 
                             var text = textTemplate.format({
-                                id: id,
-                                name: name
+                                id: id
                             });
 
                             if (getLength(children) != 0) {
@@ -265,37 +215,64 @@ tree.directive("workspaceTree", [
                                     var template = '' +
                                         '<div ng-class="{{minus} : items[\'{id}\'].isOpen, {plus} : !items[\'{id}\'].isOpen}" ' +
                                         '     ng-click="items[\'{id}\'].toggle()">' +
-                                        '</div>{text}';
+                                        '</div>' +
+                                        '<div ng-show="type" class="tree_icon_{type}">' +
+                                        '</div>' +
+                                        '{text}';
 
                                     if (length == 1) {
-                                        childMark = template.format({
-                                            'minus': 'tree_minus_0',
-                                            'id': id,
-                                            'plus': 'tree_plus_0',
-                                            'text': text
-                                        });
+                                        if (item.parent) {
+                                            childMark = template.format({
+                                                'minus': 'tree_minus_3',
+                                                'id': id,
+                                                'plus': 'tree_plus_3',
+                                                'text': text,
+                                                'type': item.type
+                                            });
+                                        } else {
+                                            childMark = template.format({
+                                                'minus': 'tree_minus_0',
+                                                'id': id,
+                                                'plus': 'tree_plus_0',
+                                                'text': text,
+                                                'type': item.type
+                                            });
+                                        }
                                     } else {
                                         if (index == 0) {
-                                            childMark = template.format({
-                                                'plus': 'tree_plus_1',
-                                                'minus': 'tree_minus_1',
-                                                'id': id,
-                                                'text': text
-                                            });
+                                            if (item.parent) {
+                                                childMark = template.format({
+                                                    'plus': 'tree_plus_2',
+                                                    'minus': 'tree_minus_2',
+                                                    'id': id,
+                                                    'text': text,
+                                                    'type': item.type
+                                                });
+                                            } else {
+                                                childMark = template.format({
+                                                    'plus': 'tree_plus_1',
+                                                    'minus': 'tree_minus_1',
+                                                    'id': id,
+                                                    'text': text,
+                                                    'type': item.type
+                                                });
+                                            }
                                         } else {
                                             if (index != length - 1) {
                                                 childMark = template.format({
                                                     'plus': 'tree_plus_2',
                                                     'minus': 'tree_minus_2',
                                                     'id': id,
-                                                    'text': text
+                                                    'text': text,
+                                                    'type': item.type
                                                 });
                                             } else {
                                                 childMark = template.format({
                                                     'plus': 'tree_plus_3',
                                                     'minus': 'tree_minus_3',
                                                     'id': id,
-                                                    'text': text
+                                                    'text': text,
+                                                    'type': item.type
                                                 });
                                             }
                                         }
@@ -305,29 +282,36 @@ tree.directive("workspaceTree", [
                                 if (length != 0) {
                                     var template = '' +
                                         '<div class="{class}">' +
-                                        '</div>{text}';
+                                        '</div>' +
+                                        '<div ng-show="type" class="tree_icon_{type}">' +
+                                        '</div>' +
+                                        '{text}';
 
                                     if (length == 1) {
                                         childMark = template.format({
                                             'class': 'tree_line_2',
-                                            'text': text
+                                            'text': text,
+                                            'type': item.type
                                         });
                                     } else {
                                         if (index == 0) {
                                             childMark = template.format({
                                                 'class': 'tree_line_3',
-                                                'text': text
+                                                'text': text,
+                                                'type': item.type
                                             });
                                         } else {
                                             if (index != length - 1) {
                                                 childMark = template.format({
                                                     'class': 'tree_line_3',
-                                                    'text': text
+                                                    'text': text,
+                                                    'type': item.type
                                                 });
                                             } else {
                                                 childMark = template.format({
                                                     'class': 'tree_line_2',
-                                                    'text': text
+                                                    'text': text,
+                                                    'type': item.type
                                                 });
                                             }
                                         }
@@ -349,7 +333,9 @@ tree.directive("workspaceTree", [
 
                             var template = ('' +
                                 '<div>' +
-                                '     <div class="tree_node">{childMark}<input type="button" value="+" ng-click="insertChildNode(items[\'{id}\'])"><input type="button" value="x" ng-click="removeNode(items[\'{id}\'])">' +
+                                '     <div class="tree_node">{childMark}' +
+                                '         <input type="button" value="+" ng-click="insertChildNode(items[\'{id}\'])">' +
+                                '         <input type="button" value="x" ng-click="removeNode(items[\'{id}\'])">' +
                                 '     </div>' +
                                 '     <div child ng-show="items[\'{id}\'].isOpen">' +
                                 '     </div>' +

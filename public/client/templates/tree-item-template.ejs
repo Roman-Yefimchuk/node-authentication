@@ -1,0 +1,40 @@
+<div>
+    <div class="tree_node">
+
+        <% function renderText(){ %>
+
+        <span class="tree_item"
+              ng-click="onItemClick(items['<%= id %>'])"
+              ng-class="{tree_selected_item : isItemSelected(items['<%= id %>'])}">
+              <%= name %>
+        </span>
+
+        <% } %>
+
+        <% _.forEach(lines, function(hasLine){ %>
+
+        <% if (hasLine) { %>
+        <div class="tree_line_1"></div>
+        <% } else { %>
+        <div class="tree_space"></div>
+        <% } %>
+
+        <% }) %>
+
+        <% if (hasChildren) { %>
+        <div ng-class="{'tree_minus_<%= classId %>' : items['<%= id %>'].isOpen, 'tree_plus_<%= classId %>' : !items['<%= id %>'].isOpen}"
+             ng-click="items['<%= id %>'].toggle()">
+        </div>
+        <% renderText() %>
+        <% } else { %>
+        <div class="tree_line_<%= classId %>">
+        </div>
+        <% renderText() %>
+        <% } %>
+
+    </div>
+
+    <div child ng-show="items['<%= id %>'].isOpen">
+    </div>
+
+</div>
