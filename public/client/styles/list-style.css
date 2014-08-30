@@ -1,0 +1,46 @@
+li[item] {
+    list-style-type: none;
+    padding: 10px;
+}
+
+ul[is-lats-item='false'] > li[item] {
+    border-bottom: 1px solid #dddddd;
+}
+
+li[item]:hover {
+    background-color: #EFF7FF;
+    cursor: pointer;
+}
+
+.list-frame {
+    border: 1px solid #dddddd;
+}
+
+div[users-collection] {
+    height: 460px;
+    overflow-y: auto;
+}
+
+div[users-collection] > ul {
+    padding: 0px;
+    margin: 0px;
+}
+
+button[control] {
+    float: right;
+    line-height: 20px;
+    text-decoration: none;
+    background: rgba(0, 0, 0, 0.1);
+    font-size: 11px;
+    padding: 0 10px;
+    border-radius: 3px;
+    box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 0.2);
+    margin-top: 6px;
+    margin-left: 6px;
+    cursor: pointer;
+}
+
+button[control]:hover {
+    background: rgba(0, 0, 0, 0.15);
+    box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 0.3);
+}

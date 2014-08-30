@@ -2,6 +2,8 @@
 
 module.exports = function (app, dbProvider, serviceProvider) {
 
+    var Exception = require('../app/exception');
+
     function getParam(paramName, request) {
         var params = request.params;
         return params[paramName];
@@ -12,7 +14,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         if (userAccount && userAccount.isAuthenticated()) {
             return userAccount.userId;
         } else {
-            throw 'Access denied';
+            throw new Exception(Exception.NOT_AUTHENTICATED, 'You are not authenticated');
         }
     }
 
@@ -151,7 +153,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
 
     serviceProvider.get('/api/items/:workspaceId', function (request, response, resultCallback) {
         var userId = getUserId(request);
-        var workspaceId = getParam('workspaceId', request)
+        var workspaceId = getParam('workspaceId', request);
         dbProvider.getItems(workspaceId, userId, function (items) {
             resultCallback({
                 message: 'Selected ' + items.length + ' item(s)',
@@ -164,12 +166,10 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var userId = getUserId(request);
         var workspaceId = getParam('workspaceId', request);
         var todoModel = request.body['todoModel'];
-        dbProvider.save(workspaceId, userId, todoModel, function (itemId) {
+        dbProvider.save(workspaceId, userId, todoModel, function (item) {
             resultCallback({
-                message: 'Item[' + itemId + '] saved',
-                data: {
-                    itemId: itemId
-                }
+                message: 'Item[' + item.itemId + '] saved',
+                data: item
             });
         });
     });

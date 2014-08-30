@@ -1,0 +1,39 @@
+<div>
+    <div class="modal-header">
+        <h4>
+            Edit todo
+        </h4>
+    </div>
+
+    <div class="modal-body">
+
+        <form ng-submit="save(itemModel)">
+
+            <div class="input-group task-add">
+                <input class="form-control input-sm" type="text"
+                       ng-model="itemModel" autofocus autocomplete="off">
+
+                    <span class="btn btn-danger btn-sm input-group-addon" href
+                          ng-click="itemModel = ''"
+                          ng-class="{ 'disabled' : !itemModel }">
+                        <i class="fa fa-eraser"></i>
+                        Clear
+                    </span>
+
+            </div>
+
+        </form>
+
+    </div>
+    <div class="modal-footer ng-scope" style="margin-top: 0">
+        <a class="btn btn-primary" ng-click="save(itemModel)" href
+           ng-class="{ 'disabled' : !itemModel || itemModel == originItemModel }">
+            <i class="fa fa-floppy-o"></i>
+            Save
+        </a>
+        <a class="btn btn-warning" ng-click="cancel()" href>
+            <i class="fa fa-share"></i>
+            Cancel
+        </a>
+    </div>
+</div>

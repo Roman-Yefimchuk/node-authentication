@@ -2,6 +2,8 @@
 
 module.exports = function (app, developmentMode) {
 
+    var Exception = require('../exception');
+
     function send(response, data) {
         process.nextTick(function () {
             response.send(JSON.stringify(data));
@@ -10,43 +12,30 @@ module.exports = function (app, developmentMode) {
 
     function handleResult(response, result) {
         if (result) {
-            switch (typeof(result)) {
-                case 'string':
-                {
+            if (typeof result == 'string') {
+                send(response, {
+                    status: true,
+                    message: result
+                });
+            } else {
+                var message = result.message;
+                var data = result.data;
+                if (data) {
                     send(response, {
                         status: true,
-                        message: result
+                        message: message,
+                        data: data
                     });
-                    break;
-                }
-                case 'function':
-                {
-                    handleResult(response, result());
-                    break;
-                }
-                default :
-                {
-                    var message = result.message;
-                    var data = result.data;
-                    if (data) {
-                        send(response, {
-                            status: true,
-                            message: message,
-                            data: data
-                        });
-                    } else {
-                        send(response, {
-                            status: true,
-                            message: message
-                        });
-                    }
-                    break;
+                } else {
+                    send(response, {
+                        status: true,
+                        message: message
+                    });
                 }
             }
         } else {
             send(response, {
-                status: false,
-                message: 'Empty result'
+                status: true
             });
         }
     }
@@ -70,20 +59,34 @@ module.exports = function (app, developmentMode) {
                     handleResult(response, result);
                 });
             }, function (e) {
-                send(response, {
-                    status: false,
-                    message: e
-                });
+                if (e instanceof Exception) {
+                    send(response, {
+                        status: false,
+                        error: e
+                    });
+                } else {
+                    e = new Exception(Exception.UNHANDLED_EXCEPTION, 'Unhandled exception', e);
+                    send(response, {
+                        status: false,
+                        error: e
+                    });
+                }
             });
         };
     }
 
     return {
-        get: function (path, callback) {
+        'get': function (path, callback) {
             app.get(path, getRequestHandler(callback));
         },
-        post: function (path, callback) {
+        'post': function (path, callback) {
             app.post(path, getRequestHandler(callback));
+        },
+        'put': function (path, callback) {
+            app.put(path, getRequestHandler(callback));
+        },
+        'delete': function (path, callback) {
+            app.delete(path, getRequestHandler(callback));
         }
     };
 };

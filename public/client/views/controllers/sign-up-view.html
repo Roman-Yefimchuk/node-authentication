@@ -1,0 +1,48 @@
+<div class="panel col-sm-6 col-sm-offset-3" style="margin-top: 80px">
+
+    <h1><span class="fa fa-sign-in" ng-click="quickSingUp()"></span> Sign Up</h1>
+
+    <div ng-show="errorMessage != null">
+        <alert type="danger" close="errorMessage = null">
+            {{ errorMessage }}
+        </alert>
+    </div>
+
+    <form action="/signup" method="post" autocomplete="off">
+
+        <div class="form-group" ng-class="{ 'has-error' : !isNameValid() }">
+            <label>Name</label>
+            <input type="text" class="form-control" name="name" ng-model="name"
+                   autocomplete="off">
+        </div>
+
+        <div class="form-group" ng-class="{ 'has-error' : !isEmailValid() }">
+            <label>Email</label>
+            <input type="text" class="form-control" name="email" ng-model="email"
+                   autocomplete="off">
+        </div>
+
+        <div class="form-group" ng-class="{ 'has-error' : !isPasswordValid() }">
+            <label>Password</label>
+            <input type="password" class="form-control" name="password" ng-model="password"
+                   autocomplete="off">
+        </div>
+
+        <div class="form-group" ng-class="{ 'has-error' : !isPasswordValid() }">
+            <label>Confirm password</label>
+            <input type="password" class="form-control" ng-model="confirmedPassword"
+                   autocomplete="off">
+        </div>
+
+        <button type="submit" class="btn btn-warning"
+                ng-disabled="!isEmailValid() || !isPasswordValid()">
+            Sign Up
+        </button>
+    </form>
+
+    <hr>
+
+    <p>Already have an account? <a href="#/login">Login</a></p>
+
+    <p>Or go <a href="#/">home</a>.</p>
+</div>

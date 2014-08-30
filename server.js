@@ -86,6 +86,7 @@ dbConnector.connect(function (dbProvider) {
 
     var serviceProvider = require('./app/providers/services-provider')(app, developmentMode);
     require('./app/services')(app, dbProvider, serviceProvider);
+    require('./app/session-manager')(app, dbProvider, serviceProvider);
 
     server.listen(port);
 

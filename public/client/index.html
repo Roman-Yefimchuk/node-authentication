@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <link rel="stylesheet" href="/libs/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.css">
+
+    <link rel="stylesheet" href="/client/styles/styles.css">
+    <link rel="stylesheet" href="/client/styles/ajax-loader.css">
+
+    <link rel="stylesheet" href="/client/styles/dialog-style.css">
+    <link rel="stylesheet" href="/client/styles/list-style.css">
+
+    <link rel="stylesheet" href="/client/styles/tasks.css">
+
+</head>
+<body ng-app="application" ng-cloak>
+
+<div class="container">
+    <div ng-view="">
+    </div>
+</div>
+
+<div id="ajax_loader" class="ajax-loader"></div>
+
+<script type="text/javascript" src="/libs/js/jquery.js"></script>
+<script type="text/javascript" src="/libs/js/angular.js"></script>
+<script type="text/javascript" src="/libs/js/angular-route.js"></script>
+<script type="text/javascript" src="/libs/bootstrap/js/ui-bootstrap-tpls.js"></script>
+<script type="text/javascript" src="/libs/js/date-format.js"></script>
+<script type="text/javascript" src="/libs/js/notify.js"></script>
+<script type="text/javascript" src="/libs/js/underscore.js"></script>
+
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+
+<!--application-->
+<script type="text/javascript" src="/client/scripts/application.js"></script>
+
+<!--config-->
+<script type="text/javascript" src="/client/scripts/config.js"></script>
+
+<!--controllers-->
+<script type="text/javascript" src="/client/scripts/controllers/index.js"></script>
+<script type="text/javascript" src="/client/scripts/controllers/home.js"></script>
+<script type="text/javascript" src="/client/scripts/controllers/login.js"></script>
+<script type="text/javascript" src="/client/scripts/controllers/logout.js"></script>
+<script type="text/javascript" src="/client/scripts/controllers/not-found.js"></script>
+<script type="text/javascript" src="/client/scripts/controllers/sign-up.js"></script>
+<script type="text/javascript" src="/client/scripts/controllers/profile.js"></script>
+<script type="text/javascript" src="/client/scripts/controllers/settings.js"></script>
+
+<script type="text/javascript" src="/client/scripts/controllers/dialogs/workspace-manager.js"></script>
+<script type="text/javascript" src="/client/scripts/controllers/dialogs/item-editor.js"></script>
+
+<!--directives-->
+<script type="text/javascript" src="/client/scripts/directives/list-item.js"></script>
+<script type="text/javascript" src="/client/scripts/directives/manager-dialog.js"></script>
+<script type="text/javascript" src="/client/scripts/directives/todo-blur.js"></script>
+<script type="text/javascript" src="/client/scripts/directives/todo-focus.js"></script>
+<script type="text/javascript" src="/client/scripts/directives/users-dialog.js"></script>
+
+<!--filters-->
+<script type="text/javascript" src="/client/scripts/filters/date-filter.js"></script>
+
+<!--services-->
+<script type="text/javascript" src="/client/scripts/services/http-client.js"></script>
+<script type="text/javascript" src="/client/scripts/services/api.js"></script>
+<script type="text/javascript" src="/client/scripts/services/notifications.js"></script>
+<script type="text/javascript" src="/client/scripts/services/sockets.js"></script>
+<script type="text/javascript" src="/client/scripts/services/loader.js"></script>
+<script type="text/javascript" src="/client/scripts/services/session-manager.js"></script>
+<script type="text/javascript" src="/client/scripts/services/user.js"></script>
+<script type="text/javascript" src="/client/scripts/services/dialogs.js"></script>
+
+<!--common-->
+<script type="text/javascript" src="/client/scripts/utils/common.js"></script>
+
+</body>
+</html>

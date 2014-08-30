@@ -305,18 +305,21 @@ module.exports = function (db, developmentMode) {
         },
         save: function (workspaceId, userId, todoModel, callback) {
             db.query("" +
-                "INSERT INTO Todo (workspaceId, creatorId, title, completed) " +
-                "VALUES (:workspaceId, :creatorId, :title, :completed)", {
+                "INSERT INTO Todo (workspaceId, creatorId, title, completed, createdDate) " +
+                "VALUES (:workspaceId, :creatorId, :title, :completed, :createdDate)", {
                 params: {
                     workspaceId: workspaceId,
                     creatorId: userId,
                     title: todoModel.title,
-                    completed: todoModel.completed
+                    completed: todoModel.completed,
+                    createdDate: _.now()
                 }
             }).then(function (results) {
                 var item = results[0];
-                var itemId = encodeId(item);
-                callback(itemId);
+                callback({
+                    itemId: encodeId(item),
+                    createdDate: item.createdDate
+                });
             });
         },
         update: function (workspaceId, userId, todoModels, callback) {
