@@ -46,7 +46,7 @@ angular.module('application')
                 if (collection.length > 0) {
                     apiService.setUsersPermissionsForWorkspace($scope.workspaceId, collection, function () {
                         var socketConnection = $scope.socketConnection;
-                        socketConnection.permissionsChanged(collection);
+                        socketConnection.permissionsChanged(collection, $scope.workspaceId);
 
                         $modalInstance.close();
                     });

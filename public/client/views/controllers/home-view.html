@@ -27,12 +27,6 @@
             </li>
         </ul>
 
-        <!--        <form class="navbar-form navbar-left">
-                    <button type="submit" class="btn btn-default">
-                        Add workspace
-                    </button>
-                </form>-->
-
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 
             <ul class="nav navbar-nav navbar-right">
@@ -85,7 +79,8 @@
     <div class="col-md-8 column">
 
         <section class="panel tasks-widget">
-            <header class="header panel-heading text-center">
+            <header class="panel-heading text-center"
+                    ng-class="{'header' : canManageCollection(), 'header-min' : !canManageCollection()}">
 
             <span title="Third party users" class="pull-left"
                   style="cursor: pointer"
@@ -145,7 +140,7 @@
                                             ng-class="{ 'task-done' : todo.completed }"
                                             is-lats-item="{{ $last }}">
 
-                                            <div class="task-checkbox">
+                                            <div class="task-checkbox" ng-show="canManageCollection()">
                                                 <input type="checkbox" class="list-child"
                                                        ng-model="todo.completed" ng-change="mark(todo)">
                                             </div>
@@ -156,7 +151,6 @@
                                       style="vertical-align: sub;">
                                     {{ todo.title }}
                                 </span>
-                                                <!--<span class="badge badge-sm label-success">2 Days</span>-->
 
                                                 <div class="pull-right hidden-phone">
 
@@ -164,14 +158,16 @@
                                             {{ todo.createdDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}
                                         </span>
 
-                                                    <button class="btn btn-primary btn-xs" title="Edit"
-                                                            ng-click="editTodo(todo)">
+                                                    <span class="btn btn-primary btn-xs" title="Edit"
+                                                          ng-click="editTodo(todo)"
+                                                          ng-show="canManageCollection()">
                                                         <i class="fa fa-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-danger btn-xs" title="Remove"
-                                                            ng-click="removeTodo(todo)">
+                                                    </span>
+                                                    <span class="btn btn-danger btn-xs" title="Remove"
+                                                          ng-click="removeTodo(todo)"
+                                                          ng-show="canManageCollection()">
                                                         <i class="fa fa-trash-o"></i>
-                                                    </button>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </li>
@@ -201,13 +197,13 @@
 
                     <div class="row clearfix">
                         <div class="col-md-4 column">
-                            <a class="btn btn-primary btn-sm pull-left" href
-                               ng-model="allChecked" ng-click="markAll(!allChecked)"
-                               ng-class="{ 'disabled' : !todos.length }"
-                               ng-show="canManageCollection()"
-                               btn-checkbox>
+                            <span class="btn btn-primary btn-sm pull-left"
+                                  ng-model="allChecked" ng-click="markAll(!allChecked)"
+                                  ng-class="{ 'disabled' : !todos.length }"
+                                  ng-show="canManageCollection()"
+                                  btn-checkbox>
                                 Select all
-                            </a>
+                            </span>
                         </div>
 
                         <div class="col-md-4 column text-center">
@@ -223,11 +219,11 @@
                         </div>
 
                         <div class="col-md-4 column">
-                            <a class="btn btn-danger btn-sm pull-right" href
-                               ng-show="remainingCount < todos.length"
-                               ng-click="clearDoneTodos()">
+                            <span class="btn btn-danger btn-sm pull-right"
+                                  ng-show="remainingCount < todos.length && canManageCollection()"
+                                  ng-click="clearDoneTodos()">
                                 Clear completed ({{ todos.length - remainingCount }})
-                            </a>
+                            </span>
                         </div>
                     </div>
 

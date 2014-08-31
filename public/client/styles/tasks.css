@@ -3,6 +3,10 @@
     margin-bottom: 15px;
 }
 
+.tasks-widget .header-min {
+    border-color: #eff2f7;
+}
+
 .task-content {
     margin-bottom: 15px;
 }

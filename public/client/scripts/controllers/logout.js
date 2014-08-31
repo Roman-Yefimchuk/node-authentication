@@ -6,8 +6,11 @@ angular.module('application')
 
         '$scope',
         '$location',
+        'socketsService',
 
-        function ($scope, $location) {
+        function ($scope, $location, socketsService) {
+
+            socketsService.closeConnection();
             $location.path('/');
         }
     ]

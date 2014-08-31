@@ -77,8 +77,10 @@ angular.module('application')
             userService.getData({
                 success: function (user, externalNotification) {
 
-                    var socketConnection = socketsService.openCollection('http://127.0.0.1:8080/', $scope, user.workspaceId);
+                    var socketConnection = socketsService.openCollection('http://127.0.0.1:8080/', user.userId, user.workspaceId);
                     $scope.socketConnection = socketConnection;
+
+                    subscribeForSocketEvent();
 
                     apiService.getPermittedWorkspaces(function (workspaces) {
                         $scope.workspaces = workspaces;
@@ -89,8 +91,8 @@ angular.module('application')
 
                                 apiService.setUserWorkspace(workspaceId, function (data) {
 
-                                    socketConnection.changedWorkspace();
-                                    socketConnection.updatePresentUsers();
+                                    socketConnection.changedWorkspace(workspaceId);
+                                    socketConnection.updatePresentUsers(workspaceId);
 
                                     $scope.permissions = data.permissions;
                                     $scope.isOwnWorkspace = data.isOwnWorkspace;
@@ -204,7 +206,7 @@ angular.module('application')
 
                     if (getWorkspaceId() == workspaceId) {
                         $scope.currentWorkspace = _.findWhere($scope.workspaces, {
-                            id: $scope.defaultWorkspaceId
+                            id: $scope.user['defaultWorkspaceId']
                         });
                     }
 
@@ -302,7 +304,7 @@ angular.module('application')
 
                     return "User @{userName} removed @{count} item(s)".format({
                         userName: userName,
-                        count: items.length
+                        count: itemIds.length
                     });
                 });
             };
@@ -418,18 +420,77 @@ angular.module('application')
                 return false;
             };
 
+            $scope.addWorkspace = function () {
+                $scope.workspaceDropdown['isOpen'] = false;
+            };
+
             $scope.logout = function () {
                 userService.logout(function () {
-                    var socketConnection = $scope.socketConnection;
-                    if (socketConnection) {
-                        socketConnection.closeConnection();
-                    }
                     $location.path('/logout');
                 });
             };
 
-            $scope.$on("$destroy", function () {
-            });
+            function subscribeForSocketEvent() {
+                $scope.$on('socketsService:userConnected', function (event, data) {
+                    $scope.presentUsers = data['presentUsers'];
+                });
+
+                $scope.$on('socketsService:userDisconnected', function (event, data) {
+                    $scope.userHasLeft(data['userId'], function (user) {
+                        notificationsService.info('User @{userName} disconnected', {
+                            userName: user.displayName
+                        });
+                    });
+                });
+
+                $scope.$on('socketsService:changedWorkspace', function (event, data) {
+                    if (data['workspaceId'] == getWorkspaceId()) {
+                        $scope.userJoined(data['userId'], function (user) {
+                            notificationsService.success('User @{userName} joined to workspace', {
+                                userName: user.displayName
+                            });
+                        });
+                    } else {
+                        $scope.userHasLeft(data['userId'], function (user) {
+                            notificationsService.info('User @{userName} has left workspace', {
+                                userName: user.displayName
+                            });
+                        });
+                    }
+                });
+
+                $scope.$on('socketsService:addedItem', function (event, data) {
+                    $scope.addedItem(data['userId'], data['item']);
+                });
+
+                $scope.$on('socketsService:updatedItems', function (event, data) {
+                    $scope.updatedItems(data['userId'], data['items']);
+                });
+
+                $scope.$on('socketsService:removedItems', function (event, data) {
+                    $scope.removedItems(data['userId'], data['itemIds']);
+                });
+
+                $scope.$on('socketsService:permissionsChanged', function (event, data) {
+                    var userId = data['userId'];
+                    var workspaceId = data['workspaceId'];
+
+                    if (data['access']) {
+                        var permissions = data['permissions'];
+                        $scope.updatePermissions(userId, workspaceId, permissions);
+                    } else {
+                        $scope.closeAccess(userId, workspaceId);
+                    }
+                });
+
+                $scope.$on('socketsService:updatePresentUsers', function (event, data) {
+                    $scope.presentUsers = data['presentUsers'];
+                });
+
+                $scope.$on('socketsService:disconnect', function (event, data) {
+                    notificationsService.error('You lost connection');
+                });
+            }
         }
     ]
 );

@@ -4,139 +4,115 @@ angular.module('application')
 
     .service('socketsService', [
 
-        'notificationsService',
+        '$rootScope',
 
-        function (notificationsService) {
+        function ($rootScope) {
+
+            var socket = null;
+
+            var connection = null;
+
+            function closeConnection() {
+                connection = null;
+
+                if (socket) {
+                    return socket.close();
+                }
+            }
+
             return {
-                openCollection: function (url, $scope, workspaceId) {
-                    var userId = $scope.userId;
-                    var socket = io.connect(url);
+                openCollection: function (url, userId, workspaceId) {
+                    if (connection) {
+                        return connection;
+                    } else {
+                        socket = io.connect(url);
 
-                    function sendCommand(command, data) {
-                        socket.emit(command, data);
-                    }
+                        _.forEach({
+                            'user_connected': 'userConnected',
+                            'user_disconnected': 'userDisconnected',
 
-                    function onCommand(command, callback) {
-                        socket.on(command, function (data) {
-                            callback(data);
+                            'changed_workspace': 'changedWorkspace',
+
+                            'added_item': 'addedItem',
+                            'updated_items': 'updatedItems',
+                            'removed_items': 'removedItems',
+
+                            'permissions_changed': 'permissionsChanged',
+
+                            'update_present_users': 'updatePresentUsers',
+
+                            'disconnect': 'disconnect'
+                        }, function (value, command) {
+                            socket.on(command, function (data) {
+                                if (command == 'disconnect' && connection) {
+
+                                    closeConnection();
+
+                                    $rootScope.$broadcast('socketsService:' + value, data);
+                                } else {
+                                    $rootScope.$broadcast('socketsService:' + value, data);
+                                }
+                            });
                         });
-                    }
 
-                    function getWorkspaceId() {
-                        return $scope.currentWorkspace['id'];
-                    }
+                        connection = {
+                            changedWorkspace: function (workspaceId) {
+                                emit('changed_workspace', {
+                                    userId: userId,
+                                    workspaceId: workspaceId
+                                });
+                            },
+                            addedItem: function (item) {
+                                emit('added_item', {
+                                    userId: userId,
+                                    item: item
+                                });
+                            },
+                            updatedItems: function (items) {
+                                emit('updated_items', {
+                                    userId: userId,
+                                    items: items
+                                });
+                            },
+                            removedItems: function (itemIds) {
+                                emit('removed_items', {
+                                    userId: userId,
+                                    itemIds: itemIds
+                                });
+                            },
+                            permissionsChanged: function (collection, workspaceId) {
+                                emit('permissions_changed', {
+                                    userId: userId,
+                                    workspaceId: workspaceId,
+                                    collection: collection
+                                });
+                            },
+                            updatePresentUsers: function (workspaceId) {
+                                emit('update_present_users', {
+                                    userId: userId,
+                                    workspaceId: workspaceId
+                                });
+                            }
+                        };
 
-                    onCommand('user_connected', function (data) {
-                        $scope.presentUsers = data.presentUsers;
-                    });
+                        var emit = function (command, data) {
+                            if (connection) {
+                                socket.emit(command, data);
+                            } else {
+                                throw 'Connection closed';
+                            }
+                        };
 
-                    onCommand('changed_workspace', function (data) {
-                        var userId = data.userId;
-                        var workspaceId = data.workspaceId;
-
-                        if (workspaceId == getWorkspaceId()) {
-                            $scope.userJoined(userId, function (user) {
-                                notificationsService.success('User ' + user.displayName + ' joined to workspace');
-                            });
-                        } else {
-                            $scope.userHasLeft(userId, function (user) {
-                                notificationsService.info('User ' + user.displayName + ' has left workspace');
-                            });
-                        }
-                    });
-
-                    onCommand('added_item', function (data) {
-                        var userId = data.userId;
-                        var item = data.item;
-                        $scope.addedItem(userId, item);
-                    });
-
-                    onCommand('updated_items', function (data) {
-                        var userId = data.userId;
-                        var items = data.items;
-                        $scope.updatedItems(userId, items);
-                    });
-
-                    onCommand('removed_items', function (data) {
-                        var userId = data.userId;
-                        var itemIds = data.itemIds;
-                        $scope.removedItems(userId, itemIds);
-                    });
-
-                    onCommand('permissions_changed', function (data) {
-                        var userId = data.userId;
-                        var workspaceId = data.workspaceId;
-                        if (data.access) {
-                            var permissions = data.permissions;
-                            $scope.updatePermissions(userId, workspaceId, permissions);
-                        } else {
-                            $scope.closeAccess(userId, workspaceId);
-                        }
-                    });
-
-                    onCommand('update_present_users', function (data) {
-                        $scope.presentUsers = data.presentUsers;
-                    });
-
-                    onCommand('user_disconnected', function (data) {
-                        var userId = data.userId;
-                        $scope.userHasLeft(userId, function (user) {
-                            notificationsService.info('User ' + user.displayName + ' disconnected');
+                        emit('user_connection', {
+                            userId: userId,
+                            workspaceId: workspaceId
                         });
-                    });
 
-                    onCommand('disconnect', function () {
-                        socket.disconnect();
-                        notificationsService.error('You lost connection');
-                    });
-
-                    sendCommand('user_connection', {
-                        userId: $scope.userId,
-                        workspaceId: workspaceId
-                    });
-
-                    return {
-                        changedWorkspace: function () {
-                            sendCommand('changed_workspace', {
-                                userId: userId,
-                                workspaceId: getWorkspaceId()
-                            });
-                        },
-                        addedItem: function (item) {
-                            sendCommand('added_item', {
-                                userId: userId,
-                                item: item
-                            });
-                        },
-                        updatedItems: function (items) {
-                            sendCommand('updated_items', {
-                                userId: userId,
-                                items: items
-                            });
-                        },
-                        removedItems: function (itemIds) {
-                            sendCommand('removed_items', {
-                                userId: userId,
-                                itemIds: itemIds
-                            });
-                        },
-                        permissionsChanged: function (collection) {
-                            sendCommand('permissions_changed', {
-                                userId: userId,
-                                workspaceId: getWorkspaceId(),
-                                collection: collection
-                            });
-                        },
-                        updatePresentUsers: function () {
-                            sendCommand('update_present_users', {
-                                userId: userId,
-                                workspaceId: getWorkspaceId()
-                            });
-                        },
-                        closeConnection: function () {
-                            return socket.close();
-                        }
-                    };
+                        return connection;
+                    }
+                },
+                closeConnection: function () {
+                    closeConnection();
                 }
             };
         }
