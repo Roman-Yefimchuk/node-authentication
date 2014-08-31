@@ -8,7 +8,7 @@
         </alert>
     </div>
 
-    <form action="/signup" method="post" autocomplete="off">
+    <form ng-submit="signUp()" autocomplete="off">
 
         <div class="form-group" ng-class="{ 'has-error' : !isNameValid() }">
             <label>Name</label>

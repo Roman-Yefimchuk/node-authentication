@@ -4,16 +4,16 @@ module.exports = function (app, developmentMode) {
 
     var Exception = require('../exception');
 
-    function send(response, data) {
+    function send(request, response, data) {
         process.nextTick(function () {
             response.send(JSON.stringify(data));
         });
     }
 
-    function handleResult(response, result) {
+    function handleResult(request, response, result) {
         if (result) {
             if (typeof result == 'string') {
-                send(response, {
+                send(request, response, {
                     status: true,
                     message: result
                 });
@@ -21,20 +21,20 @@ module.exports = function (app, developmentMode) {
                 var message = result.message;
                 var data = result.data;
                 if (data) {
-                    send(response, {
+                    send(request, response, {
                         status: true,
                         message: message,
                         data: data
                     });
                 } else {
-                    send(response, {
+                    send(request, response, {
                         status: true,
                         message: message
                     });
                 }
             }
         } else {
-            send(response, {
+            send(request, response, {
                 status: true
             });
         }
@@ -47,7 +47,8 @@ module.exports = function (app, developmentMode) {
             if (e) {
                 failureCallback(e);
             } else {
-                failureCallback('Unknown exception :(');
+                e = new Exception(Exception.UNHANDLED_EXCEPTION, 'Unhandled exception');
+                failureCallback(e);
             }
         }
     }
@@ -56,17 +57,17 @@ module.exports = function (app, developmentMode) {
         return function (request, response) {
             executeService(function () {
                 callback(request, response, function (result) {
-                    handleResult(response, result);
+                    handleResult(request, response, result);
                 });
             }, function (e) {
                 if (e instanceof Exception) {
-                    send(response, {
+                    send(request, response, {
                         status: false,
                         error: e
                     });
                 } else {
                     e = new Exception(Exception.UNHANDLED_EXCEPTION, 'Unhandled exception', e);
-                    send(response, {
+                    send(request, response, {
                         status: false,
                         error: e
                     });

@@ -1,27 +1,54 @@
-<div>
-    <table width="100%">
-        <tr>
-            <td width="55%">
+<div class="text-center">
+    <div class="row clearfix">
+        <div class="col-md-7 column">
+            <span class="pull-left">
                 User ID: <b>{{ user.id }}</b>
-                <br>
+            </span>
+
+            <br>
+
+            <span class="pull-left">
                 User name: <b>{{ user.displayName }}</b>
-                <br>
+            </span>
+
+            <br>
+
+            <span class="pull-left">
                 Registered date: <b>{{ user.registeredDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}</b>
-            </td>
-            <td width="15%">
-                <div style="text-align: center" ng-show="user.isCreator">
-                    <img src="/client/images/user.png" width="30px" height="30px" title="Creator of this workspace">
-                </div>
-            </td>
-            <td width="30%">
-                <div style="float: right">
-                    <label><input type="checkbox" ng-model="permissions.readOnly"/>Read only</label>
-                    <br>
-                    <label><input type="checkbox" ng-model="permissions.collectionManager"/>Collection manager</label>
-                    <br>
-                    <label><input type="checkbox" ng-model="permissions.accessManager"/>Access manager</label>
-                </div>
-            </td>
-        </tr>
-    </table>
+            </span>
+        </div>
+        <div class="col-md-1 column text-center" style="margin-top: 18px;">
+            <div ng-show="user.isCreator">
+                <i class="fa fa-user" title="Creator of this workspace"></i>
+            </div>
+        </div>
+        <div class="col-md-4 column">
+            <div>
+                <span class="pull-left" btn-checkbox ng-model="permissions.readOnly">
+                    <i class="fa"
+                       ng-class="{ 'fa-square-o' : !permissions.readOnly, 'fa-check-square-o' : permissions.readOnly }">
+                    </i>
+                    Read only
+                </span>
+
+                <br>
+
+                <span class="pull-left" btn-checkbox ng-model="permissions.collectionManager">
+                    <i class="fa"
+                       ng-class="{ 'fa-square-o' : !permissions.collectionManager, 'fa-check-square-o' : permissions.collectionManager }">
+                    </i>
+                    Collection manager
+                </span>
+
+                <br>
+
+                <span class="pull-left" btn-checkbox ng-model="permissions.accessManager">
+                    <i class="fa"
+                       ng-class="{ 'fa-square-o' : !permissions.accessManager, 'fa-check-square-o' : permissions.accessManager }">
+                    </i>
+                    Access manager
+                </span>
+            </div>
+        </div>
+    </div>
 </div>

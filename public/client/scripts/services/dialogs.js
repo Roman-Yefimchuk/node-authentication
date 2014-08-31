@@ -12,6 +12,7 @@ angular.module('application')
                     return $modal.open({
                         templateUrl: '/client/views/controllers/dialogs/workspace-manager-view.html',
                         controller: 'WorkspaceManagerController',
+/*                        size: 'lg',*/
                         resolve: {
                             options: function () {
                                 return options;

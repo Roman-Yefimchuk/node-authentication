@@ -9,17 +9,17 @@ angular.module('application')
 
         function ($rootScope, sessionManagerService) {
 
-            var userData = null;
+            var user = null;
 
             $rootScope.$on('user:updateProfile', function (event, data) {
-                userData = angular.extend(data, userData || {});
+                user = angular.extend(data, user || {});
             });
 
             var userService = {
                 getData: function (handler) {
 
-                    var successCallback = function (userData) {
-                        (handler.success || angular.noop)(userData);
+                    var successCallback = function (user, externalNotification) {
+                        (handler.success || angular.noop)(user, externalNotification);
                     };
 
                     var failureCallback = function (error) {
@@ -29,9 +29,9 @@ angular.module('application')
                     sessionManagerService.isAuthenticated({
                         success: function (response) {
                             if (response.isAuthenticated) {
-                                if (userData) {
-                                    if (userData.token == response.token) {
-                                        successCallback(userData);
+                                if (user) {
+                                    if (user.token == response.token) {
+                                        successCallback(user);
                                     } else {
                                         userService.logout(function () {
                                             failureCallback({
@@ -43,8 +43,8 @@ angular.module('application')
                                 } else {
                                     sessionManagerService.getUserData({
                                         success: function (data) {
-                                            userData = data;
-                                            successCallback(data);
+                                            user = data.user;
+                                            successCallback(user, data.externalNotification);
                                         },
                                         failure: function (error) {
                                             failureCallback(error);
@@ -66,11 +66,11 @@ angular.module('application')
                 logout: function (callback) {
                     sessionManagerService.logout({
                         success: function () {
-                            userData = null;
+                            user = null;
                             callback();
                         },
                         failure: function () {
-                            userData = null;
+                            user = null;
                             callback();
                         }
                     });

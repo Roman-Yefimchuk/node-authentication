@@ -1,28 +1,6 @@
 "use strict";
 
-module.exports = function (app, passport, dbProvider, developmentMode) {
-
-    var _ = require('underscore');
-
-    require('../app/client')(app, developmentMode);
-
-    // locally --------------------------------
-
-    // LOGIN ===============================
-
-    app.post('/login', passport.authenticate('local-login', {
-        successRedirect: '/#/home',
-        failureRedirect: '/login',
-        failureFlash: true
-    }));
-
-    // SIGNUP =================================
-
-    app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect: '/#/home',
-        failureRedirect: '/signup',
-        failureFlash: true
-    }));
+module.exports = function (app, passport, developmentMode) {
 
     // facebook -------------------------------
 
@@ -67,14 +45,6 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
 // =============================================================================
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
 // =============================================================================
-
-    // locally --------------------------------
-
-    app.post('/connect/local', passport.authenticate('local-signup', {
-        successRedirect: '/#/home',
-        failureRedirect: '/connect/local',
-        failureFlash: true
-    }));
 
     // facebook -------------------------------
 

@@ -11,6 +11,8 @@ var authorizationConfig = require('./../../config/authorization-config');
 
 module.exports = function (passport, dbProvider) {
 
+    var Exception = require('../exception');
+
     passport.serializeUser(function (userAccount, done) {
         done(null, userAccount.genericId);
     });
@@ -42,16 +44,19 @@ module.exports = function (passport, dbProvider) {
                 success: function (userAccount) {
                     if (userAccount) {
                         if (security.validPassword(userAccount, password)) {
-                            return done(null, userAccount, req.flash('workspaceId', req.body['workspaceId']));
+                            return done(null, userAccount);
                         } else {
-                            return done(null, null, req.flash('loginMessage', 'Oops! Wrong password.'));
+                            var error = new Exception(Exception.INVALID_PASSWORD, 'Oops! Wrong password.');
+                            return done(null, null, error);
                         }
                     } else {
-                        return done(null, null, req.flash('loginMessage', 'No user found.'));
+                        var error = new Exception(Exception.USER_NOT_FOUND, 'No user found.');
+                        return done(null, null, error);
                     }
                 },
                 failure: function (error) {
-                    done(error);
+                    error = new Exception(Exception.UNHANDLED_EXCEPTION, "Can't find user.", error);
+                    done(null, null, error);
                 }
             });
         });
@@ -61,7 +66,7 @@ module.exports = function (passport, dbProvider) {
     // LOCAL SIGNUP ============================================================
     // =========================================================================
 
-    passport.use('local-signup', new LocalStrategy({
+    passport.use('local-sign-up', new LocalStrategy({
         usernameField: 'email',
         passwordField: 'password',
         passReqToCallback: true
@@ -75,8 +80,10 @@ module.exports = function (passport, dbProvider) {
 
             dbProvider.findUser(email, {
                 success: function (userAccount) {
+
                     if (userAccount) {
-                        return done(null, null, req.flash('signupMessage', 'That email is already taken.'));
+                        var error = new Exception(Exception.EMAIL_ALREADY_EXIST, 'That email is already taken.');
+                        return done(null, null, error);
                     }
 
                     if (req.user) {
@@ -91,7 +98,8 @@ module.exports = function (passport, dbProvider) {
                                 done(null, userAccount);
                             },
                             failure: function (error) {
-                                done(error);
+                                error = new Exception(Exception.UNHANDLED_EXCEPTION, "Can't update user.");
+                                done(null, null, error);
                             }
                         });
                     } else {
@@ -108,13 +116,15 @@ module.exports = function (passport, dbProvider) {
                                 done(null, userAccount);
                             },
                             failure: function (error) {
-                                done(error);
+                                error = new Exception(Exception.UNHANDLED_EXCEPTION, "Can't create user.");
+                                done(null, null, error);
                             }
                         });
                     }
                 },
                 failure: function (error) {
-                    done(error);
+                    error = new Exception(Exception.UNHANDLED_EXCEPTION, "Can't find user.", error);
+                    done(null, null, error);
                 }
             });
         });

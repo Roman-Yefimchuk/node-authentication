@@ -17,6 +17,12 @@ angular.module('application')
 
         function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService) {
 
+            $scope.workspaceDropdown = {
+                isOpen: false
+            };
+
+            $scope.loading = true;
+
             $scope.viewModes = [
                 {
                     title: 'All',
@@ -69,8 +75,7 @@ angular.module('application')
             loaderService.showLoader();
 
             userService.getData({
-                success: function (data) {
-                    var user = data.user;
+                success: function (user, externalNotification) {
 
                     var socketConnection = socketsService.openCollection('http://127.0.0.1:8080/', $scope, user.workspaceId);
                     $scope.socketConnection = socketConnection;
@@ -92,6 +97,7 @@ angular.module('application')
 
                                     apiService.items(workspaceId, function (items) {
                                         $scope.todos = items;
+                                        $scope.loading = false;
                                     });
                                 });
                             }
@@ -104,6 +110,10 @@ angular.module('application')
                         $scope.user = user;
 
                         loaderService.hideLoader();
+
+                        if (externalNotification) {
+                            notificationsService.notify(externalNotification.message, externalNotification.type);
+                        }
 
                         notificationsService.info("Hello @{userName}!", {
                             userName: user.displayName
@@ -155,6 +165,7 @@ angular.module('application')
 
             $scope.setWorkspace = function (workspace) {
                 $scope.currentWorkspace = workspace;
+                $scope.workspaceDropdown['isOpen'] = false;
             };
 
             $scope.presentUsers = [];

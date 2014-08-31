@@ -5,8 +5,11 @@ angular.module('application')
     .controller('SignUpController', [
 
         '$scope',
+        '$location',
+        'loaderService',
+        'apiService',
 
-        function ($scope) {
+        function ($scope, $location, loaderService, apiService) {
 
             var emailPattern = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
             var passwordPattern = /^(([a-z]|[A-Z]|[0-9]|\u005F)+){6}$/;
@@ -37,9 +40,28 @@ angular.module('application')
                 $scope.confirmedPassword = 'qwerty';
 
                 $scope.$watch('email', function () {
-                    $('[action="/signup"]').submit();
+                    $scope.signUp();
                 });
-            }
+            };
+
+            $scope.signUp = function () {
+
+                loaderService.showLoader();
+
+                apiService.signUp({
+                    name: $scope.name,
+                    email: $scope.email,
+                    password: $scope.password
+                }, {
+                    success: function () {
+                        $location.path('/home');
+                    },
+                    failure: function (error) {
+                        $scope.errorMessage = error.message;
+                        loaderService.hideLoader();
+                    }
+                });
+            };
         }
     ]
 );

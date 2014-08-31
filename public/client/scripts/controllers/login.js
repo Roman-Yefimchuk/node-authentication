@@ -5,11 +5,12 @@ angular.module('application')
     .controller('LoginController', [
 
         '$scope',
+        '$location',
         'apiService',
         'loaderService',
         'DEBUG_MODE',
 
-        function ($scope, apiService, loaderService, DEBUG_MODE) {
+        function ($scope, $location, apiService, loaderService, DEBUG_MODE) {
 
             var emailPattern = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
             var passwordPattern = /^(([a-z]|[A-Z]|[0-9]|\u005F)+){6}$/;
@@ -56,10 +57,29 @@ angular.module('application')
                     $scope.password = 'qwerty';
 
                     $scope.$watch('email', function () {
-                        $('[action="/login"]').submit();
+                        $scope.login();
                     });
                 }
-            }
+            };
+
+            $scope.login = function () {
+
+                loaderService.showLoader();
+
+                apiService.login({
+                    email: $scope.email,
+                    password: $scope.password,
+                    workspaceId: $scope.currentWorkspace['id']
+                }, {
+                    success: function () {
+                        $location.path('/home');
+                    },
+                    failure: function (error) {
+                        $scope.errorMessage = error.message;
+                        loaderService.hideLoader();
+                    }
+                });
+            };
         }
     ]
 );

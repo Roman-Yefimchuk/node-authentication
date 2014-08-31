@@ -7,6 +7,8 @@ var flash = require('connect-flash');
 
 var port = 8080;
 
+var Exception = require('./app/exception');
+
 function isDevelopmentMode() {
     var args = process['argv'];
     if (args.length > 2) {
@@ -24,7 +26,7 @@ var developmentMode = isDevelopmentMode();
 var dbConnector = require('./app/db/db-connector');
 dbConnector.connect(function (dbProvider) {
 
-    require('./app/providers/authorization-provider')(passport, dbProvider);
+    require('./app/providers/authenticate-provider')(passport, dbProvider);
 
     app.configure(function () {
 
@@ -51,42 +53,49 @@ dbConnector.connect(function (dbProvider) {
             var static = express.static(name);
             app.use(static);
 
-            app.use(function (req, res, next) {
-                res.status(404);
+            app.use(function (request, response, next) {
+                response.status(404);
 
-                var url = decodeURIComponent(req.url);
+                var url = decodeURIComponent(request.url);
 
-                if (req.accepts('html')) {
-                    res.render('page-not-found.ejs', {
+                if (request.accepts('html')) {
+                    response.render('page-not-found.ejs', {
                         requestUrl: url
                     });
                 } else {
-                    if (req.accepts('json')) {
-                        res.send({
+                    if (request.accepts('json')) {
+                        response.send({
                             status: false,
-                            message: ' Page ' + url + ' not found'
+                            error: {
+                                status: Exception.PAGE_NOT_FOUND,
+                                message: 'Page ' + url + ' not found'
+                            }
                         });
                     } else {
-                        res.type('txt').send('Not found');
+                        response.type('txt').send('Page ' + url + ' not found');
                     }
                 }
             });
 
-            app.use(function (err, req, res, next) {
-                res.status(err.status || 500);
-                res.render('internal-server-error.ejs', {
-                    error: err
+            app.use(function (error, request, response, next) {
+                response.status(error.status || 500);
+                response.render('internal-server-error.ejs', {
+                    error: error
                 });
             });
         }
     });
 
     require('./app/sockets-handler')(io, dbProvider, developmentMode);
-    require('./app/routes')(app, passport, dbProvider, developmentMode);
+
+    require('./app/authenticate/local-authenticate')(app, passport, dbProvider, developmentMode);
+    require('./app/authenticate/external-authenticate')(app, passport, developmentMode);
 
     var serviceProvider = require('./app/providers/services-provider')(app, developmentMode);
     require('./app/services')(app, dbProvider, serviceProvider);
     require('./app/session-manager')(app, dbProvider, serviceProvider);
+
+    require('./app/client')(app, developmentMode);
 
     server.listen(port);
 

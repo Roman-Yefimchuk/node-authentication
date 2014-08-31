@@ -6,12 +6,12 @@
     </div>
     <div class="modal-body">
 
-        <!--        <div users-collection class="list-frame">
-                    <ul ng-repeat="user in users" is-lats-item="{{ $last }}">
-                        <li item list-item user="user">
-                        </li>
-                    </ul>
-                </div>-->
+        <div class="list-group" style="margin: 0;max-height: 400px;overflow-y: auto;">
+            <a ng-repeat="user in users"
+               href class="list-group-item">
+                <div list-item user="user"></div>
+            </a>
+        </div>
 
     </div>
     <div class="modal-footer ng-scope" style="margin-top: 0">

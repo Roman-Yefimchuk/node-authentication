@@ -25,7 +25,7 @@ angular.module('application')
 
             apiService.getAllUsersWithPermissions(workspace.id, function (users) {
                 $scope.users = users.filter(function (user) {
-                    return user.id != userId;
+                    return user.id != $scope.userId;
                 });
 
                 originalCollection = angular.copy($scope.users);

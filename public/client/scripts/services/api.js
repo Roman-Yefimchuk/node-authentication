@@ -9,6 +9,20 @@ angular.module('application')
         function (httpClientService) {
 
             return {
+                login: function (data, handler) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        data: data,
+                        url: '/api/login'
+                    }, handler);
+                },
+                signUp: function (data, handler) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        data: data,
+                        url: '/api/sign-up'
+                    }, handler);
+                },
                 items: function (workspaceId, callback) {
                     httpClientService.sendRequest({
                         method: 'GET',
