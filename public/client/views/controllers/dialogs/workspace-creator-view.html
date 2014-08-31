@@ -1,0 +1,46 @@
+<div>
+    <div class="modal-header">
+        <h4>
+            Create workspace
+        </h4>
+    </div>
+
+    <div class="modal-body">
+
+        <form ng-submit="createWorkspace(workspaceName, switchWorkspace)">
+
+            <div class="row clearfix">
+                <div class="col-md-12 column">
+
+                    <input class="form-control input-sm" type="text"
+                           ng-model="workspaceName" autofocus autocomplete="off">
+
+                <span class="pull-left" btn-checkbox ng-model="switchWorkspace"
+                      style="margin-top: 15px;cursor: pointer">
+                    <i class="fa"
+                       ng-class="{ 'fa-square-o' : !switchWorkspace, 'fa-check-square-o' : switchWorkspace }">
+                    </i>
+                    &nbsp;
+                    Switch workspace after create
+                </span>
+
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+    <div class="modal-footer ng-scope" style="margin-top: 0">
+        <span class="btn btn-primary" ng-click="createWorkspace(workspaceName, switchWorkspace)"
+              ng-class="{ 'disabled' : !workspaceName }">
+            <i class="fa fa-plus"></i>
+            &nbsp;
+            Create workspace
+        </span>
+        <span class="btn btn-warning" ng-click="cancel()">
+            <i class="fa fa-share"></i>
+            &nbsp;
+            Cancel
+        </span>
+    </div>
+</div>

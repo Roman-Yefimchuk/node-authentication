@@ -149,6 +149,17 @@ angular.module('application')
                     }, {
                         success: callback
                     });
+                },
+                createWorkspace: function (workspaceName, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: '/api/create-workspace',
+                        data: {
+                            workspaceName: workspaceName
+                        }
+                    }, {
+                        success: callback
+                    });
                 }
             };
         }

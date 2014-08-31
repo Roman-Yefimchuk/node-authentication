@@ -4,7 +4,12 @@
         <ul class="nav navbar-nav navbar-left">
             <li class="dropdown" is-open="workspaceDropdown.isOpen">
                 <a href class="dropdown-toggle" data-toggle="dropdown">
-                    <span>{{ currentWorkspace.name }}</span>
+                    <span>
+                    <span ng-show="user.defaultWorkspaceId == currentWorkspace.id">
+                        <i class="fa fa-home"></i>
+                    </span>
+                        {{ currentWorkspace.name }}
+                    </span>
                     <span class="caret"></span>
                 </a>
                 <ul class="dropdown-menu" role="menu">
@@ -13,14 +18,16 @@
                             <i class="fa" ng-class="{ 'fa-folder-open' : workspace == currentWorkspace,
                                                       'fa-folder' : workspace != currentWorkspace }">
                             </i>
+                            &nbsp;
                             {{ workspace.name }}
                         </a>
                     </li>
                     <li class="divider"></li>
                     <li>
-                        <a href ng-click="addWorkspace()">
+                        <a href ng-click="createWorkspace()">
                             <i class="fa fa-plus"></i>
-                            Add workspace
+                            &nbsp;
+                            Create workspace
                         </a>
                     </li>
                 </ul>
@@ -48,12 +55,14 @@
                         <li>
                             <a href="#/settings">
                                 <i class="fa fa-cog"></i>
+                                &nbsp;
                                 Settings
                             </a>
                         </li>
                         <li>
                             <a href="#/profile">
                                 <i class="fa fa-pencil-square-o"></i>
+                                &nbsp;
                                 Edit profile
                             </a>
                         </li>
@@ -61,6 +70,7 @@
                         <li>
                             <a href ng-click="logout()">
                                 <i class="fa fa-sign-out"></i>
+                                &nbsp;
                                 Logout
                             </a>
                         </li>
@@ -85,11 +95,14 @@
             <span title="Third party users" class="pull-left"
                   style="cursor: pointer"
                   ng-click="showUsers()">
-                {{ presentUsers.length }} <i class="fa fa-users"></i>
+                <i class="fa fa-users"></i>
+                &nbsp;
+                {{ presentUsers.length }}
             </span>
 
             <span ng-show="isOwnWorkspace" title="Own workspace">
                 <i class="fa fa-user"></i>
+                &nbsp;
             </span>
 
                 <span>

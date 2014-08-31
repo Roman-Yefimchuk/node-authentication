@@ -145,10 +145,17 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/add-workspace', function (request, response, resultCallback) {
+    serviceProvider.post('/api/create-workspace', function (request, response, resultCallback) {
         var userId = getUserId(request);
-        var name = request.body['name'];
-        resultCallback();
+        var workspaceName = request.body['workspaceName'];
+        dbProvider.createWorkspace(workspaceName, userId, function (workspace) {
+            resultCallback({
+                message: 'Created new workspace: ' + workspace.name,
+                data: {
+                    workspace: workspace
+                }
+            });
+        });
     });
 
     serviceProvider.get('/api/items/:workspaceId', function (request, response, resultCallback) {

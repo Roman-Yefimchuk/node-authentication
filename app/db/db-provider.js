@@ -91,7 +91,12 @@ module.exports = function (db, developmentMode) {
                     accessManager: true
                 }
             }).then(function (results) {
-                callback(workspaceId);
+                callback({
+                    id: workspaceId,
+                    name: workspace.name,
+                    creatorId: workspace.creatorId,
+                    createdDate: workspace.createdDate
+                });
             });
         });
     }
@@ -129,7 +134,7 @@ module.exports = function (db, developmentMode) {
         return result;
     }
 
-    function wrapAccountUser(userAccount) {
+    function wrapUserAccount(userAccount) {
         if (userAccount) {
             return {
                 userId: userAccount.userId,
@@ -167,7 +172,7 @@ module.exports = function (db, developmentMode) {
                         "WHERE @rid = " + extractId(userAccount), {
                         params: accountData
                     }).then(function (results) {
-                        successCallback(wrapAccountUser(userAccount));
+                        successCallback(wrapUserAccount(userAccount));
                     }).catch(function (error) {
                         failureCallback(error);
                     });
@@ -239,9 +244,10 @@ module.exports = function (db, developmentMode) {
                         var userId = userAccount.userId;
                         var workspaceName = userAccount.displayName + '[' + userAccount.authorizationProvider + ']';
 
-                        dbProvider.createDefaultWorkspace(workspaceName, userId, function (workspaceId) {
+                        dbProvider.createDefaultWorkspace(workspaceName, userId, function (workspace) {
+                            var workspaceId = workspace.id;
                             dbProvider.setUserWorkspaceId(userId, workspaceId, function () {
-                                successCallback(wrapAccountUser(userAccount));
+                                successCallback(wrapUserAccount(userAccount));
                             });
                         });
                     }).catch(function (error) {
@@ -268,7 +274,7 @@ module.exports = function (db, developmentMode) {
                 }
             }).then(function (results) {
                 if (results.length > 0) {
-                    successCallback(wrapAccountUser(results[0]));
+                    successCallback(wrapUserAccount(results[0]));
                 } else {
                     successCallback();
                 }

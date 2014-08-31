@@ -333,7 +333,7 @@ angular.module('application')
             };
 
             $scope.editTodo = function (todo) {
-                dialogsService.openItemEditor({
+                dialogsService.editItem({
                     item: todo,
                     editCallback: function (todo, callback) {
                         apiService.update(getWorkspaceId(), [todo], function () {
@@ -405,7 +405,7 @@ angular.module('application')
             };
 
             $scope.manageWorkspace = function () {
-                dialogsService.openWorkspaceManager({
+                dialogsService.manageWorkspace({
                     userId: $scope.user['userId'],
                     workspace: $scope.currentWorkspace,
                     socketConnection: $scope.socketConnection
@@ -420,7 +420,17 @@ angular.module('application')
                 return false;
             };
 
-            $scope.addWorkspace = function () {
+            $scope.createWorkspace = function () {
+                dialogsService.createWorkspace({
+                    workspaceId: getWorkspaceId(),
+                    createCallback: function (workspace, switchWorkspace, callback) {
+                        $scope.workspaces.push(workspace);
+                        if (switchWorkspace) {
+                            $scope.currentWorkspace = workspace;
+                        }
+                        callback();
+                    }
+                });
                 $scope.workspaceDropdown['isOpen'] = false;
             };
 

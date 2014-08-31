@@ -26,9 +26,11 @@ angular.module('application')
                 if (workspaces.length > 0) {
                     $scope.workspaces = workspaces;
                     $scope.currentWorkspace = workspaces[0];
-
-                    loaderService.hideLoader();
+                } else {
+                    $scope.errorMessage = 'System empty';
                 }
+
+                loaderService.hideLoader();
             });
 
             $scope.workspaceDropdown = {

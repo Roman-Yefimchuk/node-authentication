@@ -24,6 +24,10 @@
                 <ul class="dropdown-menu" role="menu">
                     <li>
                         <a href ng-repeat="workspace in workspaces" ng-click="chooseWorkspace(workspace)">
+                            <i class="fa" ng-class="{ 'fa-folder-open' : workspace == currentWorkspace,
+                                                      'fa-folder' : workspace != currentWorkspace }">
+                            </i>
+                            &nbsp;
                             {{ workspace.name }}
                         </a>
                     </li>
