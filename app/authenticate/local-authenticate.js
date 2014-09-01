@@ -25,7 +25,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
                     error: getError(error)
                 });
             } else {
-                if (info  instanceof Exception) {
+                if (info instanceof Exception) {
                     send(response, {
                         status: false,
                         error: info
