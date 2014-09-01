@@ -14,8 +14,9 @@ angular.module('application')
         'userService',
         'loaderService',
         'dialogsService',
+        'SOCKET_URL',
 
-        function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService) {
+        function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL) {
 
             $scope.workspaceDropdown = {
                 isOpen: false
@@ -66,6 +67,28 @@ angular.module('application')
                 }
             });
 
+            $scope.$watch('currentWorkspace', function (workspace) {
+                if (workspace) {
+                    var workspaceId = getWorkspaceId();
+
+                    apiService.setUserWorkspace(workspaceId, function (data) {
+
+                        var socketConnection = $scope.socketConnection;
+
+                        socketConnection.changedWorkspace(workspaceId);
+                        socketConnection.updatePresentUsers(workspaceId);
+
+                        $scope.permissions = data.permissions;
+                        $scope.isOwnWorkspace = data.isOwnWorkspace;
+
+                        apiService.items(workspaceId, function (items) {
+                            $scope.todos = items;
+                            $scope.loading = false;
+                        });
+                    });
+                }
+            });
+
             $scope.setViewMode = function (viewMode) {
                 $scope.currentViewMode = viewMode;
             };
@@ -76,49 +99,33 @@ angular.module('application')
 
             userService.getData({
                 success: function (user, externalNotification) {
+                    socketsService.openCollection({
+                        url: SOCKET_URL,
+                        userId: user.userId,
+                        workspaceId: user.workspaceId
+                    }, function (socketConnection) {
+                        $scope.socketConnection = socketConnection;
 
-                    var socketConnection = socketsService.openCollection('http://127.0.0.1:8080/', user.userId, user.workspaceId);
-                    $scope.socketConnection = socketConnection;
+                        subscribeForSocketEvent();
 
-                    subscribeForSocketEvent();
+                        apiService.getPermittedWorkspaces(function (workspaces) {
+                            $scope.workspaces = workspaces;
 
-                    apiService.getPermittedWorkspaces(function (workspaces) {
-                        $scope.workspaces = workspaces;
+                            $scope.currentWorkspace = _.findWhere(workspaces, {
+                                id: user.workspaceId
+                            });
 
-                        $scope.$watch('currentWorkspace', function (workspace) {
-                            if (workspace) {
-                                var workspaceId = getWorkspaceId();
+                            $scope.user = user;
 
-                                apiService.setUserWorkspace(workspaceId, function (data) {
+                            loaderService.hideLoader();
 
-                                    socketConnection.changedWorkspace(workspaceId);
-                                    socketConnection.updatePresentUsers(workspaceId);
-
-                                    $scope.permissions = data.permissions;
-                                    $scope.isOwnWorkspace = data.isOwnWorkspace;
-
-                                    apiService.items(workspaceId, function (items) {
-                                        $scope.todos = items;
-                                        $scope.loading = false;
-                                    });
-                                });
+                            if (externalNotification) {
+                                notificationsService.notify(externalNotification.message, externalNotification.type);
                             }
-                        });
 
-                        $scope.currentWorkspace = _.findWhere(workspaces, {
-                            id: user.workspaceId
-                        });
-
-                        $scope.user = user;
-
-                        loaderService.hideLoader();
-
-                        if (externalNotification) {
-                            notificationsService.notify(externalNotification.message, externalNotification.type);
-                        }
-
-                        notificationsService.info("Hello @{userName}!", {
-                            userName: user.displayName
+                            notificationsService.info("Hello @{userName}!", {
+                                userName: user.displayName
+                            });
                         });
                     });
                 },
