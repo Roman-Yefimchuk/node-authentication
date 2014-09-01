@@ -24,7 +24,7 @@
                     </li>
                     <li class="divider"></li>
                     <li>
-                        <a href ng-click="createWorkspace()">
+                        <a href ng-click="showWorkspaceCreator()">
                             <i class="fa fa-plus"></i>
                             &nbsp;
                             Create workspace
@@ -94,7 +94,7 @@
 
             <span title="Third party users" class="pull-left"
                   style="cursor: pointer"
-                  ng-click="showUsers()">
+                  ng-click="showPresentUsers()">
                 <i class="fa fa-users"></i>
                 &nbsp;
                 {{ presentUsers.length }}
@@ -111,7 +111,7 @@
 
                 <span title="Manage workspace" class="pull-right"
                       style="cursor: pointer"
-                      ng-click="manageWorkspace()"
+                      ng-click="showWorkspaceManager()"
                       ng-show="canManageAccess()">
 
                     <i class="fa fa-cogs"></i>
@@ -172,7 +172,7 @@
                                         </span>
 
                                                     <span class="btn btn-primary btn-xs" title="Edit"
-                                                          ng-click="editTodo(todo)"
+                                                          ng-click="showItemEditor(todo)"
                                                           ng-show="canManageCollection()">
                                                         <i class="fa fa-pencil"></i>
                                                     </span>

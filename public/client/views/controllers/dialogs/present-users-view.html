@@ -1,0 +1,28 @@
+<div>
+    <div class="modal-header">
+        <h4>
+            Here <span>{{ presentUsers.length }}</span> user(s)
+        </h4>
+    </div>
+    <div class="modal-body">
+
+        <div class="list-group" style="margin: 0;max-height: 400px;overflow-y: auto;">
+            <a ng-repeat="user in presentUsers"
+               href class="list-group-item">
+                User ID: <b>{{ user.id }}</b>
+                <br>
+                User name: <b>{{ user.displayName }}</b>
+                <br>
+                Registered date: <b>{{ user.registeredDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}</b>
+            </a>
+        </div>
+
+    </div>
+    <div class="modal-footer ng-scope" style="margin-top: 0">
+        <a class="btn btn-success" ng-click="cancel()" href>
+            <i class="fa fa-check"></i>
+            &nbsp;
+            OK
+        </a>
+    </div>
+</div>

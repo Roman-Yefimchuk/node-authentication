@@ -8,11 +8,10 @@ angular.module('application')
 
         function ($modal) {
             return {
-                manageWorkspace: function (options) {
+                showWorkspaceManager: function (options) {
                     return $modal.open({
                         templateUrl: '/client/views/controllers/dialogs/workspace-manager-view.html',
                         controller: 'WorkspaceManagerController',
-                        /*                        size: 'lg',*/
                         resolve: {
                             options: function () {
                                 return options;
@@ -20,7 +19,7 @@ angular.module('application')
                         }
                     });
                 },
-                editItem: function (options) {
+                showItemEditor: function (options) {
                     return $modal.open({
                         templateUrl: '/client/views/controllers/dialogs/item-editor-view.html',
                         controller: 'ItemEditorController',
@@ -31,10 +30,21 @@ angular.module('application')
                         }
                     });
                 },
-                createWorkspace: function (options) {
+                showWorkspaceCreator: function (options) {
                     return $modal.open({
                         templateUrl: '/client/views/controllers/dialogs/workspace-creator-view.html',
                         controller: 'WorkspaceCreatorController',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
+                },
+                showPresentUsers: function (options) {
+                    return $modal.open({
+                        templateUrl: '/client/views/controllers/dialogs/present-users-view.html',
+                        controller: 'PresentUsersController',
                         resolve: {
                             options: function () {
                                 return options;
