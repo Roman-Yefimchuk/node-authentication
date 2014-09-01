@@ -18,12 +18,24 @@ angular.module('application')
 
         function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL) {
 
+            $scope.currentWorkspace = undefined;
+            $scope.loading = true;
+            $scope.currentViewMode = _.find($scope.viewModes, function (viewMode) {
+                return viewMode.name == 'all';
+            });
+            $scope.todos = [];
+            $scope.newTodo = '';
+            $scope.presentUsers = [];
+            $scope.workspaces = [];
+            $scope.user = {};
             $scope.workspaceDropdown = {
                 isOpen: false
             };
-
-            $scope.loading = true;
-
+            $scope.permissions = {
+                readOnly: false,
+                collectionManager: false,
+                accessManager: false
+            };
             $scope.viewModes = [
                 {
                     title: 'All',
@@ -38,10 +50,6 @@ angular.module('application')
                     name: 'completed'
                 }
             ];
-
-            $scope.currentViewMode = _.find($scope.viewModes, function (viewMode) {
-                return viewMode.name == 'all';
-            });
 
             $scope.$watch('currentViewMode', function (viewMode) {
                 switch (viewMode.name) {
@@ -89,11 +97,15 @@ angular.module('application')
                 }
             });
 
-            $scope.setViewMode = function (viewMode) {
-                $scope.currentViewMode = viewMode;
-            };
+            $scope.$watch('todos', function () {
 
-            $scope.user = {};
+                $scope.remainingCount = filterFilter($scope.todos, {
+                    completed: false
+                }).length;
+
+                $scope.doneCount = $scope.todos.length - $scope.remainingCount;
+                $scope.allChecked = !$scope.remainingCount;
+            }, true);
 
             loaderService.showLoader();
 
@@ -135,53 +147,13 @@ angular.module('application')
                 }
             });
 
-            function getWorkspaceId() {
-                return $scope.currentWorkspace['id'];
-            }
-
-            function changeNotification(userId, messageBuilder, type) {
-                if (!type) {
-                    type = 'info';
-                }
-
-                apiService.getUser(userId, function (user) {
-                    var userName = user.displayName;
-
-                    var message = messageBuilder(userName);
-                    notificationsService.notify(message, type);
-                });
-            }
-
-            function permissionsChangeNotification(userId, workspaceId, messageBuilder, type) {
-                if (!type) {
-                    type = 'info';
-                }
-
-                apiService.getUser(userId, function (user) {
-                    var userName = user.displayName;
-
-                    apiService.getWorkspace(workspaceId, function (workspace) {
-                        var workspaceName = workspace.name;
-
-                        var message = messageBuilder(userName, workspaceName);
-                        notificationsService.notify(message, type);
-                    });
-                });
-            }
-
-            $scope.workspaces = [];
-            $scope.currentWorkspace = undefined;
+            $scope.setViewMode = function (viewMode) {
+                $scope.currentViewMode = viewMode;
+            };
 
             $scope.setWorkspace = function (workspace) {
                 $scope.currentWorkspace = workspace;
                 $scope.workspaceDropdown['isOpen'] = false;
-            };
-
-            $scope.presentUsers = [];
-            $scope.permissions = {
-                readOnly: false,
-                collectionManager: false,
-                accessManager: false
             };
 
             $scope.updatePermissions = function (userId, workspaceId, permissions) {
@@ -257,19 +229,6 @@ angular.module('application')
                 var permissions = $scope.permissions;
                 return permissions.accessManager;
             };
-
-            $scope.todos = [];
-            $scope.newTodo = '';
-
-            $scope.$watch('todos', function () {
-
-                $scope.remainingCount = filterFilter($scope.todos, {
-                    completed: false
-                }).length;
-
-                $scope.doneCount = $scope.todos.length - $scope.remainingCount;
-                $scope.allChecked = !$scope.remainingCount;
-            }, true);
 
             $scope.addedItem = function (userId, item) {
                 changeNotification(userId, function (userName) {
@@ -448,6 +407,40 @@ angular.module('application')
                     $location.path('/logout');
                 });
             };
+
+            function getWorkspaceId() {
+                return $scope.currentWorkspace['id'];
+            }
+
+            function changeNotification(userId, messageBuilder, type) {
+                if (!type) {
+                    type = 'info';
+                }
+
+                apiService.getUser(userId, function (user) {
+                    var userName = user.displayName;
+
+                    var message = messageBuilder(userName);
+                    notificationsService.notify(message, type);
+                });
+            }
+
+            function permissionsChangeNotification(userId, workspaceId, messageBuilder, type) {
+                if (!type) {
+                    type = 'info';
+                }
+
+                apiService.getUser(userId, function (user) {
+                    var userName = user.displayName;
+
+                    apiService.getWorkspace(workspaceId, function (workspace) {
+                        var workspaceName = workspace.name;
+
+                        var message = messageBuilder(userName, workspaceName);
+                        notificationsService.notify(message, type);
+                    });
+                });
+            }
 
             function subscribeForSocketEvent() {
                 $scope.$on('socketsService:userConnected', function (event, data) {
