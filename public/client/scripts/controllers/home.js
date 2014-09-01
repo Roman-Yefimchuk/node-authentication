@@ -21,9 +21,6 @@ angular.module('application')
             $scope.errorMessage = null;
             $scope.currentWorkspace = undefined;
             $scope.loading = true;
-            $scope.currentViewMode = _.find($scope.viewModes, function (viewMode) {
-                return viewMode.name == 'all';
-            });
             $scope.todos = [];
             $scope.newTodo = '';
             $scope.presentUsers = [];
@@ -40,17 +37,23 @@ angular.module('application')
             $scope.viewModes = [
                 {
                     title: 'All',
-                    name: 'all'
+                    name: 'all',
+                    icon: 'fa-book'
                 },
                 {
                     title: 'Active',
-                    name: 'active'
+                    name: 'active',
+                    icon: 'fa-exclamation'
                 },
                 {
                     title: 'Completed',
-                    name: 'completed'
+                    name: 'completed',
+                    icon: 'fa-flag'
                 }
             ];
+            $scope.currentViewMode = _.find($scope.viewModes, function (viewMode) {
+                return viewMode.name == 'all';
+            });
 
             $scope.$watch('currentViewMode', function (viewMode) {
                 switch (viewMode.name) {

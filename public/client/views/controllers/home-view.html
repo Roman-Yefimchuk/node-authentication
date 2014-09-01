@@ -131,9 +131,10 @@
                 <div class="input-group task-add">
                     <input class="form-control input-sm" type="text" placeholder="What needs to be done?"
                            ng-model="newTodo" autofocus autocomplete="off">
-                    <span class="btn btn-success btn-sm input-group-addon" href
+                    <span class="btn btn-success btn-sm input-group-addon"
                           ng-click="addTodo()">
                         <i class="fa fa-plus"></i>
+                        &nbsp;
                         Add task
                     </span>
                 </div>
@@ -215,32 +216,38 @@
                 <div class="add-task-row">
 
                     <div class="row clearfix">
-                        <div class="col-md-4 column">
+                        <div class="col-md-3 column">
                             <span class="btn btn-primary btn-sm pull-left"
                                   ng-model="allChecked" ng-click="markAll(!allChecked)"
                                   ng-class="{ 'disabled' : !todos.length }"
                                   ng-show="canManageCollection()"
                                   btn-checkbox>
+                                <i class="fa fa-check"></i>
+                                &nbsp;
                                 Select all
                             </span>
                         </div>
 
-                        <div class="col-md-4 column text-center">
+                        <div class="col-md-6 column text-center">
                             <div class="btn-group">
                                 <label ng-repeat="viewMode in viewModes"
                                        class="btn btn-success btn-sm"
                                        ng-model="currentViewMode"
                                        ng-click="setViewMode(viewMode)"
                                        btn-radio="viewMode">
+                                    <i class="fa {{ viewMode.icon }}"></i>
+                                    &nbsp;
                                     {{ viewMode.title }}
                                 </label>
                             </div>
                         </div>
 
-                        <div class="col-md-4 column">
+                        <div class="col-md-3 column">
                             <span class="btn btn-danger btn-sm pull-right"
                                   ng-show="remainingCount < todos.length && canManageCollection()"
                                   ng-click="clearDoneTodos()">
+                                <i class="fa fa-trash-o"></i>
+                                &nbsp;
                                 Clear completed ({{ todos.length - remainingCount }})
                             </span>
                         </div>
