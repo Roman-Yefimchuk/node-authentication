@@ -88,6 +88,12 @@
 
     <div class="col-md-8 column">
 
+        <div ng-show="errorMessage != null">
+            <alert type="danger" close="errorMessage = null" class="text-center">
+                {{ errorMessage }}
+            </alert>
+        </div>
+
         <section class="panel tasks-widget">
             <header class="panel-heading text-center"
                     ng-class="{'header' : canManageCollection(), 'header-min' : !canManageCollection()}">

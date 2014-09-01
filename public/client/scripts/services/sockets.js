@@ -73,7 +73,7 @@ angular.module('application')
                     if (isConnected) {
                         callback(socketConnection);
                     } else {
-                        socket = io.connect(url, {
+                        socket = io(url, {
                             'force new connection': true
                         });
 
@@ -117,6 +117,10 @@ angular.module('application')
                                 closeConnection();
                                 $rootScope.$broadcast('socketsService:disconnect', data);
                             }
+                        });
+
+                        socket.on('error', function (error) {
+                            $rootScope.$broadcast('socketsService:error', error);
                         });
                     }
                 },

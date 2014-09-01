@@ -18,6 +18,7 @@ angular.module('application')
 
         function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL) {
 
+            $scope.errorMessage = null;
             $scope.currentWorkspace = undefined;
             $scope.loading = true;
             $scope.currentViewMode = _.find($scope.viewModes, function (viewMode) {
@@ -111,6 +112,12 @@ angular.module('application')
 
             userService.getData({
                 success: function (user, externalNotification) {
+
+                    $scope.$on('socketsService:error', function (event, error) {
+                        $scope.errorMessage = 'Connection problem with socket';
+                        loaderService.hideLoader();
+                    });
+
                     socketsService.openCollection({
                         url: SOCKET_URL,
                         userId: user.userId,
