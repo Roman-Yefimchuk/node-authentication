@@ -81,6 +81,9 @@ angular.module('application')
                                 scope.activeNode = this;
                                 treeScope.$emit('treeView:select', this);
                             },
+                            setActive: function () {
+                                scope.activeNode = this;
+                            },
                             isActive: function () {
                                 return scope.activeNode == this;
                             },
@@ -112,7 +115,7 @@ angular.module('application')
                                 var children = item.children;
                                 children.push(childItem);
 
-                                makeTreeNodes(nodeScope, [childItem], childTreeNode, node);
+                                return makeTreeNodes(nodeScope, [childItem], childTreeNode, node)[0];
                             },
                             update: function (name) {
                                 this.item['name'] = name;
@@ -150,6 +153,9 @@ angular.module('application')
                     }
 
                     function makeTreeNodes(scope, data, element, parentNode) {
+
+                        var result = [];
+
                         _.forEach(data, function (item) {
 
                             var children = item.children;
@@ -189,10 +195,14 @@ angular.module('application')
 
                             $compile(treeNode)(nodeScope);
 
+                            result.push(nodeScope.node);
+
                             makeTreeNodes(nodeScope, children, treeNode.find("[child]"), nodeScope.node);
 
                             element.append(treeNode);
                         });
+
+                        return result;
                     }
                 }
             };
