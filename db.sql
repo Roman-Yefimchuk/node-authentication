@@ -26,6 +26,7 @@ CREATE CLASS Workspace
 CREATE PROPERTY Workspace.name STRING
 CREATE PROPERTY Workspace.creatorId STRING
 CREATE PROPERTY Workspace.createdDate LONG
+CREATE PROPERTY Workspace.parentId STRING
 
 CREATE CLASS OwnWorkspace
 CREATE PROPERTY OwnWorkspace.userId STRING 
