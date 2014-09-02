@@ -18,15 +18,6 @@ angular.module('application')
 
         function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL) {
 
-            $scope.treeModel = [
-                {
-                    id: 0,
-                    name: 'ROOT',
-                    level: 0,
-                    children: []
-                }
-            ];
-
             $scope.errorMessage = null;
             $scope.currentWorkspace = undefined;
             $scope.loading = true;
