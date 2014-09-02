@@ -16,12 +16,12 @@ angular.module('application')
                 controller: function ($scope) {
                     $scope.$on('treeView:select', function (event, node) {
                         if ($scope.onItemSelect) {
-                            $scope.onItemSelect()(node['item']);
+                            $scope.onItemSelect()(node);
                         }
                     });
                     $scope.$on('treeView:remove', function (event, node) {
                         if ($scope.onItemRemove) {
-                            $scope.onItemRemove()(node['item']);
+                            $scope.onItemRemove()(node);
                         }
                     });
                 },
