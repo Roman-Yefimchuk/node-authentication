@@ -646,7 +646,7 @@ module.exports = function (db, developmentMode) {
 
                 if (isAccessGranted) {
                     db.query("" +
-                        "SELECT readOnly, collectionManager, accessManager " +
+                        "SELECT COUNT(*) AS count " +
                         "FROM PermittedWorkspace " +
                         "WHERE userId = :userId AND workspaceId = :workspaceId", {
                         params: {
@@ -654,7 +654,7 @@ module.exports = function (db, developmentMode) {
                             workspaceId: workspaceId
                         }
                     }).then(function (results) {
-                        if (results.length > 0) {
+                        if (results[0].count > 0) {
                             db.query("" +
                                 "UPDATE PermittedWorkspace " +
                                 "SET readOnly = :readOnly, collectionManager = :collectionManager, accessManager = :accessManager " +
