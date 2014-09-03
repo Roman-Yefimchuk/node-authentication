@@ -12,7 +12,8 @@ angular.module('application')
                 transclude: true,
                 scope: {
                     treeModel: '=',
-                    onSelection: '&'
+                    onSelection: '&',
+                    onToggle: '&'
                 },
                 controller: function ($scope) {
                 },
@@ -73,7 +74,7 @@ angular.module('application')
 
                         var node = {
                             item: item,
-                            open: false,
+                            expanded: false,
                             level: level,
                             parentNode: parentNode,
                             onSelection: function ($event) {
@@ -99,7 +100,15 @@ angular.module('application')
                                 return !this.item['children'].length;
                             },
                             toggle: function ($event) {
-                                this.open = !this.open;
+                                this.expanded = !this.expanded;
+
+                                if (scope.onToggle) {
+                                    scope.onToggle({
+                                        node: this,
+                                        expanded: this.expanded
+                                    });
+                                }
+
                                 $event.stopPropagation();
                             },
                             insert: function (data) {
@@ -126,7 +135,7 @@ angular.module('application')
                                     children = _.without(children, item);
 
                                     parentNode.item['children'] = children;
-                                    parentNode.open = children.length > 0;
+                                    parentNode.expanded = children.length > 0;
 
                                     var activeNode = scope.activeNode;
 
@@ -170,20 +179,20 @@ angular.module('application')
                             var template = '' +
                                 '<li style="display: table;">' +
                                 '     <span>' +
-                                '         <i ng-show="!node.isEmpty()" class="fa" style="cursor: pointer" ' +
-                                '            ng-class="{ \'fa-minus-square-o\' : node.open, \'fa-plus-square-o\' : !node.open }"' +
+                                '         <a href="javascript:void(0)"><i ng-show="!node.isEmpty()" class="fa" style="cursor: pointer" ' +
+                                '            ng-class="{ \'fa-minus-square-o\' : node.expanded, \'fa-plus-square-o\' : !node.expanded }"' +
                                 '            ng-click="node.toggle($event)">' +
-                                '         </i><i ng-show="node.isEmpty()" class="fa fa-minus-square-o" ' +
+                                '         </i></a><i ng-show="node.isEmpty()" class="fa fa-minus-square-o" ' +
                                 '            style="color: rgba(255, 255, 255, 0)">' +
                                 '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
-                                '            ng-class="{ \'fa-folder-open\' : node.open, \'fa-folder\' : !node.open }">' +
+                                '            ng-class="{ \'fa-folder-open\' : node.expanded, \'fa-folder\' : !node.expanded }">' +
                                 '         </i>' +
                                 '         <a style="cursor: pointer" ng-click="node.onSelection($event)" class="active"' +
                                 '               ng-class="{ \'bold-fond\' : node.isActive() }" href>' +
                                 '             {{ node.item["name"] }}' +
                                 '         </a>&nbsp;<i class="fa fa-times" style="cursor: pointer"  ng-click="node.remove()"></i>' +
                                 '     </span>' +
-                                '     <ul style="padding-left: 15px" child ng-show="node.open">' +
+                                '     <ul style="padding-left: 15px" child ng-show="node.expanded">' +
                                 '     </ul>' +
                                 '</li>';
 
