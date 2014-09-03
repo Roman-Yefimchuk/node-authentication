@@ -18,6 +18,41 @@ angular.module('application')
 
         function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL) {
 
+            {
+                var randomString = ((function () {
+                    var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
+
+                    return function (length) {
+                        if (!length) {
+                            length = 16;
+                        }
+
+                        var result = '';
+                        for (var index = 0; index < length; index++) {
+                            var charIndex = Math.floor(Math.random() * chars.length);
+                            result += chars[charIndex];
+                        }
+                        return result;
+                    }
+                })());
+
+                $scope.treeModel = [
+                    {
+                        name: 'ROOT',
+                        id: randomString(),
+                        children: []
+                    }
+                ];
+
+                $scope.onTreeItemClick = function (node) {
+                    console.log(node.insert({
+                        name: randomString(),
+                        id: randomString(),
+                        children: []
+                    }));
+                };
+            }
+
             $scope.errorMessage = null;
             $scope.currentWorkspace = undefined;
             $scope.loading = true;

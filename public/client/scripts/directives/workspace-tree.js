@@ -5,51 +5,63 @@ angular.module('application')
     .directive('workspaceTree', [
 
         '$compile',
+        '$log',
 
-        function ($compile) {
+        function ($compile, $log) {
             return {
                 scope: {
                     treeModel: '=',
-                    onItemSelect: '&',
-                    onItemRemove: '&'
+                    onItemClick: '&',
+                    searchAction: '='
                 },
                 controller: function ($scope) {
-                    $scope.$on('treeView:select', function (event, node) {
-                        if ($scope.onItemSelect) {
-                            $scope.onItemSelect()(node);
+                    $scope.$on('treeView:click', function (event, node) {
+                        if ($scope.onItemClick) {
+                            $scope.onItemClick()(node);
                         }
                     });
-                    $scope.$on('treeView:remove', function (event, node) {
-                        if ($scope.onItemRemove) {
-                            $scope.onItemRemove()(node);
+                    $scope.$watch('searchAction', function (searchAction) {
+                        if (searchAction) {
+                            searchAction.on('tree:search', function (id) {
+                                searchAction.emit('tree:searchResult', [
+                                    []
+                                ]);
+                            });
                         }
                     });
                 },
-                link: function (scope, element, attrs) {
+                link: function (scope, element, attr) {
 
                     scope.activeNode = null;
 
-                    var randomString = ((function () {
-                        var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
+                    var global = {};
+                    var gcCounter = 0;
 
-                        return function (length) {
-                            if (!length) {
-                                length = 16;
-                            }
+                    function removeFromGlobal(id) {
+                        global[id] = null;
+                        if (++gcCounter == 10) {
 
-                            var result = '';
-                            for (var index = 0; index < length; index++) {
-                                var charIndex = Math.floor(Math.random() * chars.length);
-                                result += chars[charIndex];
-                            }
-                            return result;
+                            var result = {};
+                            _.forEach(global, function (node) {
+                                if (node) {
+                                    result[node.item['id']] = node;
+                                }
+                            });
+
+                            global = result;
+                            gcCounter = 0;
+
+                            $log.debug('Compacted');
+                            $log.debug(global);
+                            $log.debug('----------------------');
                         }
-                    })());
+                    }
 
                     function getTreeScope() {
                         var treeScope = scope.$new(scope);
                         treeScope.$on('$destroy', function (event) {
-                            console.log('tree view destroyed');
+                            global = {};
+                            $log.debug('WorkspaceTree destroyed');
                         });
 
                         return treeScope;
@@ -70,16 +82,17 @@ angular.module('application')
                         }
                     });
 
-                    function getNode(nodeScope, item, treeNode, parentNode) {
+                    function getNode(nodeScope, item, treeNode, parentNode, level) {
                         var childTreeNode = treeNode.find("[child]");
 
                         var node = {
                             item: item,
                             open: false,
+                            level: level,
                             parentNode: parentNode,
                             onClick: function () {
                                 scope.activeNode = this;
-                                treeScope.$emit('treeView:select', this);
+                                treeScope.$emit('treeView:click', this);
                             },
                             setActive: function () {
                                 scope.activeNode = this;
@@ -94,28 +107,18 @@ angular.module('application')
                                 this.open = !this.open;
                             },
                             insert: function (data) {
-
-                                if (!data) {
-                                    data = {
-                                        id: randomString(),
-                                        name: randomString(),
-                                        childrenQuantity: 10,
-                                        children: []
+                                if (data) {
+                                    var childItem = {
+                                        id: data.id,
+                                        name: data.name,
+                                        children: data.children || []
                                     };
+
+                                    var children = item.children;
+                                    children.push(childItem);
+
+                                    return makeTreeNodes(nodeScope, [childItem], childTreeNode, node, level + 1)[0];
                                 }
-
-                                var childItem = {
-                                    id: data.id,
-                                    name: data.name,
-                                    childrenQuantity: data.childrenQuantity,
-                                    level: item.level + 1,
-                                    children: data.children || []
-                                };
-
-                                var children = item.children;
-                                children.push(childItem);
-
-                                return makeTreeNodes(nodeScope, [childItem], childTreeNode, node)[0];
                             },
                             update: function (name) {
                                 this.item['name'] = name;
@@ -134,25 +137,33 @@ angular.module('application')
                                     if (activeNode == node) {
                                         scope.activeNode = parentNode;
                                     } else {
-                                        if (activeNode && node.item['level'] < activeNode.item['level']) {
+                                        if (activeNode && node.level < activeNode.level) {
                                             scope.activeNode = parentNode;
                                         }
                                     }
                                 } else {
                                     scope.activeNode = null;
                                 }
-
-                                treeScope.$emit('treeView:remove', this);
-
                                 treeNode.remove();
                                 nodeScope.$destroy();
                             }
                         };
 
+                        if (global[item.id]) {
+                            $log.debug('Duplicated ID: ' + item.id);
+                            $log.debug('Item:');
+                            $log.debug(item);
+                            $log.debug('-----------------------------');
+                        }
+
+                        global[item.id] = node;
+
                         return node;
                     }
 
-                    function makeTreeNodes(scope, data, element, parentNode) {
+                    function makeTreeNodes(scope, data, element, parentNode, level) {
+
+                        level = level || 0;
 
                         var result = [];
 
@@ -160,7 +171,7 @@ angular.module('application')
 
                             var children = item.children;
 
-                            var template = ('' +
+                            var template = '' +
                                 '<li style="display: table;">' +
                                 '     <span>' +
                                 '         <i ng-show="!node.isEmpty()" class="fa" style="cursor: pointer" ' +
@@ -174,12 +185,11 @@ angular.module('application')
                                 '         <a style="cursor: pointer" ng-click="node.onClick()" class="active"' +
                                 '               ng-class="{ \'bold-fond\' : node.isActive() }" href>' +
                                 '             {{ node.item["name"] }}' +
-                                '         </a>&nbsp;<i class="fa fa-plus" style="cursor: pointer" ng-click="node.insert()"></i>&nbsp;<i class="fa fa-times" style="cursor: pointer"  ng-click="node.remove()"></i>' +
+                                '         </a>&nbsp;<i class="fa fa-times" style="cursor: pointer"  ng-click="node.remove()"></i>' +
                                 '     </span>' +
                                 '     <ul style="padding-left: 15px" child ng-show="node.open">' +
                                 '     </ul>' +
-                                '</li>' +
-                                '');
+                                '</li>';
 
                             var treeNode = angular.element(template);
 
@@ -187,17 +197,18 @@ angular.module('application')
                                 var nodeScope = scope.$new(scope);
 
                                 nodeScope.$on('$destroy', function (event) {
-                                    console.log(nodeScope.node.item.name + ' destroyed');
+                                    removeFromGlobal(item.id);
+                                    $log.debug(nodeScope.node.item.name + ' destroyed');
                                 });
 
-                                nodeScope.node = getNode(nodeScope, item, treeNode, parentNode);
+                                nodeScope.node = getNode(nodeScope, item, treeNode, parentNode, level);
                             }
 
                             $compile(treeNode)(nodeScope);
 
                             result.push(nodeScope.node);
 
-                            makeTreeNodes(nodeScope, children, treeNode.find("[child]"), nodeScope.node);
+                            makeTreeNodes(nodeScope, children, treeNode.find("[child]"), nodeScope.node, level + 1);
 
                             element.append(treeNode);
                         });
