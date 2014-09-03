@@ -9,26 +9,12 @@ angular.module('application')
 
         function ($compile, $log) {
             return {
+                transclude: true,
                 scope: {
                     treeModel: '=',
-                    onItemClick: '&',
-                    searchAction: '='
+                    onSelection: '&'
                 },
                 controller: function ($scope) {
-                    $scope.$on('treeView:click', function (event, node) {
-                        if ($scope.onItemClick) {
-                            $scope.onItemClick()(node);
-                        }
-                    });
-                    $scope.$watch('searchAction', function (searchAction) {
-                        if (searchAction) {
-                            searchAction.on('tree:search', function (id) {
-                                searchAction.emit('tree:searchResult', [
-                                    []
-                                ]);
-                            });
-                        }
-                    });
                 },
                 link: function (scope, element, attr) {
 
@@ -90,9 +76,18 @@ angular.module('application')
                             open: false,
                             level: level,
                             parentNode: parentNode,
-                            onClick: function () {
+                            onSelection: function ($event) {
+
+                                if (scope.activeNode != this) {
+                                    if (scope.onSelection) {
+                                        scope.onSelection({
+                                            node: this
+                                        });
+                                    }
+                                }
+
                                 scope.activeNode = this;
-                                treeScope.$emit('treeView:click', this);
+                                $event.stopPropagation();
                             },
                             setActive: function () {
                                 scope.activeNode = this;
@@ -103,8 +98,9 @@ angular.module('application')
                             isEmpty: function () {
                                 return !this.item['children'].length;
                             },
-                            toggle: function () {
+                            toggle: function ($event) {
                                 this.open = !this.open;
+                                $event.stopPropagation();
                             },
                             insert: function (data) {
                                 if (data) {
@@ -176,13 +172,13 @@ angular.module('application')
                                 '     <span>' +
                                 '         <i ng-show="!node.isEmpty()" class="fa" style="cursor: pointer" ' +
                                 '            ng-class="{ \'fa-minus-square-o\' : node.open, \'fa-plus-square-o\' : !node.open }"' +
-                                '            ng-click="node.toggle()">' +
+                                '            ng-click="node.toggle($event)">' +
                                 '         </i><i ng-show="node.isEmpty()" class="fa fa-minus-square-o" ' +
                                 '            style="color: rgba(255, 255, 255, 0)">' +
                                 '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
                                 '            ng-class="{ \'fa-folder-open\' : node.open, \'fa-folder\' : !node.open }">' +
                                 '         </i>' +
-                                '         <a style="cursor: pointer" ng-click="node.onClick()" class="active"' +
+                                '         <a style="cursor: pointer" ng-click="node.onSelection($event)" class="active"' +
                                 '               ng-class="{ \'bold-fond\' : node.isActive() }" href>' +
                                 '             {{ node.item["name"] }}' +
                                 '         </a>&nbsp;<i class="fa fa-times" style="cursor: pointer"  ng-click="node.remove()"></i>' +

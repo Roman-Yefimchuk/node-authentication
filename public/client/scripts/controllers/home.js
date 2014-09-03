@@ -44,7 +44,7 @@ angular.module('application')
                     }
                 ];
 
-                $scope.onTreeItemClick = function (node) {
+                $scope.onTreeItemSelection = function (node) {
                     console.log(node.insert({
                         name: randomString(),
                         id: randomString(),
