@@ -150,17 +150,12 @@ angular.module('application')
 
                             $scope.workspaces = workspaces;
 
-                            $scope.currentWorkspace = _.findWhere(workspaces, {
-                                id: user.workspaceId
-                            });
-
                             $scope.user = user;
 
                             $scope.$on('workspaceTree:ready', function () {
                                 $rootScope.$broadcast('workspaceTree:search', user.workspaceId, function (node) {
                                     if (node) {
                                         updateActiveNode(node);
-                                        node.setActive();
                                     }
 
                                     loaderService.hideLoader();
@@ -185,7 +180,6 @@ angular.module('application')
 
             $scope.onWorkspaceChanged = function (node) {
                 updateActiveNode(node);
-                $scope.currentWorkspace = node.item['workspace'];
                 $scope.workspaceDropdown['isOpen'] = false;
             };
 
@@ -206,11 +200,6 @@ angular.module('application')
 
             $scope.setViewMode = function (viewMode) {
                 $scope.currentViewMode = viewMode;
-            };
-
-            $scope.setWorkspace = function (workspace) {
-                $scope.currentWorkspace = workspace;
-                $scope.workspaceDropdown['isOpen'] = false;
             };
 
             $scope.updatePermissions = function (userId, workspaceId, permissions) {
@@ -241,8 +230,10 @@ angular.module('application')
                     });
 
                     if (getWorkspaceId() == workspaceId) {
-                        $scope.currentWorkspace = _.findWhere($scope.workspaces, {
-                            id: $scope.user['defaultWorkspaceId']
+                        $rootScope.$broadcast('workspaceTree:search', $scope.user['defaultWorkspaceId'], function (node) {
+                            if (node) {
+                                updateActiveNode(node);
+                            }
                         });
                     }
 
@@ -458,9 +449,7 @@ angular.module('application')
                             children: []
                         });
                         if (switchWorkspace) {
-                            node.setActive();
                             updateActiveNode(node);
-                            $scope.currentWorkspace = workspace;
                         }
                         callback();
                     }
@@ -477,6 +466,8 @@ angular.module('application')
             function updateActiveNode(node) {
                 $scope.activeNode = node;
                 $scope.breadcrumb = getBreadcrumb();
+                $scope.currentWorkspace = node.item['workspace'];
+                node.setActive();
             }
 
             function getBreadcrumb() {
@@ -489,9 +480,7 @@ angular.module('application')
                         return {
                             title: node.item['name'],
                             click: function () {
-                                node.setActive();
                                 updateActiveNode(node);
-                                $scope.currentWorkspace = node.item['workspace'];
                             }
                         };
                     };

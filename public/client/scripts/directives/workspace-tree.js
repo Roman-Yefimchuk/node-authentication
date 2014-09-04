@@ -17,12 +17,14 @@ angular.module('application')
                     onLoading: '&',
                     onToggle: '&'
                 },
-                controller: function ($scope) {
-                },
                 link: function (scope, element, attr) {
 
                     scope.$on('workspaceTree:search', function (event, id, callback) {
-                        callback(global[id]);
+                        if (typeof callback == 'function') {
+                            callback(global[id]);
+                        } else {
+                            $log.debug('callback is not function');
+                        }
                     });
 
                     scope.activeNode = null;
@@ -115,13 +117,9 @@ angular.module('application')
                             isEmpty: function () {
                                 var item = this.item;
                                 if (isLoaded) {
-                                    return !item['children'].length;
+                                    return !item.children['length'];
                                 } else {
-                                    if (item.childrenCount == undefined) {
-                                        return !item['children'].length;
-                                    } else {
-                                        return !item.childrenCount;
-                                    }
+                                    return !(item.childrenCount || item.children['length']);
                                 }
                             },
                             toggle: function ($event) {
@@ -173,8 +171,8 @@ angular.module('application')
                                     return makeTreeNodes(nodeScope, [childItem], childTreeNode, node, level + 1)[0];
                                 }
                             },
-                            update: function (name) {
-                                this.item['name'] = name;
+                            update: function (item) {
+                                this.item = item;
                             },
                             remove: function () {
                                 if (parentNode) {
@@ -234,7 +232,7 @@ angular.module('application')
                                 '            style="color: rgba(255, 255, 255, 0)">' +
                                 '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
                                 '            ng-class="{ \'fa-folder-open\' : node.expanded, \'fa-folder\' : !node.expanded }">' +
-                                '         </i>&nbsp;<a href="javascript:void(0)" style="cursor: pointer" ng-click="node.onSelection($event)" class="active"' +
+                                '         </i>&nbsp;<a href="javascript:void(0)" style="cursor: pointer" ng-click="node.onSelection($event)"' +
                                 '               ng-class="{ \'bold-fond\' : node.isActive() }" href>' +
                                 '             {{ node.item["name"] }}' +
                                 '         </a>' +
