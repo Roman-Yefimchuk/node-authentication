@@ -5,35 +5,47 @@ module.exports = function (io, dbProvider, developmentMode) {
     var socketsSession = {};
     var _ = require('underscore');
 
+    var SocketSession = (function () {
+
+        var closedCounter = 0;
+
+        function SocketSession(socket, userId, workspaceId) {
+            this.socket = socket;
+            this.userId = userId;
+            this.workspaceId = workspaceId;
+        }
+
+        SocketSession.prototype.sendCommand = function (command, data) {
+            var socket = this.socket;
+            socket.emit(command, data);
+        };
+
+        SocketSession.prototype.close = function () {
+            var socket = this.socket;
+
+            delete socketsSession[socket.id];
+            socket.disconnect();
+
+            if (++closedCounter > 100) {
+                socketsSession = _.compact(socketsSession);
+                closedCounter = 0;
+            }
+        };
+
+        return SocketSession;
+    })();
+
     io.on('connection', function (socket) {
 
         function getSession() {
             return socketsSession[socket.id];
         }
 
-        var createSession = (function () {
-
-            var closedCounter = 0;
-
-            return function (userId, workspaceId) {
-                socketsSession[socket.id] = {
-                    userId: userId,
-                    workspaceId: workspaceId,
-                    sendCommand: function (command, data) {
-                        socket.emit(command, data);
-                    },
-                    close: function () {
-                        delete socketsSession[socket.id];
-                        socket.disconnect();
-
-                        if (++closedCounter > 100) {
-                            socketsSession = _.compact(socketsSession);
-                            closedCounter = 0;
-                        }
-                    }
-                };
-            };
-        })();
+        function createSession(userId, workspaceId) {
+            var socketSession = new SocketSession(socket, userId, workspaceId);
+            socketsSession[socket.id] = socketSession;
+            return socketSession;
+        }
 
         function sendBroadcast(command, data, workspaceId) {
             var currentSocketSession = getSession();
