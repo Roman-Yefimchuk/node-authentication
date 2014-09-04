@@ -11,16 +11,18 @@ angular.module('application')
 
         function ($scope, $modalInstance, apiService, options) {
 
+            var workspaceId = options.workspaceId;
             var createCallback = options.createCallback;
 
             $scope.workspaceName = 'New workspace';
+            $scope.workspaceId = workspaceId;
             $scope.switchWorkspace = false;
 
-            $scope.createWorkspace = function (workspaceName, switchWorkspace) {
+            $scope.createWorkspace = function (workspaceName, workspaceId, switchWorkspace) {
                 var workspaceName = workspaceName.trim();
 
                 if (workspaceName) {
-                    apiService.createWorkspace(workspaceName, function (data) {
+                    apiService.createWorkspace(workspaceName, workspaceId, function (data) {
                         var workspace = data.workspace;
                         createCallback(workspace, switchWorkspace, function () {
                             $modalInstance.close();

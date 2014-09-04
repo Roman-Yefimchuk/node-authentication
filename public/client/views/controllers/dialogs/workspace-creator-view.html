@@ -8,7 +8,7 @@
 
     <div class="modal-body">
 
-        <form ng-submit="createWorkspace(workspaceName, switchWorkspace)">
+        <form ng-submit="createWorkspace(workspaceName, workspaceId, switchWorkspace)">
 
             <div class="row clearfix">
                 <div class="col-md-12 column">
@@ -37,7 +37,7 @@
             &nbsp;
             Cancel
         </span>
-        <span class="btn btn-success btn-sm" ng-click="createWorkspace(workspaceName, switchWorkspace)"
+        <span class="btn btn-success btn-sm" ng-click="createWorkspace(workspaceName, workspaceId, switchWorkspace)"
               ng-class="{ 'disabled' : !workspaceName }">
             <i class="fa fa-plus"></i>
             &nbsp;

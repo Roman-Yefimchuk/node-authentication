@@ -85,9 +85,10 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/get-permitted-workspaces', function (request, response, resultCallback) {
+    serviceProvider.post('/api/get-permitted-workspaces', function (request, response, resultCallback) {
         var userId = getUserId(request);
-        dbProvider.getPermittedWorkspaces(userId, function (workspaces) {
+        var parentWorkspaceId = request.body['parentWorkspaceId'];
+        dbProvider.getPermittedWorkspaces(userId, parentWorkspaceId, function (workspaces) {
             resultCallback({
                 message: 'Selected ' + workspaces.length + ' permitted workspaces(s)',
                 data: workspaces
@@ -108,8 +109,9 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/get-all-workspaces', function (request, response, resultCallback) {
-        dbProvider.getAllWorkspaces(function (workspaces) {
+    serviceProvider.post('/api/get-all-workspaces', function (request, response, resultCallback) {
+        var parentWorkspaceId = request.body['parentWorkspaceId'];
+        dbProvider.getAllWorkspaces(parentWorkspaceId, function (workspaces) {
             resultCallback({
                 message: 'Selected ' + workspaces.length + ' workspace(s)',
                 data: workspaces
@@ -156,7 +158,8 @@ module.exports = function (app, dbProvider, serviceProvider) {
     serviceProvider.post('/api/create-workspace', function (request, response, resultCallback) {
         var userId = getUserId(request);
         var workspaceName = request.body['workspaceName'];
-        dbProvider.createWorkspace(workspaceName, userId, function (workspace) {
+        var parentWorkspaceId = request.body['parentWorkspaceId'];
+        dbProvider.createWorkspace(workspaceName, userId, parentWorkspaceId, function (workspace) {
             resultCallback({
                 message: 'Created new workspace: ' + workspace.name,
                 data: {

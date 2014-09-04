@@ -6,18 +6,24 @@ angular.module('application')
 
         '$compile',
         '$log',
+        '$rootScope',
 
-        function ($compile, $log) {
+        function ($compile, $log, $rootScope) {
             return {
                 transclude: true,
                 scope: {
                     treeModel: '=',
                     onSelection: '&',
+                    onLoading: '&',
                     onToggle: '&'
                 },
                 controller: function ($scope) {
                 },
                 link: function (scope, element, attr) {
+
+                    scope.$on('workspaceTree:search', function (event, id, callback) {
+                        callback(global[id]);
+                    });
 
                     scope.activeNode = null;
 
@@ -66,11 +72,14 @@ angular.module('application')
                         if (treeModel) {
                             treeScope = getTreeScope();
                             makeTreeNodes(treeScope, treeModel, element);
+
+                            $rootScope.$broadcast('workspaceTree:ready');
                         }
                     });
 
                     function getNode(nodeScope, item, treeNode, parentNode, level) {
                         var childTreeNode = treeNode.find("[child]");
+                        var isLoaded = false;
 
                         var node = {
                             item: item,
@@ -91,33 +100,72 @@ angular.module('application')
                                 $event.stopPropagation();
                             },
                             setActive: function () {
+
+                                var node = this.parentNode;
+                                while (node) {
+                                    node.expanded = true;
+                                    node = node.parentNode;
+                                }
+
                                 scope.activeNode = this;
                             },
                             isActive: function () {
                                 return scope.activeNode == this;
                             },
                             isEmpty: function () {
-                                return !this.item['children'].length;
+                                var item = this.item;
+                                if (isLoaded) {
+                                    return !item['children'].length;
+                                } else {
+                                    if (item.childrenCount == undefined) {
+                                        return !item['children'].length;
+                                    } else {
+                                        return !item.childrenCount;
+                                    }
+                                }
                             },
                             toggle: function ($event) {
-                                this.expanded = !this.expanded;
+                                var context = this;
 
-                                if (scope.onToggle) {
-                                    scope.onToggle({
-                                        node: this,
-                                        expanded: this.expanded
-                                    });
+                                context.expanded = !context.expanded;
+
+                                function toggle() {
+                                    if (scope.onToggle) {
+                                        scope.onToggle({
+                                            node: this,
+                                            expanded: context.expanded
+                                        });
+                                    }
+                                }
+
+                                if (context.expanded && !isLoaded) {
+                                    if (scope.onLoading) {
+                                        scope.onLoading({
+                                            item: context.item,
+                                            callback: function (data, wrapItem) {
+                                                isLoaded = true;
+
+                                                _.forEach(data, function (item) {
+                                                    node.insert(wrapItem(item));
+                                                });
+
+                                                toggle();
+                                            }
+                                        })
+                                    } else {
+                                        isLoaded = true;
+                                        toggle();
+                                    }
+                                } else {
+                                    toggle();
                                 }
 
                                 $event.stopPropagation();
                             },
-                            insert: function (data) {
-                                if (data) {
-                                    var childItem = {
-                                        id: data.id,
-                                        name: data.name,
-                                        children: data.children || []
-                                    };
+                            insert: function (childItem) {
+                                if (childItem) {
+
+                                    childItem.children = childItem.children || [];
 
                                     var children = item.children;
                                     children.push(childItem);
@@ -186,7 +234,7 @@ angular.module('application')
                                 '            style="color: rgba(255, 255, 255, 0)">' +
                                 '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
                                 '            ng-class="{ \'fa-folder-open\' : node.expanded, \'fa-folder\' : !node.expanded }">' +
-                                '         </i>&nbsp;<a style="cursor: pointer" ng-click="node.onSelection($event)" class="active"' +
+                                '         </i>&nbsp;<a href="javascript:void(0)" style="cursor: pointer" ng-click="node.onSelection($event)" class="active"' +
                                 '               ng-class="{ \'bold-fond\' : node.isActive() }" href>' +
                                 '             {{ node.item["name"] }}' +
                                 '         </a>' +

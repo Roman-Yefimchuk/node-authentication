@@ -2,6 +2,8 @@
 
 module.exports = function (db, developmentMode) {
 
+    var ROOT_ID = '@root';
+
     var asyncCycle = require('../utils/async-cycle');
     var security = require('../utils/security');
     var _ = require('underscore');
@@ -55,6 +57,33 @@ module.exports = function (db, developmentMode) {
         });
     }
 
+    function getChildrenCount(parentWorkspaceId, callback) {
+        db.query("" +
+            "SELECT COUNT(*) AS count " +
+            "FROM Workspace " +
+            "WHERE parentWorkspaceId = :parentWorkspaceId", {
+            params: {
+                parentWorkspaceId: parentWorkspaceId
+            }
+        }).then(function (results) {
+            callback(results[0].count);
+        });
+    }
+
+    function getPermittedChildrenCount(userId, parentWorkspaceId, callback) {
+        db.query("" +
+            "SELECT COUNT(*) AS count " +
+            "FROM PermittedWorkspace " +
+            "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
+            params: {
+                userId: userId,
+                parentWorkspaceId: parentWorkspaceId
+            }
+        }).then(function (results) {
+            callback(results[0].count);
+        });
+    }
+
     function isCreator(userId, workspaceId, callback) {
         db.query("" +
             "SELECT isOwn " +
@@ -74,13 +103,14 @@ module.exports = function (db, developmentMode) {
         });
     }
 
-    function addWorkspace(name, creatorId, isDefault, callback) {
+    function createWorkspace(name, creatorId, parentWorkspaceId, isDefault, callback) {
         db.query("" +
-            "INSERT INTO Workspace (name, creatorId, createDate) " +
-            "VALUES (:name, :creatorId, :createDate)", {
+            "INSERT INTO Workspace (name, creatorId, parentWorkspaceId, createDate) " +
+            "VALUES (:name, :creatorId, :parentWorkspaceId, :createDate)", {
             params: {
                 name: name,
                 creatorId: creatorId,
+                parentWorkspaceId: parentWorkspaceId || ROOT_ID,
                 createDate: _.now()
             }
         }).then(function (results) {
@@ -88,8 +118,8 @@ module.exports = function (db, developmentMode) {
             var workspaceId = encodeId(workspace);
 
             db.query("" +
-                "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, readOnly, collectionManager, accessManager) " +
-                "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :readOnly, :collectionManager, :accessManager)", {
+                "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, readOnly, collectionManager, accessManager, parentWorkspaceId) " +
+                "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :readOnly, :collectionManager, :accessManager, :parentWorkspaceId)", {
                 params: {
                     userId: creatorId,
                     workspaceId: workspaceId,
@@ -97,7 +127,8 @@ module.exports = function (db, developmentMode) {
                     isDefault: isDefault,
                     readOnly: true,
                     collectionManager: true,
-                    accessManager: true
+                    accessManager: true,
+                    parentWorkspaceId: parentWorkspaceId || ROOT_ID
                 }
             }).then(function (results) {
                 callback({
@@ -410,10 +441,10 @@ module.exports = function (db, developmentMode) {
             });
         },
         createDefaultWorkspace: function (name, creatorId, callback) {
-            addWorkspace(name, creatorId, true, callback);
+            createWorkspace(name, creatorId, ROOT_ID, true, callback);
         },
-        createWorkspace: function (name, creatorId, callback) {
-            addWorkspace(name, creatorId, false, callback);
+        createWorkspace: function (name, creatorId, parentWorkspaceId, callback) {
+            createWorkspace(name, creatorId, parentWorkspaceId, false, callback);
         },
         //TODO: return not only ID
         getWorkspaces: function (userId, callback) {
@@ -523,13 +554,14 @@ module.exports = function (db, developmentMode) {
                 callback(result);
             });
         },
-        getPermittedWorkspaces: function (userId, callback) {
+        getPermittedWorkspaces: function (userId, parentWorkspaceId, callback) {
             db.query("" +
                 "SELECT * " +
                 "FROM PermittedWorkspace " +
-                "WHERE userId = :userId", {
+                "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
                 params: {
-                    userId: userId
+                    userId: userId,
+                    parentWorkspaceId: parentWorkspaceId || ROOT_ID
                 }
             }).then(function (results) {
                 var permittedWorkspaces = results;
@@ -546,45 +578,62 @@ module.exports = function (db, developmentMode) {
                         }
                     }).then(function (results) {
                         var workspace = results[0];
+                        var workspaceId = permittedWorkspace.workspaceId;
 
-                        result.push({
-                            id: permittedWorkspace.workspaceId,
-                            name: workspace.name,
-                            creatorId: workspace.creatorId,
-                            createdDate: workspace.createdDate,
-                            permissions: {
-                                readOnly: permittedWorkspace.readOnly,
-                                collectionManager: permittedWorkspace.collectionManager,
-                                accessManager: permittedWorkspace.accessManager
-                            }
+                        getPermittedChildrenCount(userId, workspaceId, function (childrenCount) {
+                            result.push({
+                                id: permittedWorkspace.workspaceId,
+                                name: workspace.name,
+                                creatorId: workspace.creatorId,
+                                createdDate: workspace.createdDate,
+                                childrenCount: childrenCount,
+                                permissions: {
+                                    readOnly: permittedWorkspace.readOnly,
+                                    collectionManager: permittedWorkspace.collectionManager,
+                                    accessManager: permittedWorkspace.accessManager
+                                }
+                            });
+
+                            next();
                         });
-
-                        next();
                     });
                 }, function () {
                     callback(result);
                 });
             });
         },
-        getAllWorkspaces: function (callback) {
+        getAllWorkspaces: function (parentWorkspaceId, callback) {
             db.query("" +
                 "SELECT * " +
-                "FROM Workspace", {
+                "FROM Workspace " +
+                "WHERE parentWorkspaceId = :parentWorkspaceId", {
+                params: {
+                    parentWorkspaceId: parentWorkspaceId || ROOT_ID
+                }
             }).then(function (results) {
                 var workspaces = results;
 
                 var result = [];
 
-                _.forEach(workspaces, function (workspace) {
-                    result.push({
-                        id: encodeId(workspace),
-                        name: workspace.name,
-                        creatorId: workspace.creatorId,
-                        createdDate: workspace.createdDate
-                    });
-                });
+                asyncCycle(workspaces, function (workspace, index, next) {
 
-                callback(result);
+                    var workspaceId = encodeId(workspace);
+
+                    getChildrenCount(workspaceId, function (childrenCount) {
+                        result.push({
+                            id: encodeId(workspace),
+                            name: workspace.name,
+                            creatorId: workspace.creatorId,
+                            createdDate: workspace.createdDate,
+                            childrenCount: childrenCount
+                        });
+
+                        next();
+                    });
+
+                }, function () {
+                    callback(result);
+                });
             });
         },
         //TODO: pagination

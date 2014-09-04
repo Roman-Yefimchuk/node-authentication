@@ -26,6 +26,7 @@ CREATE CLASS Workspace
 CREATE PROPERTY Workspace.name STRING
 CREATE PROPERTY Workspace.creatorId STRING
 CREATE PROPERTY Workspace.createdDate LONG
+CREATE PROPERTY Workspace.parentWorkspaceId STRING
 
 CREATE CLASS OwnWorkspace
 CREATE PROPERTY OwnWorkspace.userId STRING 
@@ -34,6 +35,7 @@ CREATE PROPERTY OwnWorkspace.workspaceId STRING
 CREATE CLASS PermittedWorkspace
 CREATE PROPERTY PermittedWorkspace.userId STRING
 CREATE PROPERTY PermittedWorkspace.workspaceId STRING
+CREATE PROPERTY PermittedWorkspace.parentWorkspaceId STRING
 CREATE PROPERTY PermittedWorkspace.isOwn BOOLEAN
 CREATE PROPERTY PermittedWorkspace.isDefault BOOLEAN
 CREATE PROPERTY PermittedWorkspace.readOnly BOOLEAN

@@ -13,10 +13,11 @@
                     <span class="caret"></span>
                 </a>
 
-<!--                <ul class="dropdown-menu" role="menu">
+                <ul class="dropdown-menu" role="menu">
                     <li style="margin: 0">
                         <a href workspace-tree tree-model="treeModel"
-                           on-selection="onTreeItemSelection(node)"
+                           on-selection="onWorkspaceChanged(node)"
+                           on-loading="onWorkspaceLoading(item, callback)"
                            style="padding-left: 15px;padding-right: 15px;">
                         </a>
                     </li>
@@ -28,27 +29,8 @@
                             Create workspace
                         </a>
                     </li>
-                </ul>-->
-
-                <ul class="dropdown-menu" role="menu">
-                    <li ng-repeat="workspace in workspaces">
-                        <a href ng-click="setWorkspace(workspace)">
-                            <i class="fa" ng-class="{ 'fa-folder-open' : workspace == currentWorkspace,
-                                                      'fa-folder' : workspace != currentWorkspace }">
-                            </i>
-                            &nbsp;
-                            {{ workspace.name }}
-                        </a>
-                    </li>
-                    <li class="divider"></li>
-                    <li>
-                        <a href ng-click="showWorkspaceCreator()">
-                            <i class="fa fa-plus"></i>
-                            &nbsp;
-                            Create workspace
-                        </a>
-                    </li>
                 </ul>
+
             </li>
         </ul>
 
@@ -106,6 +88,17 @@
     </div>
 
     <div class="col-md-8 column">
+
+        <ol class="panel breadcrumb" ng-show="breadcrumb.length">
+            <li ng-repeat="item in breadcrumb" ng-class="{ 'active' : $last }">
+                <a ng-if="!$last" href="javascript:void(0)" ng-click="item.click()">
+                    {{ item.title }}
+                </a>
+                <span ng-if="$last">
+                    {{ item.title }}
+                </span>
+            </li>
+        </ol>
 
         <div ng-show="errorMessage != null">
             <alert type="danger" close="errorMessage = null" class="text-center">

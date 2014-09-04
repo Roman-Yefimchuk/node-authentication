@@ -64,10 +64,13 @@ angular.module('application')
                         success: callback
                     });
                 },
-                getAllWorkspaces: function (callback) {
+                getAllWorkspaces: function (parentWorkspaceId, callback) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/get-all-workspaces'
+                        method: 'POST',
+                        url: '/api/get-all-workspaces',
+                        data: {
+                            parentWorkspaceId: parentWorkspaceId
+                        }
                     }, {
                         success: callback
                     });
@@ -92,10 +95,13 @@ angular.module('application')
                         success: callback
                     });
                 },
-                getPermittedWorkspaces: function (callback) {
+                getPermittedWorkspaces: function (parentWorkspaceId, callback) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/get-permitted-workspaces'
+                        method: 'POST',
+                        url: '/api/get-permitted-workspaces',
+                        data: {
+                            parentWorkspaceId: parentWorkspaceId
+                        }
                     }, {
                         success: callback
                     });
@@ -158,12 +164,13 @@ angular.module('application')
                         success: callback
                     });
                 },
-                createWorkspace: function (workspaceName, callback) {
+                createWorkspace: function (workspaceName, parentWorkspaceId, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
                         url: '/api/create-workspace',
                         data: {
-                            workspaceName: workspaceName
+                            workspaceName: workspaceName,
+                            parentWorkspaceId: parentWorkspaceId
                         }
                     }, {
                         success: callback

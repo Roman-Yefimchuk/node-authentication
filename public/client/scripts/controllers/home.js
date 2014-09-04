@@ -18,42 +18,8 @@ angular.module('application')
 
         function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL) {
 
-            {
-                //TODO: temp
-                var randomString = ((function () {
-                    var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
-
-                    return function (length) {
-                        if (!length) {
-                            length = 16;
-                        }
-
-                        var result = '';
-                        for (var index = 0; index < length; index++) {
-                            var charIndex = Math.floor(Math.random() * chars.length);
-                            result += chars[charIndex];
-                        }
-                        return result;
-                    }
-                })());
-
-                $scope.treeModel = [
-                    {
-                        name: 'ROOT',
-                        id: randomString(),
-                        children: []
-                    }
-                ];
-
-                $scope.onTreeItemSelection = function (node) {
-                    console.log(node.insert({
-                        name: randomString(),
-                        id: randomString(),
-                        children: []
-                    }));
-                };
-            }
-
+            $scope.treeModel = [];
+            $scope.breadcrumb = [];
             $scope.errorMessage = null;
             $scope.currentWorkspace = undefined;
             $scope.loading = true;
@@ -166,7 +132,22 @@ angular.module('application')
 
                         subscribeForSocketEvent();
 
-                        apiService.getPermittedWorkspaces(function (workspaces) {
+                        apiService.getPermittedWorkspaces('@root', function (workspaces) {
+
+                            var treeModel = [];
+
+                            _.forEach(workspaces, function (workspace) {
+                                treeModel.push({
+                                    name: workspace.name,
+                                    id: workspace.id,
+                                    childrenCount: workspace.childrenCount,
+                                    children: [],
+                                    workspace: workspace
+                                });
+                            });
+
+                            $scope.treeModel = treeModel;
+
                             $scope.workspaces = workspaces;
 
                             $scope.currentWorkspace = _.findWhere(workspaces, {
@@ -175,14 +156,23 @@ angular.module('application')
 
                             $scope.user = user;
 
-                            loaderService.hideLoader();
+                            $scope.$on('workspaceTree:ready', function () {
+                                $rootScope.$broadcast('workspaceTree:search', user.workspaceId, function (node) {
+                                    if (node) {
+                                        updateActiveNode(node);
+                                        node.setActive();
+                                    }
 
-                            if (externalNotification) {
-                                notificationsService.notify(externalNotification.message, externalNotification.type);
-                            }
+                                    loaderService.hideLoader();
 
-                            notificationsService.info("Hello @{userName}!", {
-                                userName: user.displayName
+                                    if (externalNotification) {
+                                        notificationsService.notify(externalNotification.message, externalNotification.type);
+                                    }
+
+                                    notificationsService.info("Hello @{userName}!", {
+                                        userName: user.displayName
+                                    });
+                                });
                             });
                         });
                     });
@@ -192,6 +182,27 @@ angular.module('application')
                     loaderService.hideLoader();
                 }
             });
+
+            $scope.onWorkspaceChanged = function (node) {
+                updateActiveNode(node);
+                $scope.currentWorkspace = node.item['workspace'];
+                $scope.workspaceDropdown['isOpen'] = false;
+            };
+
+            $scope.onWorkspaceLoading = function (item, callback) {
+                var workspace = item.workspace;
+                apiService.getPermittedWorkspaces(workspace.id, function (data) {
+                    callback(data, function (workspace) {
+                        return {
+                            name: workspace.name,
+                            id: workspace.id,
+                            workspace: workspace,
+                            childrenCount: workspace.childrenCount,
+                            children: []
+                        };
+                    });
+                });
+            };
 
             $scope.setViewMode = function (viewMode) {
                 $scope.currentViewMode = viewMode;
@@ -438,8 +449,17 @@ angular.module('application')
                 dialogsService.showWorkspaceCreator({
                     workspaceId: getWorkspaceId(),
                     createCallback: function (workspace, switchWorkspace, callback) {
-                        $scope.workspaces.push(workspace);
+                        var activeNode = $scope.activeNode;
+
+                        var node = activeNode.insert({
+                            name: workspace.name,
+                            id: workspace.id,
+                            workspace: workspace,
+                            children: []
+                        });
                         if (switchWorkspace) {
+                            node.setActive();
+                            updateActiveNode(node);
                             $scope.currentWorkspace = workspace;
                         }
                         callback();
@@ -454,8 +474,46 @@ angular.module('application')
                 });
             };
 
+            function updateActiveNode(node) {
+                $scope.activeNode = node;
+                $scope.breadcrumb = getBreadcrumb();
+            }
+
+            function getBreadcrumb() {
+                var items = [];
+
+                var node = $scope.activeNode;
+                if (node) {
+
+                    var wrapNode = function (node) {
+                        return {
+                            title: node.item['name'],
+                            click: function () {
+                                node.setActive();
+                                updateActiveNode(node);
+                                $scope.currentWorkspace = node.item['workspace'];
+                            }
+                        };
+                    };
+
+                    items.push(wrapNode(node));
+
+                    node = node.parentNode;
+                    while (node) {
+                        items.push(wrapNode(node));
+                        node = node.parentNode;
+                    }
+
+                    return items.reverse();
+                }
+
+                return items;
+            }
+
             function getWorkspaceId() {
-                return $scope.currentWorkspace['id'];
+                if ($scope.currentWorkspace) {
+                    return $scope.currentWorkspace['id'];
+                }
             }
 
             function changeNotification(userId, messageBuilder, type) {
