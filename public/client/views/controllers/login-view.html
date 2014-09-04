@@ -21,6 +21,7 @@
                 <button type="button" class="btn btn-primary dropdown-toggle">
                     {{ currentWorkspace.name }} <span class="caret"></span>
                 </button>
+
                 <ul class="dropdown-menu" role="menu">
                     <li>
                         <a href ng-repeat="workspace in workspaces" ng-click="chooseWorkspace(workspace)">
@@ -32,6 +33,16 @@
                         </a>
                     </li>
                 </ul>
+
+<!--                <ul class="dropdown-menu" role="menu">
+                    <li style="margin: 0">
+                        <a href workspace-tree tree-model="treeModel"
+                           on-selection="onTreeItemSelection(node)"
+                           style="padding-left: 15px;padding-right: 15px;">
+                        </a>
+                    </li>
+                </ul>-->
+
             </div>
 
         </div>

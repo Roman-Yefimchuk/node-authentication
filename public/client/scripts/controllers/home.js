@@ -19,6 +19,7 @@ angular.module('application')
         function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL) {
 
             {
+                //TODO: temp
                 var randomString = ((function () {
                     var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
 

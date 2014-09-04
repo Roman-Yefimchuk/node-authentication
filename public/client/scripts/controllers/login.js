@@ -12,6 +12,42 @@ angular.module('application')
 
         function ($scope, $location, apiService, loaderService, DEBUG_MODE) {
 
+            {
+                //TODO: temp
+                var randomString = ((function () {
+                    var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
+
+                    return function (length) {
+                        if (!length) {
+                            length = 16;
+                        }
+
+                        var result = '';
+                        for (var index = 0; index < length; index++) {
+                            var charIndex = Math.floor(Math.random() * chars.length);
+                            result += chars[charIndex];
+                        }
+                        return result;
+                    }
+                })());
+
+                $scope.treeModel = [
+                    {
+                        name: 'ROOT',
+                        id: randomString(),
+                        children: []
+                    }
+                ];
+
+                $scope.onTreeItemSelection = function (node) {
+                    console.log(node.insert({
+                        name: randomString(),
+                        id: randomString(),
+                        children: []
+                    }));
+                };
+            }
+
             var emailPattern = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
             var passwordPattern = /^(([a-z]|[A-Z]|[0-9]|\u005F)+){6}$/;
 
