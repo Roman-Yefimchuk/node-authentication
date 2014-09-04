@@ -19,6 +19,152 @@ angular.module('application')
                 },
                 link: function (scope, element, attr) {
 
+                    var Node = (function () {
+
+                        function Node(nodeScope, item, element, parentNode, level) {
+                            this.nodeScope = nodeScope;
+                            this.item = item;
+                            this.element = element;
+                            this.parentNode = parentNode;
+                            this.level = level;
+
+                            this.expanded = false;
+                            this.isLoaded = false;
+                            this.childrenElement = element.find("[children]")
+                        }
+
+                        Node.prototype.onSelection = function ($event) {
+                            if (scope.activeNode != this) {
+                                if (scope.onSelection) {
+                                    scope.onSelection({
+                                        node: this
+                                    });
+                                }
+                            }
+
+                            scope.activeNode = this;
+                            $event.stopPropagation();
+                        };
+
+                        Node.prototype.setActive = function () {
+                            var node = this.parentNode;
+                            while (node) {
+                                node.expanded = true;
+                                node = node.parentNode;
+                            }
+
+                            scope.activeNode = this;
+                        };
+
+                        Node.prototype.isActive = function () {
+                            return scope.activeNode == this;
+                        };
+
+                        Node.prototype.isEmpty = function () {
+                            var item = this.item;
+                            if (this.isLoaded) {
+                                return !item.children['length'];
+                            } else {
+                                return !(item.childrenCount || item.children['length']);
+                            }
+                        };
+
+                        Node.prototype.toggle = function ($event) {
+                            var context = this;
+
+                            context.expanded = !context.expanded;
+
+                            function toggle() {
+                                if (scope.onToggle) {
+                                    scope.onToggle({
+                                        node: this,
+                                        expanded: context.expanded
+                                    });
+                                }
+                            }
+
+                            if (context.expanded && !context.isLoaded) {
+                                if (scope.onLoading) {
+                                    scope.onLoading({
+                                        item: context.item,
+                                        callback: function (data, wrapItem) {
+                                            context.isLoaded = true;
+
+                                            _.forEach(data, function (item) {
+                                                context.insert(wrapItem(item));
+                                            });
+
+                                            toggle();
+                                        }
+                                    })
+                                } else {
+                                    context.isLoaded = true;
+                                    toggle();
+                                }
+                            } else {
+                                toggle();
+                            }
+
+                            $event.stopPropagation();
+                        };
+
+                        Node.prototype.insert = function (childItem) {
+                            var context = this;
+
+                            if (childItem) {
+
+                                childItem.children = childItem.children || [];
+
+                                var children = context.item['children'];
+                                children.push(childItem);
+
+                                var nodeScope = context.nodeScope;
+                                var childrenElement = context.childrenElement;
+                                var level = context.level;
+
+                                return makeTreeNodes(nodeScope, [childItem], childrenElement, context, level + 1)[0];
+                            }
+                        };
+
+                        Node.prototype.update = function (item) {
+                            this.item = item;
+                        };
+
+                        Node.prototype.remove = function () {
+                            var context = this;
+                            var parentNode = context.parentNode;
+
+                            if (parentNode) {
+                                var children = parentNode.item['children'];
+
+                                children = _.without(children, context.item);
+
+                                parentNode.item['children'] = children;
+                                parentNode.expanded = children.length > 0;
+
+                                var activeNode = scope.activeNode;
+
+                                if (activeNode == context) {
+                                    scope.activeNode = parentNode;
+                                } else {
+                                    if (activeNode && context.level < activeNode.level) {
+                                        scope.activeNode = parentNode;
+                                    }
+                                }
+                            } else {
+                                scope.activeNode = null;
+                            }
+                            var element = context.element;
+                            element.remove();
+
+                            var nodeScope = context.nodeScope;
+                            nodeScope.$destroy();
+                        };
+
+                        return Node;
+
+                    })();
+
                     scope.$on('workspaceTree:search', function (event, id, callback) {
                         if (typeof callback == 'function') {
                             callback(global[id]);
@@ -79,126 +225,9 @@ angular.module('application')
                         }
                     });
 
-                    function getNode(nodeScope, item, treeNode, parentNode, level) {
-                        var childTreeNode = treeNode.find("[child]");
-                        var isLoaded = false;
+                    function getNode(nodeScope, item, element, parentNode, level) {
 
-                        var node = {
-                            item: item,
-                            expanded: false,
-                            level: level,
-                            parentNode: parentNode,
-                            onSelection: function ($event) {
-
-                                if (scope.activeNode != this) {
-                                    if (scope.onSelection) {
-                                        scope.onSelection({
-                                            node: this
-                                        });
-                                    }
-                                }
-
-                                scope.activeNode = this;
-                                $event.stopPropagation();
-                            },
-                            setActive: function () {
-
-                                var node = this.parentNode;
-                                while (node) {
-                                    node.expanded = true;
-                                    node = node.parentNode;
-                                }
-
-                                scope.activeNode = this;
-                            },
-                            isActive: function () {
-                                return scope.activeNode == this;
-                            },
-                            isEmpty: function () {
-                                var item = this.item;
-                                if (isLoaded) {
-                                    return !item.children['length'];
-                                } else {
-                                    return !(item.childrenCount || item.children['length']);
-                                }
-                            },
-                            toggle: function ($event) {
-                                var context = this;
-
-                                context.expanded = !context.expanded;
-
-                                function toggle() {
-                                    if (scope.onToggle) {
-                                        scope.onToggle({
-                                            node: this,
-                                            expanded: context.expanded
-                                        });
-                                    }
-                                }
-
-                                if (context.expanded && !isLoaded) {
-                                    if (scope.onLoading) {
-                                        scope.onLoading({
-                                            item: context.item,
-                                            callback: function (data, wrapItem) {
-                                                isLoaded = true;
-
-                                                _.forEach(data, function (item) {
-                                                    node.insert(wrapItem(item));
-                                                });
-
-                                                toggle();
-                                            }
-                                        })
-                                    } else {
-                                        isLoaded = true;
-                                        toggle();
-                                    }
-                                } else {
-                                    toggle();
-                                }
-
-                                $event.stopPropagation();
-                            },
-                            insert: function (childItem) {
-                                if (childItem) {
-
-                                    childItem.children = childItem.children || [];
-
-                                    var children = item.children;
-                                    children.push(childItem);
-
-                                    return makeTreeNodes(nodeScope, [childItem], childTreeNode, node, level + 1)[0];
-                                }
-                            },
-                            update: function (item) {
-                                this.item = item;
-                            },
-                            remove: function () {
-                                if (parentNode) {
-                                    var children = parentNode.item['children'];
-
-                                    children = _.without(children, item);
-
-                                    parentNode.item['children'] = children;
-                                    parentNode.expanded = children.length > 0;
-
-                                    var activeNode = scope.activeNode;
-
-                                    if (activeNode == node) {
-                                        scope.activeNode = parentNode;
-                                    } else {
-                                        if (activeNode && node.level < activeNode.level) {
-                                            scope.activeNode = parentNode;
-                                        }
-                                    }
-                                } else {
-                                    scope.activeNode = null;
-                                }
-                                treeNode.remove();
-                                nodeScope.$destroy();
-                            }
-                        };
+                        var node = new Node(nodeScope, item, element, parentNode, level);
 
                         if (global[item.id]) {
                             $log.debug('Duplicated ID: ' + item.id);
@@ -237,7 +266,7 @@ angular.module('application')
                                 '             {{ node.item["name"] }}' +
                                 '         </a>' +
                                 '     </span>' +
-                                '     <div style="padding-left: 15px" child ng-show="node.expanded">' +
+                                '     <div style="padding-left: 15px" children ng-show="node.expanded">' +
                                 '     </div>' +
                                 '</div>';
 
@@ -258,7 +287,7 @@ angular.module('application')
 
                             result.push(nodeScope.node);
 
-                            makeTreeNodes(nodeScope, children, treeNode.find("[child]"), nodeScope.node, level + 1);
+                            makeTreeNodes(nodeScope, children, treeNode.find("[children]"), nodeScope.node, level + 1);
 
                             element.append(treeNode);
                         });

@@ -18,6 +18,20 @@ angular.module('application')
 
         function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL) {
 
+            var BreadcrumbItem = (function () {
+                function BreadcrumbItem(node) {
+                    this.node = node;
+                    this.title = node.item['name'];
+                }
+
+                BreadcrumbItem.prototype.click = function () {
+                    var node = this.node;
+                    updateActiveNode(node);
+                };
+
+                return BreadcrumbItem;
+            })();
+
             $scope.treeModel = [];
             $scope.breadcrumb = [];
             $scope.errorMessage = null;
@@ -378,8 +392,8 @@ angular.module('application')
                 });
 
                 apiService.remove(getWorkspaceId(), ids, function () {
-                    $scope.todos = $scope.todos.filter(function (val) {
-                        return !val.completed;
+                    $scope.todos = _.filter($scope.todos, function (item) {
+                        return !item.completed;
                     });
 
                     var socketConnection = $scope.socketConnection;
@@ -476,20 +490,13 @@ angular.module('application')
                 var node = $scope.activeNode;
                 if (node) {
 
-                    var wrapNode = function (node) {
-                        return {
-                            title: node.item['name'],
-                            click: function () {
-                                updateActiveNode(node);
-                            }
-                        };
-                    };
-
-                    items.push(wrapNode(node));
+                    var activeItem = new BreadcrumbItem(node);
+                    items.push(activeItem);
 
                     node = node.parentNode;
                     while (node) {
-                        items.push(wrapNode(node));
+                        var item = new BreadcrumbItem(node);
+                        items.push(item);
                         node = node.parentNode;
                     }
 
