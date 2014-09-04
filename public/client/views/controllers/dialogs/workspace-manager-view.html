@@ -18,8 +18,8 @@
             </div>
 
             <div class="col-md-12 column" ng-show="pagination.totalPages > pagination.itemsPerPage">
-                <pagination class="pull-right" total-items="pagination.totalPages" ng-model="pagination.pageNumber"
-                            max-size="pagination.maxPaginationSize" class="pagination-sm"
+                <pagination class="pull-right pagination-sm" total-items="pagination.totalPages"
+                            ng-model="pagination.pageNumber" max-size="pagination.maxPaginationSize"
                             items-per-page="pagination.itemsPerPage" style="margin-bottom: 0;"
                             previous-text="&laquo;" next-text="&raquo;">
                 </pagination>
@@ -28,12 +28,12 @@
 
     </div>
     <div class="modal-footer ng-scope" style="margin-top: 0">
-        <span class="btn btn-warning" ng-click="cancel()" href>
+        <span class="btn btn-warning btn-sm" ng-click="cancel()" href>
             <i class="fa fa-share"></i>
             &nbsp;
             Cancel
         </span>
-        <span class="btn btn-primary" ng-click="save()" href>
+        <span class="btn btn-primary btn-sm" ng-click="save()" href>
             <i class="fa fa-floppy-o"></i>
             &nbsp;
             Save
