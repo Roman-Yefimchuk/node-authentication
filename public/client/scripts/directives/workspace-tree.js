@@ -186,11 +186,10 @@ angular.module('application')
                                 '            style="color: rgba(255, 255, 255, 0)">' +
                                 '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
                                 '            ng-class="{ \'fa-folder-open\' : node.expanded, \'fa-folder\' : !node.expanded }">' +
-                                '         </i>' +
-                                '         <a style="cursor: pointer" ng-click="node.onSelection($event)" class="active"' +
+                                '         </i>&nbsp;<a style="cursor: pointer" ng-click="node.onSelection($event)" class="active"' +
                                 '               ng-class="{ \'bold-fond\' : node.isActive() }" href>' +
                                 '             {{ node.item["name"] }}' +
-                                '         </a>&nbsp;<i class="fa fa-times" style="cursor: pointer"  ng-click="node.remove()"></i>' +
+                                '         </a>' +
                                 '     </span>' +
                                 '     <div style="padding-left: 15px" child ng-show="node.expanded">' +
                                 '     </div>' +
