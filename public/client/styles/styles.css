@@ -10,3 +10,7 @@ body {
 .bold-fond {
     font-weight: bold;
 }
+
+a[workspace-tree]:focus, a[workspace-tree]:hover {
+    background-color: #fff !important;
+}

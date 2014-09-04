@@ -177,7 +177,7 @@ angular.module('application')
                             var children = item.children;
 
                             var template = '' +
-                                '<li style="display: table;">' +
+                                '<div style="display: table;">' +
                                 '     <span>' +
                                 '         <a href="javascript:void(0)"><i ng-show="!node.isEmpty()" class="fa" style="cursor: pointer" ' +
                                 '            ng-class="{ \'fa-minus-square-o\' : node.expanded, \'fa-plus-square-o\' : !node.expanded }"' +
@@ -192,9 +192,9 @@ angular.module('application')
                                 '             {{ node.item["name"] }}' +
                                 '         </a>&nbsp;<i class="fa fa-times" style="cursor: pointer"  ng-click="node.remove()"></i>' +
                                 '     </span>' +
-                                '     <ul style="padding-left: 15px" child ng-show="node.expanded">' +
-                                '     </ul>' +
-                                '</li>';
+                                '     <div style="padding-left: 15px" child ng-show="node.expanded">' +
+                                '     </div>' +
+                                '</div>';
 
                             var treeNode = angular.element(template);
 
