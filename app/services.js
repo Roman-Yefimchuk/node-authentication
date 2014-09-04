@@ -70,13 +70,17 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/get-all-users-with-permissions/:workspaceId', function (request, response, resultCallback) {
+    serviceProvider.post('/api/get-all-users-with-permissions/:workspaceId', function (request, response, resultCallback) {
         var userId = getUserId(request);
         var workspaceId = getParam('workspaceId', request);
-        dbProvider.getAllUsersWithPermissions(workspaceId, function (workspaces) {
+
+        var skip = request.body['skip'];
+        var limit = request.body['limit'];
+
+        dbProvider.getAllUsersWithPermissions(workspaceId, skip, limit, function (result) {
             resultCallback({
-                message: 'Selected ' + workspaces.length + ' permitted workspaces(s)',
-                data: workspaces
+                message: 'Selected ' + result.count + ' user(s)',
+                data: result
             });
         });
     });
@@ -91,11 +95,15 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/get-all-users', function (request, response, resultCallback) {
-        dbProvider.getAllUsers(function (users) {
+    serviceProvider.post('/api/get-all-users', function (request, response, resultCallback) {
+
+        var skip = request.body['skip'];
+        var limit = request.body['limit'];
+
+        dbProvider.getAllUsers(skip, limit, function (result) {
             resultCallback({
-                message: 'Selected ' + users.length + ' users(s)',
-                data: users
+                message: 'Selected ' + result.count + ' users(s)',
+                data: result
             });
         });
     });

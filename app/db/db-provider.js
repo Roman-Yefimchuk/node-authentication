@@ -46,6 +46,15 @@ module.exports = function (db, developmentMode) {
         });
     }
 
+    function getUsersCount(callback) {
+        db.query("" +
+            "SELECT COUNT(*) AS count " +
+            "FROM UserAccount", {
+        }).then(function (results) {
+            callback(results[0].count);
+        });
+    }
+
     function isCreator(userId, workspaceId, callback) {
         db.query("" +
             "SELECT isOwn " +
@@ -579,58 +588,81 @@ module.exports = function (db, developmentMode) {
             });
         },
         //TODO: pagination
-        //SELECT COUNT(*) AS total, * FROM UserAccount SKIP 5 LIMIT 5
-        getAllUsers: function (callback) {
-            db.query("" +
-                "SELECT userId, displayName, registeredDate " +
-                "FROM UserAccount", {
-            }).then(function (results) {
-                var usersAccount = results;
+        getAllUsers: function (skip, limit, callback) {
+            getUsersCount(function (count) {
+                if (count > 0) {
+                    db.query("" +
+                        "SELECT userId, displayName, registeredDate " +
+                        "FROM UserAccount SKIP " + skip + " LIMIT " + limit, {
+                    }).then(function (results) {
+                        var usersAccount = results;
 
-                var result = [];
+                        var users = [];
 
-                asyncCycle(usersAccount, function (userAccount, index, next) {
-                    result.push({
-                        id: userAccount.userId,
-                        displayName: userAccount.displayName,
-                        registeredDate: userAccount.registeredDate
-                    });
-
-                    next();
-                }, function () {
-                    callback(result);
-                });
-            });
-        },
-        //TODO: pagination
-        getAllUsersWithPermissions: function (workspaceId, callback) {
-            db.query("" +
-                "SELECT userId, displayName, registeredDate " +
-                "FROM UserAccount", {
-            }).then(function (results) {
-                var usersAccount = results;
-
-                var result = [];
-
-                asyncCycle(usersAccount, function (userAccount, index, next) {
-                    var userId = userAccount.userId;
-
-                    getUserPermissionsForWorkspace(userId, workspaceId, function (permissions) {
-                        isCreator(userId, workspaceId, function (isCreator) {
-                            result.push({
-                                id: userId,
+                        asyncCycle(usersAccount, function (userAccount, index, next) {
+                            users.push({
+                                id: userAccount.userId,
                                 displayName: userAccount.displayName,
-                                permissions: permissions,
-                                isCreator: isCreator,
                                 registeredDate: userAccount.registeredDate
                             });
 
                             next();
-                        })
+                        }, function () {
+                            callback({
+                                users: users,
+                                count: count
+                            });
+                        });
                     });
-                }, function () {
-                    callback(result);
-                });
+                } else {
+                    callback({
+                        users: [],
+                        count: 0
+                    });
+                }
+            });
+        },
+        //TODO: pagination
+        getAllUsersWithPermissions: function (workspaceId, skip, limit, callback) {
+            getUsersCount(function (count) {
+                if (count > 0) {
+                    db.query("" +
+                        "SELECT userId, displayName, registeredDate " +
+                        "FROM UserAccount SKIP " + skip + " LIMIT " + limit, {
+                    }).then(function (results) {
+                        var usersAccount = results;
+
+                        var users = [];
+
+                        asyncCycle(usersAccount, function (userAccount, index, next) {
+                            var userId = userAccount.userId;
+
+                            getUserPermissionsForWorkspace(userId, workspaceId, function (permissions) {
+                                isCreator(userId, workspaceId, function (isCreator) {
+                                    users.push({
+                                        id: userId,
+                                        displayName: userAccount.displayName,
+                                        permissions: permissions,
+                                        isCreator: isCreator,
+                                        registeredDate: userAccount.registeredDate
+                                    });
+
+                                    next();
+                                })
+                            });
+                        }, function () {
+                            callback({
+                                users: users,
+                                count: count
+                            });
+                        });
+                    });
+                } else {
+                    callback({
+                        users: [],
+                        count: 0
+                    });
+                }
             });
         },
         isAccessGrantedForWorkspace: function (userId, workspaceId, callback) {

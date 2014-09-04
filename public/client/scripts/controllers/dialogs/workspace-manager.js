@@ -10,6 +10,17 @@ angular.module('application')
         'options',
 
         function ($scope, $modalInstance, apiService, options) {
+
+            $scope.pagination = {
+                itemsPerPage: 5,
+                maxPaginationSize: 5,
+                totalPages: 0,
+                pageNumber: 1
+            };
+
+            $scope.itemsPerPage = 5;
+            $scope.maxPaginationSize = 5;
+
             $scope.users = [];
 
             var originalCollection = [];
@@ -23,12 +34,27 @@ angular.module('application')
             $scope.dialogTitle = workspace.name;
             $scope.workspaceId = workspace.id;
 
-            apiService.getAllUsersWithPermissions(workspace.id, function (users) {
-                $scope.users = users.filter(function (user) {
-                    return user.id != $scope.userId;
-                });
+            function updatePage() {
+                apiService.getAllUsersWithPermissions(workspace.id, {
+                    skip: ($scope.pagination['pageNumber'] - 1) * $scope.pagination['itemsPerPage'],
+                    limit: $scope.pagination['itemsPerPage']
+                }, function (result) {
+                    $scope.pagination['totalPages'] = result.count;
+                    if (result.count > 0) {
 
-                originalCollection = angular.copy($scope.users);
+/*                        $scope.users = _.filter(result.users, function (user) {
+                            return user.id != $scope.userId;
+                        });*/
+
+                        $scope.users = result.users;
+
+                        originalCollection = angular.copy($scope.users);
+                    }
+                });
+            }
+
+            $scope.$watch('pagination.pageNumber', function () {
+                updatePage();
             });
 
             $scope.save = function () {

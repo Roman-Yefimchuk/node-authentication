@@ -80,10 +80,14 @@ angular.module('application')
                         success: callback
                     });
                 },
-                getAllUsers: function (callback) {
+                getAllUsers: function (options, callback) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/get-all-users'
+                        method: 'POST',
+                        url: '/api/get-all-users',
+                        data: {
+                            skip: options.skip,
+                            limit: options.limit
+                        }
                     }, {
                         success: callback
                     });
@@ -96,10 +100,14 @@ angular.module('application')
                         success: callback
                     });
                 },
-                getAllUsersWithPermissions: function (workspaceId, callback) {
+                getAllUsersWithPermissions: function (workspaceId, options, callback) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/get-all-users-with-permissions/' + workspaceId
+                        method: 'POST',
+                        url: '/api/get-all-users-with-permissions/' + workspaceId,
+                        data: {
+                            skip: options.skip,
+                            limit: options.limit
+                        }
                     }, {
                         success: callback
                     });
