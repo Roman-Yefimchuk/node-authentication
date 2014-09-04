@@ -13,14 +13,14 @@ angular.module('application')
                     httpClientService.sendRequest({
                         method: 'POST',
                         data: data,
-                        url: '/api/login'
+                        url: '/api/authenticate/login'
                     }, handler);
                 },
                 signUp: function (data, handler) {
                     httpClientService.sendRequest({
                         method: 'POST',
                         data: data,
-                        url: '/api/sign-up'
+                        url: '/api/authenticate/sign-up'
                     }, handler);
                 },
                 items: function (workspaceId, callback) {

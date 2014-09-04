@@ -309,7 +309,7 @@ module.exports = function (db, developmentMode) {
                 callback(result);
             });
         },
-        save: function (workspaceId, userId, todoModel, callback) {
+        saveItem: function (workspaceId, userId, todoModel, callback) {
             db.query("" +
                 "INSERT INTO Todo (workspaceId, creatorId, title, completed, createdDate) " +
                 "VALUES (:workspaceId, :creatorId, :title, :completed, :createdDate)", {
@@ -328,7 +328,7 @@ module.exports = function (db, developmentMode) {
                 });
             });
         },
-        update: function (workspaceId, userId, todoModels, callback) {
+        updateItems: function (workspaceId, userId, todoModels, callback) {
             asyncCycle(todoModels, function (todoModel, index, next) {
                 db.query("" +
                     "UPDATE Todo " +
@@ -346,7 +346,7 @@ module.exports = function (db, developmentMode) {
                 callback();
             });
         },
-        remove: function (workspaceId, userId, todoIds, callback) {
+        removeItems: function (workspaceId, userId, todoIds, callback) {
             asyncCycle(todoIds, function (todoId, index, next) {
                 db.query("" +
                     "DELETE FROM Todo " +
@@ -406,6 +406,7 @@ module.exports = function (db, developmentMode) {
         createWorkspace: function (name, creatorId, callback) {
             addWorkspace(name, creatorId, false, callback);
         },
+        //TODO: return not only ID
         getWorkspaces: function (userId, callback) {
             db.query("" +
                 "SELECT workspaceId " +
@@ -577,6 +578,8 @@ module.exports = function (db, developmentMode) {
                 callback(result);
             });
         },
+        //TODO: pagination
+        //SELECT COUNT(*) AS total, * FROM UserAccount SKIP 5 LIMIT 5
         getAllUsers: function (callback) {
             db.query("" +
                 "SELECT userId, displayName, registeredDate " +
@@ -599,6 +602,7 @@ module.exports = function (db, developmentMode) {
                 });
             });
         },
+        //TODO: pagination
         getAllUsersWithPermissions: function (workspaceId, callback) {
             db.query("" +
                 "SELECT userId, displayName, registeredDate " +

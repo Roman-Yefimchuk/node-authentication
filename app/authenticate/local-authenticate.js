@@ -63,7 +63,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
         };
     }
 
-    app.post('/api/login', function (request, response, next) {
+    app.post('/api/authenticate/login', function (request, response, next) {
 
         var authenticateHandler = getAuthenticateHandler(request, response, function (user, callback) {
             dbProvider.setUserWorkspaceId(user.userId, request.body['workspaceId'], callback)
@@ -72,7 +72,7 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
         passport.authenticate('local-login', authenticateHandler)(request, response, next);
     });
 
-    app.post('/api/sign-up', function (request, response, next) {
+    app.post('/api/authenticate/sign-up', function (request, response, next) {
 
         var authenticateHandler = getAuthenticateHandler(request, response);
 

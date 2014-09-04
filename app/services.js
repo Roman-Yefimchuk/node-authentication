@@ -173,7 +173,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var userId = getUserId(request);
         var workspaceId = getParam('workspaceId', request);
         var todoModel = request.body['todoModel'];
-        dbProvider.save(workspaceId, userId, todoModel, function (item) {
+        dbProvider.saveItem(workspaceId, userId, todoModel, function (item) {
             resultCallback({
                 message: 'Item[' + item.itemId + '] saved',
                 data: item
@@ -185,7 +185,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var userId = getUserId(request);
         var workspaceId = getParam('workspaceId', request);
         var todoModels = request.body['todoModels'];
-        dbProvider.update(workspaceId, userId, todoModels, function () {
+        dbProvider.updateItems(workspaceId, userId, todoModels, function () {
             resultCallback('Updated ' + todoModels.length + ' item(s)');
         });
     });
@@ -194,7 +194,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var userId = getUserId(request);
         var workspaceId = getParam('workspaceId', request);
         var todoIds = request.body['todoIds'];
-        dbProvider.remove(workspaceId, userId, todoIds, function () {
+        dbProvider.removeItems(workspaceId, userId, todoIds, function () {
             resultCallback('Removed ' + todoIds.length + ' item(s)');
         });
     });

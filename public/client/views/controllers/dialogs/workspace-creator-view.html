@@ -1,6 +1,7 @@
 <div>
     <div class="modal-header">
-        <h4>
+        <span class="close" ng-click="cancel()">×</span>
+        <h4 style="margin-bottom: 0;margin-top: 0;">
             Create workspace
         </h4>
     </div>
@@ -31,16 +32,16 @@
 
     </div>
     <div class="modal-footer ng-scope" style="margin-top: 0">
+        <span class="btn btn-warning" ng-click="cancel()">
+            <i class="fa fa-share"></i>
+            &nbsp;
+            Cancel
+        </span>
         <span class="btn btn-success" ng-click="createWorkspace(workspaceName, switchWorkspace)"
               ng-class="{ 'disabled' : !workspaceName }">
             <i class="fa fa-plus"></i>
             &nbsp;
             Create workspace
-        </span>
-        <span class="btn btn-warning" ng-click="cancel()">
-            <i class="fa fa-share"></i>
-            &nbsp;
-            Cancel
         </span>
     </div>
 </div>
