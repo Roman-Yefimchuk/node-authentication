@@ -94,13 +94,10 @@
     <div class="col-md-8 column">
 
         <ol class="panel breadcrumb" ng-show="breadcrumb.length">
-            <li ng-repeat="item in breadcrumb" ng-class="{ 'active' : $last }">
-                <a ng-if="!$last" href="javascript:void(0)" ng-click="item.click()">
-                    {{ item.title }}
-                </a>
-                <span ng-if="$last">
-                    {{ item.title }}
-                </span>
+            <li ng-repeat="item in breadcrumb" ng-class="{ 'active' : $last }"><a ng-if="!$last"
+                                                                                  href="javascript:void(0)"
+                                                                                  ng-click="item.click()">{{ item.title }}
+            </a><span ng-if="$last">{{ item.title }}</span>
             </li>
         </ol>
 

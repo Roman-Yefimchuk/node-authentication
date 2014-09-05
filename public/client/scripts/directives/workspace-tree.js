@@ -19,6 +19,25 @@ angular.module('application')
                 },
                 link: function (scope, element, attr) {
 
+                    var NODE_TEMPLATE = '' +
+                        '<div style="display: table;">' +
+                        '     <span>' +
+                        '         <a href="javascript:void(0)"><i ng-show="!node.isEmpty()" class="fa" style="cursor: pointer;color: #000" ' +
+                        '            ng-class="{ \'fa-minus-square-o\' : node.expanded, \'fa-plus-square-o\' : !node.expanded }"' +
+                        '            ng-click="node.toggle($event)">' +
+                        '         </i></a><i ng-show="node.isEmpty()" class="fa fa-minus-square-o" ' +
+                        '            style="color: rgba(255, 255, 255, 0)">' +
+                        '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
+                        '            ng-class="{ \'fa-folder-open\' : node.expanded, \'fa-folder\' : !node.expanded }">' +
+                        '         </i>&nbsp;<a href="javascript:void(0)" style="cursor: pointer" ng-click="node.onSelection($event)"' +
+                        '               ng-class="{ \'bold-fond\' : node.isActive() }" href>' +
+                        '             {{ node.item["name"] }}' +
+                        '         </a>' +
+                        '     </span>' +
+                        '     <div style="padding-left: 15px" children ng-show="node.expanded">' +
+                        '     </div>' +
+                        '</div>';
+
                     var treeId = attr['treeId'];
                     if (!treeId) {
                         throw 'Tree ID not defined';
@@ -255,26 +274,7 @@ angular.module('application')
 
                             var children = item.children;
 
-                            var template = '' +
-                                '<div style="display: table;">' +
-                                '     <span>' +
-                                '         <a href="javascript:void(0)"><i ng-show="!node.isEmpty()" class="fa" style="cursor: pointer" ' +
-                                '            ng-class="{ \'fa-minus-square-o\' : node.expanded, \'fa-plus-square-o\' : !node.expanded }"' +
-                                '            ng-click="node.toggle($event)">' +
-                                '         </i></a><i ng-show="node.isEmpty()" class="fa fa-minus-square-o" ' +
-                                '            style="color: rgba(255, 255, 255, 0)">' +
-                                '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
-                                '            ng-class="{ \'fa-folder-open\' : node.expanded, \'fa-folder\' : !node.expanded }">' +
-                                '         </i>&nbsp;<a href="javascript:void(0)" style="cursor: pointer" ng-click="node.onSelection($event)"' +
-                                '               ng-class="{ \'bold-fond\' : node.isActive() }" href>' +
-                                '             {{ node.item["name"] }}' +
-                                '         </a>' +
-                                '     </span>' +
-                                '     <div style="padding-left: 15px" children ng-show="node.expanded">' +
-                                '     </div>' +
-                                '</div>';
-
-                            var treeNode = angular.element(template);
+                            var treeNode = angular.element(NODE_TEMPLATE);
 
                             {
                                 var nodeScope = scope.$new(scope);
