@@ -636,7 +636,9 @@ module.exports = function (db, developmentMode) {
                 });
             });
         },
-        //TODO: pagination
+        getUsersCount: function (callback) {
+            getUsersCount(callback);
+        },
         getAllUsers: function (skip, limit, callback) {
             getUsersCount(function (count) {
                 if (count > 0) {
@@ -671,7 +673,6 @@ module.exports = function (db, developmentMode) {
                 }
             });
         },
-        //TODO: pagination
         getAllUsersWithPermissions: function (workspaceId, skip, limit, callback) {
             getUsersCount(function (count) {
                 if (count > 0) {

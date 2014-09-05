@@ -43,6 +43,12 @@ angular.module('application')
                         throw 'Tree ID not defined';
                     }
 
+                    var treeScope = null;
+
+                    var rootNodes = {};
+                    var nodes = {};
+                    var gcCounter = 0;
+
                     var Node = (function () {
 
                         function Node(nodeScope, item, element, parentNode, level) {
@@ -53,7 +59,7 @@ angular.module('application')
                             this.level = level;
 
                             this.expanded = false;
-                            this.isLoaded = false;
+                            this.isLoaded = !item.childrenCount;
                             this.childrenElement = element.find("[children]")
                         }
 
@@ -113,8 +119,7 @@ angular.module('application')
 
                                             _.forEach(data, function (item) {
                                                 item = wrapItem(item);
-                                                var node = context.insert(item);
-                                                node.isLoaded = item.childrenCount == 0
+                                                context.insert(item);
                                             });
 
                                             toggle();
@@ -131,21 +136,49 @@ angular.module('application')
                             $event.stopPropagation();
                         };
 
-                        Node.prototype.insert = function (childItem) {
+                        Node.prototype.insert = function (childItem, callback) {
                             var context = this;
 
                             if (childItem) {
 
-                                childItem.children = childItem.children || [];
+                                var insert = function () {
+                                    childItem.children = childItem.children || [];
 
-                                var children = context.item['children'];
-                                children.push(childItem);
+                                    var children = context.item['children'];
+                                    children.push(childItem);
 
-                                var nodeScope = context.nodeScope;
-                                var childrenElement = context.childrenElement;
-                                var level = context.level;
+                                    var nodeScope = context.nodeScope;
+                                    var childrenElement = context.childrenElement;
+                                    var level = context.level;
 
-                                return makeTreeNodes(nodeScope, [childItem], childrenElement, context, level + 1)[0];
+                                    var childNode = makeTreeNodes(nodeScope, [childItem], childrenElement, context, level + 1)[0];
+
+                                    (callback || angular.noop)(childNode);
+                                };
+
+                                if (context.isLoaded) {
+                                    insert();
+                                } else {
+                                    if (scope.onLoading) {
+                                        scope.onLoading({
+                                            item: context.item,
+                                            callback: function (data, wrapItem) {
+                                                context.isLoaded = true;
+
+                                                _.forEach(data, function (item) {
+                                                    item = wrapItem(item);
+                                                    context.insert(item);
+                                                });
+
+                                                var childNode = nodes[data[data.length - 1].id];
+                                                (callback || angular.noop)(childNode)
+                                            }
+                                        })
+                                    } else {
+                                        context.isLoaded = true;
+                                        insert();
+                                    }
+                                }
                             }
                         };
 
@@ -188,35 +221,30 @@ angular.module('application')
 
                     })();
 
-                    scope.$on('workspaceTree[' + treeId + ']:search', function (event, id, callback) {
-                        if (typeof callback == 'function') {
-                            callback(global[id]);
-                        } else {
-                            $log.debug('callback is not function');
+                    function compact(obj) {
+                        var result = {};
+                        _.forEach(obj, function (node) {
+                            if (node) {
+                                result[node.item['id']] = node;
+                            }
+                        });
+                        return result;
+                    }
+
+                    function removeNode(id) {
+                        nodes[id] = null;
+                        if (rootNodes[id]) {
+                            rootNodes[id] = null;
                         }
-                    });
-
-                    scope.activeNode = null;
-
-                    var global = {};
-                    var gcCounter = 0;
-
-                    function removeFromGlobal(id) {
-                        global[id] = null;
                         if (++gcCounter == 10) {
 
-                            var result = {};
-                            _.forEach(global, function (node) {
-                                if (node) {
-                                    result[node.item['id']] = node;
-                                }
-                            });
+                            nodes = compact(nodes);
+                            rootNodes = compact(rootNodes);
 
-                            global = result;
                             gcCounter = 0;
 
                             $log.debug('Compacted');
-                            $log.debug(global);
+                            $log.debug(nodes);
                             $log.debug('----------------------');
                         }
                     }
@@ -224,42 +252,25 @@ angular.module('application')
                     function getTreeScope() {
                         var treeScope = scope.$new(scope);
                         treeScope.$on('$destroy', function (event) {
-                            global = {};
+                            nodes = {};
                             $log.debug('WorkspaceTree destroyed');
                         });
 
                         return treeScope;
                     }
 
-                    var treeScope = null;
-
-                    scope.$watch('treeModel', function (treeModel) {
-                        element.empty();
-
-                        if (treeScope) {
-                            treeScope.$destroy();
-                        }
-
-                        if (treeModel) {
-                            treeScope = getTreeScope();
-                            makeTreeNodes(treeScope, treeModel, element);
-
-                            $rootScope.$broadcast('workspaceTree[' + treeId + ']:ready');
-                        }
-                    });
-
                     function getNode(nodeScope, item, element, parentNode, level) {
 
                         var node = new Node(nodeScope, item, element, parentNode, level);
 
-                        if (global[item.id]) {
+                        if (nodes[item.id]) {
                             $log.debug('Duplicated ID: ' + item.id);
                             $log.debug('Item:');
                             $log.debug(item);
                             $log.debug('-----------------------------');
                         }
 
-                        global[item.id] = node;
+                        nodes[item.id] = node;
 
                         return node;
                     }
@@ -279,12 +290,17 @@ angular.module('application')
                             {
                                 var nodeScope = scope.$new(scope);
 
+                                var node = getNode(nodeScope, item, treeNode, parentNode, level);
+                                nodeScope.node = node;
+
                                 nodeScope.$on('$destroy', function (event) {
-                                    removeFromGlobal(item.id);
-                                    $log.debug(nodeScope.node.item.name + ' destroyed');
+                                    removeNode(item.id);
+                                    $log.debug(node.item['name'] + ' destroyed');
                                 });
 
-                                nodeScope.node = getNode(nodeScope, item, treeNode, parentNode, level);
+                                if (level == 0) {
+                                    rootNodes[item.id] = node;
+                                }
                             }
 
                             $compile(treeNode)(nodeScope);
@@ -298,6 +314,41 @@ angular.module('application')
 
                         return result;
                     }
+
+                    scope.needShift = function () {
+                        for (var index = 0; index < rootNodes.length; index++) {
+                            var rootNode = rootNodes[index];
+                            if (rootNode.childrenCount || rootNode.children['length']) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    };
+
+                    scope.$on('workspaceTree[' + treeId + ']:search', function (event, id, callback) {
+                        if (typeof callback == 'function') {
+                            callback(nodes[id]);
+                        } else {
+                            $log.debug('callback is not function');
+                        }
+                    });
+
+                    scope.activeNode = null;
+
+                    scope.$watch('treeModel', function (treeModel) {
+                        element.empty();
+
+                        if (treeScope) {
+                            treeScope.$destroy();
+                        }
+
+                        if (treeModel) {
+                            treeScope = getTreeScope();
+                            makeTreeNodes(treeScope, treeModel, element);
+
+                            $rootScope.$broadcast('workspaceTree[' + treeId + ']:ready');
+                        }
+                    });
                 }
             };
         }

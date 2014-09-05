@@ -151,13 +151,8 @@ angular.module('application')
                             var treeModel = [];
 
                             _.forEach(workspaces, function (workspace) {
-                                treeModel.push({
-                                    name: workspace.name,
-                                    id: workspace.id,
-                                    childrenCount: workspace.childrenCount,
-                                    children: [],
-                                    workspace: workspace
-                                });
+                                var item = workspaceToItem(workspace);
+                                treeModel.push(item);
                             });
 
                             $scope.treeModel = treeModel;
@@ -453,12 +448,12 @@ angular.module('application')
                         var activeNode = $scope.activeNode;
 
                         var item = workspaceToItem(workspace);
-                        var node = activeNode.insert(item);
-
-                        if (switchWorkspace) {
-                            updateActiveNode(node);
-                        }
-                        callback();
+                        activeNode.insert(item, function (node) {
+                            if (switchWorkspace) {
+                                updateActiveNode(node);
+                            }
+                            callback();
+                        });
                     }
                 });
                 $scope.workspaceDropdown['isOpen'] = false;
