@@ -30,8 +30,7 @@ angular.module('application')
                         '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
                         '            ng-class="{ \'fa-folder-open\' : node.expanded, \'fa-folder\' : !node.expanded }">' +
                         '         </i>&nbsp;<a href="javascript:void(0)" style="cursor: pointer" ng-click="node.onSelection($event)"' +
-                        '               ng-class="{ \'bold-fond\' : node.isActive() }" href>' +
-                        '             {{ node.item["name"] }}' +
+                        '               ng-class="{ \'bold-fond\' : node.isActive() }" href>{{ node.item["name"] }}<span ng-show="node.isLoading">&nbsp;<i class="fa fa-refresh fa-spin" style="color: #000"></i></span>' +
                         '         </a>' +
                         '     </span>' +
                         '     <div style="padding-left: 15px" children ng-show="node.expanded">' +
@@ -60,7 +59,8 @@ angular.module('application')
 
                             this.expanded = false;
                             this.isLoaded = !item.childrenCount;
-                            this.childrenElement = element.find("[children]")
+                            this.childrenElement = element.find("[children]");
+                            this.isLoading = false;
                         }
 
                         Node.prototype.onSelection = function ($event) {
@@ -99,9 +99,8 @@ angular.module('application')
                         Node.prototype.toggle = function ($event) {
                             var context = this;
 
-                            context.expanded = !context.expanded;
-
                             function toggle() {
+                                context.expanded = !context.expanded;
                                 if (scope.onToggle) {
                                     scope.onToggle({
                                         node: this,
@@ -110,8 +109,9 @@ angular.module('application')
                                 }
                             }
 
-                            if (context.expanded && !context.isLoaded) {
+                            if (!context.expanded && !context.isLoaded) {
                                 if (scope.onLoading) {
+                                    context.isLoading = true;
                                     scope.onLoading({
                                         item: context.item,
                                         callback: function (data, wrapItem) {
@@ -121,6 +121,8 @@ angular.module('application')
                                                 item = wrapItem(item);
                                                 context.insert(item);
                                             });
+
+                                            context.isLoading = false;
 
                                             toggle();
                                         }
@@ -160,6 +162,7 @@ angular.module('application')
                                     insert();
                                 } else {
                                     if (scope.onLoading) {
+                                        context.isLoading = true;
                                         scope.onLoading({
                                             item: context.item,
                                             callback: function (data, wrapItem) {
@@ -169,6 +172,8 @@ angular.module('application')
                                                     item = wrapItem(item);
                                                     context.insert(item);
                                                 });
+
+                                                context.isLoading = false;
 
                                                 var childNode = nodes[data[data.length - 1].id];
                                                 (callback || angular.noop)(childNode)
