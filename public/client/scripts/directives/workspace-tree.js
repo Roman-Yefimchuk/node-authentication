@@ -19,6 +19,11 @@ angular.module('application')
                 },
                 link: function (scope, element, attr) {
 
+                    var treeId = attr['treeId'];
+                    if (!treeId) {
+                        throw 'Tree ID not defined';
+                    }
+
                     var Node = (function () {
 
                         function Node(nodeScope, item, element, parentNode, level) {
@@ -62,11 +67,8 @@ angular.module('application')
 
                         Node.prototype.isEmpty = function () {
                             var item = this.item;
-                            if (this.isLoaded) {
-                                return !item.children['length'];
-                            } else {
-                                return !(item.childrenCount || item.children['length']);
-                            }
+
+                            return !(item.childrenCount || item.children['length']);
                         };
 
                         Node.prototype.toggle = function ($event) {
@@ -91,7 +93,9 @@ angular.module('application')
                                             context.isLoaded = true;
 
                                             _.forEach(data, function (item) {
-                                                context.insert(wrapItem(item));
+                                                item = wrapItem(item);
+                                                var node = context.insert(item);
+                                                node.isLoaded = item.childrenCount == 0
                                             });
 
                                             toggle();
@@ -165,7 +169,7 @@ angular.module('application')
 
                     })();
 
-                    scope.$on('workspaceTree:search', function (event, id, callback) {
+                    scope.$on('workspaceTree[' + treeId + ']:search', function (event, id, callback) {
                         if (typeof callback == 'function') {
                             callback(global[id]);
                         } else {
@@ -221,7 +225,7 @@ angular.module('application')
                             treeScope = getTreeScope();
                             makeTreeNodes(treeScope, treeModel, element);
 
-                            $rootScope.$broadcast('workspaceTree:ready');
+                            $rootScope.$broadcast('workspaceTree[' + treeId + ']:ready');
                         }
                     });
 

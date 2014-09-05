@@ -166,8 +166,8 @@ angular.module('application')
 
                             $scope.user = user;
 
-                            $scope.$on('workspaceTree:ready', function () {
-                                $rootScope.$broadcast('workspaceTree:search', user.workspaceId, function (node) {
+                            var ready = $scope.$on('workspaceTree[home-tree]:ready', function () {
+                                $rootScope.$broadcast('workspaceTree[home-tree]:search', user.workspaceId, function (node) {
                                     if (node) {
                                         updateActiveNode(node);
                                     }
@@ -182,6 +182,8 @@ angular.module('application')
                                         userName: user.displayName
                                     });
                                 });
+
+                                ready();
                             });
                         });
                     });
@@ -201,13 +203,7 @@ angular.module('application')
                 var workspace = item.workspace;
                 apiService.getPermittedWorkspaces(workspace.id, function (data) {
                     callback(data, function (workspace) {
-                        return {
-                            name: workspace.name,
-                            id: workspace.id,
-                            workspace: workspace,
-                            childrenCount: workspace.childrenCount,
-                            children: []
-                        };
+                        return workspaceToItem(workspace);
                     });
                 });
             };
@@ -267,7 +263,7 @@ angular.module('application')
 
             $scope.userHasLeft = function (userId, callback) {
                 apiService.getUser(userId, function (user) {
-                    $scope.presentUsers = $scope.presentUsers.filter(function (value) {
+                    $scope.presentUsers = _.filter($scope.presentUsers, function (value) {
                         return value != userId;
                     });
                     callback(user);
@@ -456,12 +452,9 @@ angular.module('application')
                     createCallback: function (workspace, switchWorkspace, callback) {
                         var activeNode = $scope.activeNode;
 
-                        var node = activeNode.insert({
-                            name: workspace.name,
-                            id: workspace.id,
-                            workspace: workspace,
-                            children: []
-                        });
+                        var item = workspaceToItem(workspace);
+                        var node = activeNode.insert(item);
+
                         if (switchWorkspace) {
                             updateActiveNode(node);
                         }
@@ -476,6 +469,16 @@ angular.module('application')
                     $location.path('/logout');
                 });
             };
+
+            function workspaceToItem(workspace) {
+                return {
+                    name: workspace.name,
+                    id: workspace.id,
+                    childrenCount: workspace.childrenCount || 0,
+                    children: [],
+                    workspace: workspace
+                };
+            }
 
             function updateActiveNode(node) {
                 $scope.activeNode = node;

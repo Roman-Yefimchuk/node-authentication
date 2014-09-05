@@ -72,13 +72,15 @@ angular.module('application')
                     $scope.errorMessage = 'System empty';
                 }
 
-                $scope.$on('workspaceTree:ready', function () {
-                    $rootScope.$broadcast('workspaceTree:search', getWorkspaceId(), function (node) {
+                var ready = $scope.$on('workspaceTree[login-tree]:ready', function () {
+                    $rootScope.$broadcast('workspaceTree[login-tree]:search', getWorkspaceId(), function (node) {
                         if (node) {
                             node.setActive();
                         }
                         loaderService.hideLoader();
                     });
+
+                    ready();
                 });
             });
 
