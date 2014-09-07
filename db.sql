@@ -11,6 +11,7 @@ CREATE CLASS User
 CREATE PROPERTY User.accountId STRING 
 CREATE PROPERTY User.currentWorkspaceId STRING
 CREATE PROPERTY User.registeredDate LONG
+CREATE PROPERTY User.role STRING
 
 CREATE CLASS UserAccount
 CREATE PROPERTY UserAccount.userId STRING
@@ -20,6 +21,9 @@ CREATE PROPERTY UserAccount.password STRING
 CREATE PROPERTY UserAccount.email STRING
 CREATE PROPERTY UserAccount.token STRING
 CREATE PROPERTY UserAccount.authorizationProvider STRING
+CREATE PROPERTY UserAccount.avatarUrl STRING
+CREATE PROPERTY UserAccount.sex STRING
+CREATE PROPERTY UserAccount.birthday LONG
 CREATE PROPERTY UserAccount.registeredDate LONG
 
 CREATE CLASS Workspace

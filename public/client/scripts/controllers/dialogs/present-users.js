@@ -6,24 +6,118 @@ angular.module('application')
 
         '$scope',
         '$modalInstance',
+        '$log',
         'apiService',
         'options',
 
-        function ($scope, $modalInstance, apiService, options) {
+        function ($scope, $modalInstance, $log, apiService, options) {
 
-            var presentUsers = options.presentUsers;
+            var presentUsers = angular.copy(options['presentUsers']);
+            var workspaceId = options.workspaceId;
+            var visibleUsers = [];
+            var pagination = {
+                itemsPerPage: 5,
+                maxPaginationSize: 5,
+                totalItems: presentUsers.length,
+                pageNumber: 1
+            };
 
-            if (presentUsers.length > 0) {
-                apiService.getUsers(presentUsers, function (users) {
-                    $scope.presentUsers = users;
+            function updateDialogTitle() {
+                $scope.dialogTitle = "Here @{usersCount} user(s)".format({
+                    usersCount: presentUsers.length
                 });
-            } else {
-                $scope.presentUsers = [];
             }
+
+            function updatePage() {
+                pagination.totalItems = presentUsers.length;
+                if (presentUsers.length > 0) {
+                    var users = getUsersForPage();
+                    if (!angular.equals(users, visibleUsers)) {
+                        visibleUsers = angular.copy(users);
+                        apiService.getUsers(visibleUsers, function (users) {
+                            $scope.presentUsers = users;
+                        });
+                    }
+                } else {
+                    $scope.presentUsers = [];
+                    visibleUsers = [];
+                }
+            }
+
+            function getUsersForPage() {
+                var users = [];
+
+                if (pagination.totalItems > pagination.itemsPerPage) {
+
+                    var fromIndex = (pagination.pageNumber - 1) * pagination.itemsPerPage;
+                    for (var index = 0; (index + fromIndex < presentUsers.length) && (index < pagination.itemsPerPage); index++) {
+                        users.push(presentUsers[index + fromIndex]);
+                    }
+                } else {
+                    users = presentUsers;
+                }
+
+                return users;
+            }
+
+            function addUser(userId) {
+                if (_.indexOf(presentUsers, userId) == -1) {
+                    presentUsers.push(userId);
+                    updatePage();
+                    updateDialogTitle();
+                } else {
+                    $log.debug('User [@{userId}] already in this workspace'.format({
+                        userId: userId
+                    }));
+                }
+            }
+
+            function removeUser(userId) {
+                if (_.indexOf(presentUsers, userId) == -1) {
+                    $log.debug('User [@{userId}] not found in this workspace'.format({
+                        userId: userId
+                    }));
+                } else {
+
+                    presentUsers = _.without(presentUsers, userId);
+
+                    var pagesCount = Math.ceil(presentUsers.length / pagination.itemsPerPage);
+                    if (pagination.pageNumber > pagesCount) {
+                        pagination.pageNumber--;
+                    } else {
+                        updatePage();
+                    }
+
+                    updateDialogTitle();
+                }
+            }
+
+            updateDialogTitle();
+
+            $scope.pagination = pagination;
+            $scope.usersForPage = [];
+
+            $scope.$watch('pagination.pageNumber', function () {
+                updatePage();
+            });
 
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
+
+            $scope.$on('socketsService:userDisconnected', function (event, data) {
+                var userId = data['userId'];
+                removeUser(userId);
+            });
+
+            $scope.$on('socketsService:changedWorkspace', function (event, data) {
+                var userId = data['userId'];
+                if (data['workspaceId'] == workspaceId) {
+                    addUser(userId);
+                } else {
+                    removeUser(userId);
+                }
+            });
         }
     ]
 );

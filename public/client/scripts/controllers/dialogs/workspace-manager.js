@@ -11,21 +11,33 @@ angular.module('application')
 
         function ($scope, $modalInstance, apiService, options) {
 
-            $scope.pagination = {
+            var originalCollection = [];
+            var workspace = options.workspace;
+
+            var pagination = {
                 itemsPerPage: 5,
                 maxPaginationSize: 5,
-                totalPages: 0,
+                totalItems: 0,
                 pageNumber: 1
             };
 
-            $scope.itemsPerPage = 5;
-            $scope.maxPaginationSize = 5;
+            function updatePage() {
+                apiService.getAllUsersWithPermissions(workspace.id, {
+                    skip: (pagination.pageNumber - 1) * pagination.itemsPerPage,
+                    limit: pagination.itemsPerPage
+                }, function (result) {
+                    pagination.totalItems = result.count;
+
+                    if (result.count > 0) {
+                        $scope.users = result.users;
+                        originalCollection = angular.copy($scope.users);
+                    }
+                });
+            }
+
+            $scope.pagination = pagination;
 
             $scope.users = [];
-
-            var originalCollection = [];
-
-            var workspace = options.workspace;
 
             $scope.userId = options.userId;
             $scope.workspace = workspace;
@@ -33,25 +45,6 @@ angular.module('application')
 
             $scope.dialogTitle = workspace.name;
             $scope.workspaceId = workspace.id;
-
-            function updatePage() {
-                apiService.getAllUsersWithPermissions(workspace.id, {
-                    skip: ($scope.pagination['pageNumber'] - 1) * $scope.pagination['itemsPerPage'],
-                    limit: $scope.pagination['itemsPerPage']
-                }, function (result) {
-                    $scope.pagination['totalPages'] = result.count;
-                    if (result.count > 0) {
-
-/*                        $scope.users = _.filter(result.users, function (user) {
-                            return user.id != $scope.userId;
-                        });*/
-
-                        $scope.users = result.users;
-
-                        originalCollection = angular.copy($scope.users);
-                    }
-                });
-            }
 
             $scope.$watch('pagination.pageNumber', function () {
                 updatePage();

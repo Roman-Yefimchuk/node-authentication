@@ -155,12 +155,6 @@ angular.module('application')
                                 treeModel.push(item);
                             });
 
-                            $scope.treeModel = treeModel;
-
-                            $scope.workspaces = workspaces;
-
-                            $scope.user = user;
-
                             var ready = $scope.$on('workspaceTree[home-tree]:ready', function () {
                                 $rootScope.$broadcast('workspaceTree[home-tree]:search', user.workspaceId, function (node) {
                                     if (node) {
@@ -180,6 +174,10 @@ angular.module('application')
 
                                 ready();
                             });
+
+                            $scope.treeModel = treeModel;
+                            $scope.workspaces = workspaces;
+                            $scope.user = user;
                         });
                     });
                 },
@@ -433,6 +431,7 @@ angular.module('application')
 
             $scope.showPresentUsers = function () {
                 dialogsService.showPresentUsers({
+                    workspaceId: getWorkspaceId(),
                     presentUsers: $scope.presentUsers
                 });
             };

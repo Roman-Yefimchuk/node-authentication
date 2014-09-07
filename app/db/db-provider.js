@@ -45,6 +45,8 @@ module.exports = function (db, developmentMode) {
                     accessManager: false
                 });
             }
+        }).catch(function (error) {
+            throw error;
         });
     }
 
@@ -54,6 +56,8 @@ module.exports = function (db, developmentMode) {
             "FROM UserAccount", {
         }).then(function (results) {
             callback(results[0].count);
+        }).catch(function (error) {
+            throw error;
         });
     }
 
@@ -67,6 +71,8 @@ module.exports = function (db, developmentMode) {
             }
         }).then(function (results) {
             callback(results[0].count);
+        }).catch(function (error) {
+            throw error;
         });
     }
 
@@ -81,6 +87,8 @@ module.exports = function (db, developmentMode) {
             }
         }).then(function (results) {
             callback(results[0].count);
+        }).catch(function (error) {
+            throw error;
         });
     }
 
@@ -100,6 +108,8 @@ module.exports = function (db, developmentMode) {
             } else {
                 callback(false);
             }
+        }).catch(function (error) {
+            throw error;
         });
     }
 
@@ -137,7 +147,11 @@ module.exports = function (db, developmentMode) {
                     creatorId: workspace.creatorId,
                     createdDate: workspace.createdDate
                 });
+            }).catch(function (error) {
+                throw error;
             });
+        }).catch(function (error) {
+            throw error;
         });
     }
 
@@ -347,6 +361,8 @@ module.exports = function (db, developmentMode) {
                 });
 
                 callback(result);
+            }).catch(function (error) {
+                throw error;
             });
         },
         saveItem: function (workspaceId, userId, todoModel, callback) {
@@ -366,6 +382,8 @@ module.exports = function (db, developmentMode) {
                     itemId: encodeId(item),
                     createdDate: item.createdDate
                 });
+            }).catch(function (error) {
+                throw error;
             });
         },
         updateItems: function (workspaceId, userId, todoModels, callback) {
@@ -381,6 +399,8 @@ module.exports = function (db, developmentMode) {
                     }
                 }).then(function (total) {
                     next();
+                }).catch(function (error) {
+                    throw error;
                 });
             }, function () {
                 callback();
@@ -396,6 +416,8 @@ module.exports = function (db, developmentMode) {
                     }
                 }).then(function (total) {
                     next();
+                }).catch(function (error) {
+                    throw error;
                 });
             }, function () {
                 callback();
@@ -420,6 +442,8 @@ module.exports = function (db, developmentMode) {
                 } else {
                     throw 'User not found';
                 }
+            }).catch(function (error) {
+                throw error;
             });
         },
         getUserWorkspaceId: function (userId, callback) {
@@ -438,6 +462,8 @@ module.exports = function (db, developmentMode) {
                 } else {
                     throw 'User not found';
                 }
+            }).catch(function (error) {
+                throw error;
             });
         },
         createDefaultWorkspace: function (name, creatorId, callback) {
@@ -464,6 +490,8 @@ module.exports = function (db, developmentMode) {
                 });
 
                 callback(result);
+            }).catch(function (error) {
+                throw error;
             });
         },
         getWorkspace: function (workspaceId, callback) {
@@ -486,6 +514,8 @@ module.exports = function (db, developmentMode) {
                 } else {
                     throw 'Workspace not found';
                 }
+            }).catch(function (error) {
+                throw error;
             });
         },
         getDefaultWorkspaceId: function (userId, callback) {
@@ -504,6 +534,8 @@ module.exports = function (db, developmentMode) {
                 } else {
                     throw 'User not found';
                 }
+            }).catch(function (error) {
+                throw error;
             });
         },
         getUser: function (userId, callback) {
@@ -525,6 +557,8 @@ module.exports = function (db, developmentMode) {
                 } else {
                     throw 'User not found';
                 }
+            }).catch(function (error) {
+                throw error;
             });
         },
         getUsers: function (ids, callback) {
@@ -549,6 +583,8 @@ module.exports = function (db, developmentMode) {
                     });
 
                     next();
+                }).catch(function (error) {
+                    throw error;
                 });
             }, function () {
                 callback(result);
@@ -596,10 +632,14 @@ module.exports = function (db, developmentMode) {
 
                             next();
                         });
+                    }).catch(function (error) {
+                        throw error;
                     });
                 }, function () {
                     callback(result);
                 });
+            }).catch(function (error) {
+                throw error;
             });
         },
         getAllWorkspaces: function (parentWorkspaceId, callback) {
@@ -634,6 +674,8 @@ module.exports = function (db, developmentMode) {
                 }, function () {
                     callback(result);
                 });
+            }).catch(function (error) {
+                throw error;
             });
         },
         getUsersCount: function (callback) {
@@ -664,6 +706,8 @@ module.exports = function (db, developmentMode) {
                                 count: count
                             });
                         });
+                    }).catch(function (error) {
+                        throw error;
                     });
                 } else {
                     callback({
@@ -706,6 +750,8 @@ module.exports = function (db, developmentMode) {
                                 count: count
                             });
                         });
+                    }).catch(function (error) {
+                        throw error;
                     });
                 } else {
                     callback({
@@ -754,6 +800,8 @@ module.exports = function (db, developmentMode) {
                                 }
                             }).then(function (total) {
                                 next();
+                            }).catch(function (error) {
+                                throw error;
                             });
                         } else {
                             db.query("" +
@@ -770,8 +818,12 @@ module.exports = function (db, developmentMode) {
                                 }
                             }).then(function (results) {
                                 next();
+                            }).catch(function (error) {
+                                throw error;
                             });
                         }
+                    }).catch(function (error) {
+                        throw error;
                     });
                 } else {
                     db.query("" +
@@ -783,6 +835,8 @@ module.exports = function (db, developmentMode) {
                         }
                     }).then(function (total) {
                         next();
+                    }).catch(function (error) {
+                        throw error;
                     });
                 }
             }, function () {

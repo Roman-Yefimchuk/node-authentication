@@ -257,6 +257,7 @@ angular.module('application')
                     function getTreeScope() {
                         var treeScope = scope.$new(scope);
                         treeScope.$on('$destroy', function (event) {
+                            rootNodes = {};
                             nodes = {};
                             $log.debug('WorkspaceTree destroyed');
                         });
@@ -350,9 +351,9 @@ angular.module('application')
                         if (treeModel) {
                             treeScope = getTreeScope();
                             makeTreeNodes(treeScope, treeModel, element);
-
-                            $rootScope.$broadcast('workspaceTree[' + treeId + ']:ready');
                         }
+
+                        $rootScope.$broadcast('workspaceTree[' + treeId + ']:ready');
                     });
                 }
             };

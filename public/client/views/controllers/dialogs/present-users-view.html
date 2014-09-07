@@ -2,20 +2,32 @@
     <div class="modal-header">
         <span class="close" ng-click="cancel()">×</span>
         <h4 style="margin-bottom: 0;margin-top: 0;">
-            Here <span>{{ presentUsers.length }}</span> user(s)
+            {{ dialogTitle }}
         </h4>
     </div>
     <div class="modal-body">
 
-        <div class="list-group" style="margin: 0;max-height: 400px;overflow-y: auto;">
-            <a ng-repeat="user in presentUsers"
-               href class="list-group-item">
-                User ID: <b>{{ user.id }}</b>
-                <br>
-                User name: <b>{{ user.displayName }}</b>
-                <br>
-                Registered date: <b>{{ user.registeredDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}</b>
-            </a>
+        <div class="row clearfix">
+            <div class="col-md-12 column">
+                <div class="list-group" style="margin: 0;">
+                    <a ng-repeat="user in presentUsers"
+                       href class="list-group-item">
+                        User ID: <b>{{ user.id }}</b>
+                        <br>
+                        User name: <b>{{ user.displayName }}</b>
+                        <br>
+                        Registered date: <b>{{ user.registeredDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}</b>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-md-12 column" ng-show="pagination.totalItems > pagination.itemsPerPage">
+                <pagination class="pull-right pagination-sm" total-items="pagination.totalItems"
+                            ng-model="pagination.pageNumber" max-size="pagination.maxPaginationSize"
+                            items-per-page="pagination.itemsPerPage" style="margin-bottom: 0;"
+                            previous-text="&laquo;" next-text="&raquo;">
+                </pagination>
+            </div>
         </div>
 
     </div>

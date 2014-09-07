@@ -19,6 +19,18 @@ angular.module('application')
                 }
             }
 
+            var emailPattern = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
+            var passwordPattern = /^(([a-z]|[A-Z]|[0-9]|\u005F)+){6}$/;
+
+            $scope.treeModel = [];
+            $scope.errorMessage = null;
+            $scope.currentWorkspace = undefined;
+            $scope.email = "";
+            $scope.password = "";
+            $scope.workspaceDropdown = {
+                isOpen: false
+            };
+
             $scope.onWorkspaceChanged = function (node) {
                 $scope.currentWorkspace = node.item['workspace'];
                 $scope.workspaceDropdown['isOpen'] = false;
@@ -39,15 +51,6 @@ angular.module('application')
                 });
             };
 
-            var emailPattern = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
-            var passwordPattern = /^(([a-z]|[A-Z]|[0-9]|\u005F)+){6}$/;
-
-            $scope.treeModel = [];
-
-            $scope.errorMessage = null;
-
-            $scope.currentWorkspace = undefined;
-
             loaderService.showLoader();
 
             apiService.getAllWorkspaces(getWorkspaceId(), function (workspaces) {
@@ -66,30 +69,24 @@ angular.module('application')
                         });
                     });
 
+                    var ready = $scope.$on('workspaceTree[login-tree]:ready', function () {
+                        $rootScope.$broadcast('workspaceTree[login-tree]:search', getWorkspaceId(), function (node) {
+                            if (node) {
+                                node.setActive();
+                            }
+                            loaderService.hideLoader();
+                        });
+
+                        ready();
+                    });
+
                     $scope.treeModel = treeModel;
 
                 } else {
                     $scope.errorMessage = 'System empty';
+                    loaderService.hideLoader();
                 }
-
-                var ready = $scope.$on('workspaceTree[login-tree]:ready', function () {
-                    $rootScope.$broadcast('workspaceTree[login-tree]:search', getWorkspaceId(), function (node) {
-                        if (node) {
-                            node.setActive();
-                        }
-                        loaderService.hideLoader();
-                    });
-
-                    ready();
-                });
             });
-
-            $scope.workspaceDropdown = {
-                isOpen: false
-            };
-
-            $scope.email = "";
-            $scope.password = "";
 
             $scope.isEmailValid = function () {
                 return emailPattern.test($scope['email']);

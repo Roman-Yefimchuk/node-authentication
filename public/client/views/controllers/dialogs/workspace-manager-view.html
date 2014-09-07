@@ -9,7 +9,7 @@
 
         <div class="row clearfix">
             <div class="col-md-12 column">
-                <div class="list-group" style="margin: 0;max-height: 400px;overflow-y: auto;">
+                <div class="list-group" style="margin: 0;">
                     <a ng-repeat="user in users"
                        href class="list-group-item" ng-class="{ 'disabled' : user.id == userId }">
                         <div list-item user="user"></div>
@@ -17,8 +17,8 @@
                 </div>
             </div>
 
-            <div class="col-md-12 column" ng-show="pagination.totalPages > pagination.itemsPerPage">
-                <pagination class="pull-right pagination-sm" total-items="pagination.totalPages"
+            <div class="col-md-12 column" ng-show="pagination.totalItems > pagination.itemsPerPage">
+                <pagination class="pull-right pagination-sm" total-items="pagination.totalItems"
                             ng-model="pagination.pageNumber" max-size="pagination.maxPaginationSize"
                             items-per-page="pagination.itemsPerPage" style="margin-bottom: 0;"
                             previous-text="&laquo;" next-text="&raquo;">
