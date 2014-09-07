@@ -11,6 +11,7 @@ angular.module('application')
         function ($compile, $log, $rootScope) {
             return {
                 transclude: true,
+                templateUrl: '/client/views/directives/workspace-tree-view.html',
                 scope: {
                     treeModel: '=',
                     onSelection: '&',
@@ -18,6 +19,8 @@ angular.module('application')
                     onToggle: '&'
                 },
                 link: function (scope, element, attr) {
+
+                    element = element.find('[tree-view]');
 
                     var NODE_TEMPLATE = '' +
                         '<div style="display: table;">' +
@@ -322,9 +325,9 @@ angular.module('application')
                     }
 
                     scope.needShift = function () {
-                        for (var index = 0; index < rootNodes.length; index++) {
-                            var rootNode = rootNodes[index];
-                            if (rootNode.childrenCount || rootNode.children['length']) {
+                        for (var key in rootNodes) {
+                            var rootNode = rootNodes[key];
+                            if (rootNode && !rootNode.isEmpty()) {
                                 return true;
                             }
                         }
