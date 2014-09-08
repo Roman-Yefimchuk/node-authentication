@@ -6,27 +6,24 @@ angular.module('application')
 
         '$scope',
         '$modalInstance',
-        'apiService',
         'options',
 
-        function ($scope, $modalInstance, apiService, options) {
+        function ($scope, $modalInstance, options) {
 
-            var workspaceId = options.workspaceId;
-            var createCallback = options.createCallback;
+            var onCreate = options.onCreate;
 
-            $scope.workspaceName = 'New workspace';
-            $scope.workspaceId = workspaceId;
-            $scope.switchWorkspace = false;
+            $scope.creatorModel = {
+                workspaceName: 'New workspace',
+                switchWorkspace: false
+            };
 
-            $scope.createWorkspace = function (workspaceName, workspaceId, switchWorkspace) {
-                var workspaceName = workspaceName.trim();
+            $scope.createWorkspace = function () {
+                var workspaceName = $scope.creatorModel['workspaceName'];
+                workspaceName = workspaceName.trim();
 
                 if (workspaceName) {
-                    apiService.createWorkspace(workspaceName, workspaceId, function (data) {
-                        var workspace = data.workspace;
-                        createCallback(workspace, switchWorkspace, function () {
-                            $modalInstance.close();
-                        });
+                    onCreate(workspaceName, $scope.creatorModel['switchWorkspace'], function () {
+                        $modalInstance.close();
                     });
                 }
             };

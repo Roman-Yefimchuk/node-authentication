@@ -175,6 +175,18 @@ angular.module('application')
                     }, {
                         success: callback
                     });
+                },
+                updateWorkspace: function (workspaceId, data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: '/api/update-workspace',
+                        data: {
+                            workspaceId: workspaceId,
+                            data: data
+                        }
+                    }, {
+                        success: callback
+                    });
                 }
             };
         }

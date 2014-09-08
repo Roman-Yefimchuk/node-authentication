@@ -3,7 +3,8 @@
 angular.module('application', [
 
     'ui.bootstrap',
-    'ngRoute'
+    'ngRoute',
+    'ngSanitize'
 
 ]).config([
 
@@ -16,6 +17,14 @@ angular.module('application', [
     function ($routeProvider, $locationProvider, $httpProvider, $logProvider, DEBUG_MODE) {
 
         $logProvider.debugEnabled(DEBUG_MODE);
+
+        if (DEBUG_MODE) {
+            //TODO: debug mode
+            window.onerror = function (message, file) {
+                alert(message);
+                alert(file);
+            };
+        }
 
         $routeProvider.when('/', {
             templateUrl: '/client/views/controllers/index-view.html',

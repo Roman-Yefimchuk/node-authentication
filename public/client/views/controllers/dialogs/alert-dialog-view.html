@@ -1,0 +1,25 @@
+<div>
+    <div class="modal-header">
+        <span class="close" ng-click="ok()">×</span>
+        <h4 style="margin-bottom: 0;margin-top: 0;">
+            <i class="fa fa-info-circle"></i>
+            &nbsp;
+            <span ng-bind-html="title">
+            </span>
+        </h4>
+    </div>
+
+    <div class="modal-body">
+
+        <div ng-bind-html="message">
+        </div>
+
+    </div>
+    <div class="modal-footer ng-scope" style="margin-top: 0">
+        <span class="btn btn-success btn-sm" ng-click="ok()">
+            <i class="fa fa-check"></i>
+            &nbsp;
+            Ok
+        </span>
+    </div>
+</div>

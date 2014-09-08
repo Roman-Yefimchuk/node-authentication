@@ -115,13 +115,13 @@ module.exports = function (db, developmentMode) {
 
     function createWorkspace(name, creatorId, parentWorkspaceId, isDefault, callback) {
         db.query("" +
-            "INSERT INTO Workspace (name, creatorId, parentWorkspaceId, createDate) " +
-            "VALUES (:name, :creatorId, :parentWorkspaceId, :createDate)", {
+            "INSERT INTO Workspace (name, creatorId, parentWorkspaceId, creationDate) " +
+            "VALUES (:name, :creatorId, :parentWorkspaceId, :creationDate)", {
             params: {
                 name: name,
                 creatorId: creatorId,
                 parentWorkspaceId: parentWorkspaceId || ROOT_ID,
-                createDate: _.now()
+                creationDate: _.now()
             }
         }).then(function (results) {
             var workspace = results[0];
@@ -145,7 +145,7 @@ module.exports = function (db, developmentMode) {
                     id: workspaceId,
                     name: workspace.name,
                     creatorId: workspace.creatorId,
-                    createdDate: workspace.createdDate
+                    creationDate: workspace.creationDate
                 });
             }).catch(function (error) {
                 throw error;
@@ -356,7 +356,7 @@ module.exports = function (db, developmentMode) {
                         title: item.title,
                         completed: item.completed,
                         workspaceId: item.workspaceId,
-                        createdDate: item.createdDate
+                        creationDate: item.creationDate
                     });
                 });
 
@@ -367,20 +367,20 @@ module.exports = function (db, developmentMode) {
         },
         saveItem: function (workspaceId, userId, todoModel, callback) {
             db.query("" +
-                "INSERT INTO Todo (workspaceId, creatorId, title, completed, createdDate) " +
-                "VALUES (:workspaceId, :creatorId, :title, :completed, :createdDate)", {
+                "INSERT INTO Todo (workspaceId, creatorId, title, completed, creationDate) " +
+                "VALUES (:workspaceId, :creatorId, :title, :completed, :creationDate)", {
                 params: {
                     workspaceId: workspaceId,
                     creatorId: userId,
                     title: todoModel.title,
                     completed: todoModel.completed,
-                    createdDate: _.now()
+                    creationDate: _.now()
                 }
             }).then(function (results) {
                 var item = results[0];
                 callback({
                     itemId: encodeId(item),
-                    createdDate: item.createdDate
+                    creationDate: item.creationDate
                 });
             }).catch(function (error) {
                 throw error;
@@ -472,6 +472,21 @@ module.exports = function (db, developmentMode) {
         createWorkspace: function (name, creatorId, parentWorkspaceId, callback) {
             createWorkspace(name, creatorId, parentWorkspaceId, false, callback);
         },
+        updateWorkspace: function (workspaceId, data, callback) {
+            db.query("" +
+                "UPDATE Workspace " +
+                "SET name = :name " +
+                "WHERE @rid = :id", {
+                params: {
+                    id: decodeId(workspaceId),
+                    name: data.name
+                }
+            }).then(function (total) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        },
         //TODO: return not only ID
         getWorkspaces: function (userId, callback) {
             db.query("" +
@@ -509,7 +524,7 @@ module.exports = function (db, developmentMode) {
                         id: workspaceId,
                         name: workspace.name,
                         creatorId: workspace.creatorId,
-                        createdDate: workspace.createdDate
+                        creationDate: workspace.creationDate
                     });
                 } else {
                     throw 'Workspace not found';
@@ -621,7 +636,7 @@ module.exports = function (db, developmentMode) {
                                 id: permittedWorkspace.workspaceId,
                                 name: workspace.name,
                                 creatorId: workspace.creatorId,
-                                createdDate: workspace.createdDate,
+                                creationDate: workspace.creationDate,
                                 childrenCount: childrenCount,
                                 permissions: {
                                     readOnly: permittedWorkspace.readOnly,
@@ -664,7 +679,7 @@ module.exports = function (db, developmentMode) {
                             id: encodeId(workspace),
                             name: workspace.name,
                             creatorId: workspace.creatorId,
-                            createdDate: workspace.createdDate,
+                            creationDate: workspace.creationDate,
                             childrenCount: childrenCount
                         });
 

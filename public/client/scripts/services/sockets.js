@@ -29,6 +29,19 @@ angular.module('application')
                             workspaceId: workspaceId
                         });
                     },
+                    removedWorkspace: function (workspaceId) {
+                        emit('workspace_removed', {
+                            userId: userId,
+                            workspaceId: workspaceId
+                        });
+                    },
+                    updatedWorkspace: function (workspaceId, data) {
+                        emit('workspace_updated', {
+                            userId: userId,
+                            workspaceId: workspaceId,
+                            data: data
+                        });
+                    },
                     addedItem: function (item) {
                         emit('added_item', {
                             userId: userId,
@@ -80,11 +93,17 @@ angular.module('application')
                         _.forEach({
                             'user_connected': 'userConnected',
                             'user_disconnected': 'userDisconnected',
+
                             'changed_workspace': 'changedWorkspace',
+                            'updated_workspace': 'updatedWorkspace',
+                            'removed_workspace': 'removedWorkspace',
+
                             'added_item': 'addedItem',
                             'updated_items': 'updatedItems',
                             'removed_items': 'removedItems',
+
                             'permissions_changed': 'permissionsChanged',
+
                             'update_present_users': 'updatePresentUsers'
                         }, function (value, command) {
                             socket.on(command, function (data) {

@@ -6,11 +6,16 @@ angular.module('application')
 
         '$modal',
 
-        function ($modal) {
+        function ($modal, $window, $timeout) {
+
+            function open(modalOptions) {
+                return $modal.open(modalOptions);
+            }
+
             return {
                 showWorkspaceManager: function (options) {
-                    return $modal.open({
-                        templateUrl: '/client/views/controllers/dialogs/workspace-manager-view.html',
+                    return open({
+                        templateUrl: '/client/views/controllers/dialogs/workspace-manager/workspace-manager-view.html',
                         controller: 'WorkspaceManagerController',
                         resolve: {
                             options: function () {
@@ -20,7 +25,7 @@ angular.module('application')
                     });
                 },
                 showItemEditor: function (options) {
-                    return $modal.open({
+                    return open({
                         templateUrl: '/client/views/controllers/dialogs/item-editor-view.html',
                         controller: 'ItemEditorController',
                         resolve: {
@@ -31,7 +36,7 @@ angular.module('application')
                     });
                 },
                 showWorkspaceCreator: function (options) {
-                    return $modal.open({
+                    return open({
                         templateUrl: '/client/views/controllers/dialogs/workspace-creator-view.html',
                         controller: 'WorkspaceCreatorController',
                         resolve: {
@@ -42,9 +47,33 @@ angular.module('application')
                     });
                 },
                 showPresentUsers: function (options) {
-                    return $modal.open({
+                    return open({
                         templateUrl: '/client/views/controllers/dialogs/present-users-view.html',
                         controller: 'PresentUsersController',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
+                },
+                showConfirmation: function (options) {
+                    return open({
+                        templateUrl: '/client/views/controllers/dialogs/confirmation-dialog-view.html',
+                        controller: 'ConfirmationDialogController',
+                        size: 'sm',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
+                },
+                showAlert: function (options) {
+                    return open({
+                        templateUrl: '/client/views/controllers/dialogs/alert-dialog-view.html',
+                        controller: 'AlertDialogController',
+                        size: 'sm',
                         resolve: {
                             options: function () {
                                 return options;

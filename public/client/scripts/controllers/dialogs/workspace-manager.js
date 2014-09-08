@@ -7,22 +7,31 @@ angular.module('application')
         '$scope',
         '$modalInstance',
         'apiService',
+        'dialogsService',
         'options',
 
-        function ($scope, $modalInstance, apiService, options) {
+        function ($scope, $modalInstance, apiService, dialogsService, options) {
+
+            var defaultGenericModel = {
+                workspaceName: options.workspace['name']
+            };
+            var defaultPermissionsModel = {
+            };
 
             var originalCollection = [];
-            var workspace = options.workspace;
-
             var pagination = {
-                itemsPerPage: 5,
+                itemsPerPage: 4,
                 maxPaginationSize: 5,
                 totalItems: 0,
                 pageNumber: 1
             };
 
+            var onUpdate = options.onUpdate;
+            var onRemove = options.onRemove;
+            var onUpdatePermissions = options.onUpdatePermissions;
+
             function updatePage() {
-                apiService.getAllUsersWithPermissions(workspace.id, {
+                apiService.getAllUsersWithPermissions($scope.workspace['id'], {
                     skip: (pagination.pageNumber - 1) * pagination.itemsPerPage,
                     limit: pagination.itemsPerPage
                 }, function (result) {
@@ -35,48 +44,138 @@ angular.module('application')
                 });
             }
 
-            $scope.pagination = pagination;
+            $scope.genericModel = angular.copy(defaultGenericModel);
+            $scope.permissionsModel = angular.copy(defaultPermissionsModel);
 
+            $scope.pagination = pagination;
             $scope.users = [];
 
             $scope.userId = options.userId;
-            $scope.workspace = workspace;
-            $scope.socketConnection = options.socketConnection;
+            $scope.defaultWorkspaceId = options.defaultWorkspaceId;
+            $scope.workspace = options.workspace;
 
-            $scope.dialogTitle = workspace.name;
-            $scope.workspaceId = workspace.id;
+            $scope.tabs = [
+                {
+                    id: 'generic',
+                    title: 'Generic',
+                    icon: 'fa-folder',
+                    template: '/client/views/controllers/dialogs/workspace-manager/tabs/generic-tab-view.html',
+                    isActive: true
+                },
+                {
+                    id: 'permissions',
+                    title: 'Permissions',
+                    icon: 'fa-users',
+                    template: '/client/views/controllers/dialogs/workspace-manager/tabs/permissions-tab-view.html',
+                    isActive: false
+                }
+            ];
+
+            $scope.tab = _.find($scope.tabs, function (tab) {
+                return tab.isActive;
+            });
+
+            $scope.setActiveTab = function (tab) {
+                tab.isActive = true;
+                $scope.tab = tab;
+            };
 
             $scope.$watch('pagination.pageNumber', function () {
                 updatePage();
             });
 
             $scope.save = function () {
-                var collection = [];
 
-                _.forEach($scope.users, function (user, index) {
-                    if (!angular.equals(user.permissions, originalCollection[index].permissions)) {
-                        collection.push({
-                            userId: user.id,
-                            permissions: user.permissions
-                        });
+                switch ($scope.tab['id']) {
+                    case 'generic':
+                    {
+
+                        var name = $scope.genericModel['workspaceName'];
+                        name = name.trim();
+
+                        if (name.length > 0 && name != defaultGenericModel.workspaceName) {
+                            onUpdate(name, function () {
+                                $modalInstance.close();
+                            });
+                        }
+
+                        break;
                     }
-                });
+                    case 'permissions':
+                    {
+                        var collection = [];
 
-                if (collection.length > 0) {
-                    apiService.setUsersPermissionsForWorkspace($scope.workspaceId, collection, function () {
-                        var socketConnection = $scope.socketConnection;
-                        socketConnection.permissionsChanged(collection, $scope.workspaceId);
+                        _.forEach($scope.users, function (user, index) {
+                            if (!angular.equals(user.permissions, originalCollection[index].permissions)) {
+                                collection.push({
+                                    userId: user.id,
+                                    permissions: user.permissions
+                                });
+                            }
+                        });
 
-                        $modalInstance.close();
-                    });
-                } else {
-                    $modalInstance.close();
+                        if (collection.length > 0) {
+                            onUpdatePermissions(collection, function () {
+                                $modalInstance.close();
+                            });
+                        }
+
+                        break;
+                    }
                 }
             };
 
             $scope.cancel = function () {
                 $modalInstance.dismiss('cancel');
             };
+
+            $scope.canRemove = function () {
+                return $scope.workspace['id'] != $scope.defaultWorkspaceId;
+            };
+
+            $scope.isSaveDisabled = function () {
+                switch ($scope.tab['id']) {
+                    case 'generic':
+                    {
+
+                        var name = $scope.genericModel['workspaceName'];
+                        name = name.trim();
+
+                        return name.length == 0 || name == defaultGenericModel.workspaceName;
+                    }
+                    case 'permissions':
+                    {
+                        var collection = [];
+
+                        _.forEach($scope.users, function (user, index) {
+                            if (!angular.equals(user.permissions, originalCollection[index].permissions)) {
+                                collection.push({
+                                    userId: user.id,
+                                    permissions: user.permissions
+                                });
+                            }
+                        });
+
+                        return collection.length == 0;
+                    }
+                }
+            };
+
+            $scope.removeWorkspace = function () {
+                dialogsService.showConfirmation({
+                    title: 'Remove workspace',
+                    message: 'Do you want remove workspace <b>@{workspaceName}</b>?'.format({
+                        workspaceName: options.workspace['name']
+                    }),
+                    onAccept: function (closeCallback) {
+                        onRemove(function () {
+                            closeCallback();
+                            $modalInstance.close();
+                        });
+                    }
+                });
+            };
         }
     ]
-);
+)
+;

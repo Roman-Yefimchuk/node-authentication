@@ -1,0 +1,16 @@
+<div class="row clearfix">
+
+    <div class="col-md-12 column">
+        <label>Workspace name</label>
+        <input type="text" class="form-control input-sm" ng-model="genericModel.workspaceName">
+    </div>
+
+    <div class="col-md-12 column text-center" ng-show="canRemove()">
+        <span class="btn btn-danger btn-sm" ng-click="removeWorkspace()" style="margin-top: 15px">
+              <i class="fa fa-trash-o"></i>
+              &nbsp;
+              Remove workspace
+        </span>
+    </div>
+
+</div>

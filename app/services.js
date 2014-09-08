@@ -169,6 +169,15 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
+    serviceProvider.post('/api/update-workspace', function (request, response, resultCallback) {
+        var userId = getUserId(request);
+        var workspaceId = request.body['workspaceId'];
+        var data = request.body['data'];
+        dbProvider.updateWorkspace(workspaceId, data, function () {
+            resultCallback();
+        });
+    });
+
     serviceProvider.get('/api/items/:workspaceId', function (request, response, resultCallback) {
         var userId = getUserId(request);
         var workspaceId = getParam('workspaceId', request);

@@ -5,7 +5,7 @@ CREATE PROPERTY Todo.userId STRING
 CREATE PROPERTY Todo.title STRING
 CREATE PROPERTY Todo.completed BOOLEAN
 CREATE PROPERTY Todo.workspaceId STRING
-CREATE PROPERTY Todo.createdDate LONG
+CREATE PROPERTY Todo.creationDate LONG
 
 CREATE CLASS User
 CREATE PROPERTY User.accountId STRING 
@@ -29,7 +29,7 @@ CREATE PROPERTY UserAccount.registeredDate LONG
 CREATE CLASS Workspace
 CREATE PROPERTY Workspace.name STRING
 CREATE PROPERTY Workspace.creatorId STRING
-CREATE PROPERTY Workspace.createdDate LONG
+CREATE PROPERTY Workspace.creationDate LONG
 CREATE PROPERTY Workspace.parentWorkspaceId STRING
 
 CREATE CLASS OwnWorkspace

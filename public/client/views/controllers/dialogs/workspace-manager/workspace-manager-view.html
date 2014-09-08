@@ -1,0 +1,37 @@
+<div>
+    <div class="modal-header">
+        <span class="close" ng-click="cancel()">×</span>
+        <h4 style="margin-bottom: 0;margin-top: 0;">
+            <i class="fa fa-cogs"></i>
+            &nbsp;
+            Workspace <b>{{ workspace.name }}</b>
+        </h4>
+    </div>
+    <div class="modal-body">
+
+        <tabset>
+            <tab ng-repeat="tab in tabs" select="setActiveTab(tab)" active="tab.active"
+                 style="cursor: pointer">
+                <tab-heading>
+                    <i class="fa {{ tab.icon }}"></i>
+                    &nbsp;
+                    {{ tab.title }}
+                </tab-heading>
+                <div ng-include="tab.template" style="padding-top: 15px"></div>
+            </tab>
+        </tabset>
+
+    </div>
+    <div class="modal-footer ng-scope" style="margin-top: 0">
+        <span class="btn btn-warning btn-sm" ng-click="cancel()" href>
+            <i class="fa fa-share"></i>
+            &nbsp;
+            Cancel
+        </span>
+        <span class="btn btn-primary btn-sm" ng-click="save()" href ng-class="{'disabled': isSaveDisabled()}">
+            <i class="fa fa-floppy-o"></i>
+            &nbsp;
+            Save
+        </span>
+    </div>
+</div>

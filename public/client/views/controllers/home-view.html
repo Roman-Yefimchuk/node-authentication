@@ -94,8 +94,8 @@
         <ol class="panel breadcrumb" ng-show="breadcrumb.length">
             <li ng-repeat="item in breadcrumb" ng-class="{ 'active' : $last }"><a ng-if="!$last"
                                                                                   href="javascript:void(0)"
-                                                                                  ng-click="item.click()">{{ item.title }}
-            </a><span ng-if="$last">{{ item.title }}</span>
+                                                                                  ng-click="item.click()">{{ item.getTitle() }}
+            </a><span ng-if="$last">{{ item.getTitle() }}</span>
             </li>
         </ol>
 
@@ -126,8 +126,16 @@
                     <b>{{ currentWorkspace.name }}</b>
                 </span>
 
-                <span title="Manage workspace" class="pull-right"
+                <span title="Workspace info" class="pull-right"
                       style="cursor: pointer"
+                      ng-click="showWorkspaceInfo()">
+
+                    <i class="fa fa-info"></i>
+
+                </span>
+
+                <span title="Manage workspace" class="pull-right"
+                      style="cursor: pointer;margin-right: 15px"
                       ng-click="showWorkspaceManager()"
                       ng-show="canManageAccess()">
 
@@ -186,7 +194,7 @@
                                                 <div class="pull-right hidden-phone">
 
                                         <span style="padding-right: 8px;vertical-align: sub;">
-                                            {{ todo.createdDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}
+                                            {{ todo.creationDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}
                                         </span>
 
                                                     <span class="btn btn-primary btn-xs" title="Edit"

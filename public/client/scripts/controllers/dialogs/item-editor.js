@@ -6,13 +6,12 @@ angular.module('application')
 
         '$scope',
         '$modalInstance',
-        'apiService',
         'options',
 
-        function ($scope, $modalInstance, apiService, options) {
+        function ($scope, $modalInstance, options) {
 
             var item = options.item;
-            var editCallback = options.editCallback;
+            var onUpdate = options.onUpdate;
 
             $scope.originItemModel = item.title;
             $scope.itemModel = item.title;
@@ -22,7 +21,7 @@ angular.module('application')
 
                 if (title.length && title != item.title) {
                     item.title = title;
-                    editCallback(item, function () {
+                    onUpdate(item, function () {
                         $modalInstance.close();
                     });
                 }

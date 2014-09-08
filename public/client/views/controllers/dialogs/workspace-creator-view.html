@@ -2,24 +2,26 @@
     <div class="modal-header">
         <span class="close" ng-click="cancel()">×</span>
         <h4 style="margin-bottom: 0;margin-top: 0;">
+            <i class="fa fa-plus"></i>
+            &nbsp;
             Create workspace
         </h4>
     </div>
 
     <div class="modal-body">
 
-        <form ng-submit="createWorkspace(workspaceName, workspaceId, switchWorkspace)">
+        <form ng-submit="createWorkspace()">
 
             <div class="row clearfix">
                 <div class="col-md-12 column">
 
                     <input class="form-control input-sm" type="text"
-                           ng-model="workspaceName" autofocus autocomplete="off">
+                           ng-model="creatorModel.workspaceName" autofocus autocomplete="off">
 
-                <span class="pull-left" btn-checkbox ng-model="switchWorkspace"
+                <span class="pull-left" btn-checkbox ng-model="creatorModel.switchWorkspace"
                       style="margin-top: 15px;cursor: pointer">
                     <i class="fa"
-                       ng-class="{ 'fa-square-o' : !switchWorkspace, 'fa-check-square-o' : switchWorkspace }">
+                       ng-class="{ 'fa-square-o' : !creatorModel.switchWorkspace, 'fa-check-square-o' : creatorModel.switchWorkspace }">
                     </i>
                     &nbsp;
                     Switch workspace after create
@@ -37,8 +39,8 @@
             &nbsp;
             Cancel
         </span>
-        <span class="btn btn-success btn-sm" ng-click="createWorkspace(workspaceName, workspaceId, switchWorkspace)"
-              ng-class="{ 'disabled' : !workspaceName }">
+        <span class="btn btn-success btn-sm" ng-click="createWorkspace()"
+              ng-class="{ 'disabled' : !creatorModel.workspaceName }">
             <i class="fa fa-plus"></i>
             &nbsp;
             Create workspace

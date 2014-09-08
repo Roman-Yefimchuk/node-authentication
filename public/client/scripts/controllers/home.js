@@ -21,12 +21,16 @@ angular.module('application')
             var BreadcrumbItem = (function () {
                 function BreadcrumbItem(node) {
                     this.node = node;
-                    this.title = node.item['name'];
                 }
 
                 BreadcrumbItem.prototype.click = function () {
                     var node = this.node;
                     updateActiveNode(node);
+                };
+
+                BreadcrumbItem.prototype.getTitle = function () {
+                    var node = this.node;
+                    return node.item['name'];
                 };
 
                 return BreadcrumbItem;
@@ -59,7 +63,7 @@ angular.module('application')
                 {
                     title: 'Active',
                     name: 'active',
-                    icon: 'fa-exclamation'
+                    icon: 'fa-rocket'
                 },
                 {
                     title: 'Completed',
@@ -339,7 +343,7 @@ angular.module('application')
 
                 apiService.save(getWorkspaceId(), item, function (response) {
                     item.id = response.itemId;
-                    item.createdDate = response.createdDate;
+                    item.creationDate = response.creationDate;
 
                     $scope.todos.push(item);
                     $scope.newTodo = '';
@@ -352,12 +356,12 @@ angular.module('application')
             $scope.showItemEditor = function (todo) {
                 dialogsService.showItemEditor({
                     item: todo,
-                    editCallback: function (todo, callback) {
+                    onUpdate: function (todo, closeCallback) {
                         apiService.update(getWorkspaceId(), [todo], function () {
                             var socketConnection = $scope.socketConnection;
                             socketConnection.updatedItems([todo]);
 
-                            callback();
+                            closeCallback();
                         });
                     }
                 });
@@ -373,6 +377,7 @@ angular.module('application')
             };
 
             $scope.clearDoneTodos = function () {
+
                 var ids = [];
                 _.forEach($scope.todos, function (todo) {
                     if (todo.completed) {
@@ -380,13 +385,23 @@ angular.module('application')
                     }
                 });
 
-                apiService.remove(getWorkspaceId(), ids, function () {
-                    $scope.todos = _.filter($scope.todos, function (item) {
-                        return !item.completed;
-                    });
+                dialogsService.showConfirmation({
+                    title: 'Remove completed items',
+                    message: 'Remove <b>@{count}</b> completed item(s)?'.format({
+                        count: ids.length
+                    }),
+                    onAccept: function (closeCallback) {
+                        apiService.remove(getWorkspaceId(), ids, function () {
+                            $scope.todos = _.filter($scope.todos, function (item) {
+                                return !item.completed;
+                            });
 
-                    var socketConnection = $scope.socketConnection;
-                    socketConnection.removedItems(ids);
+                            var socketConnection = $scope.socketConnection;
+                            socketConnection.removedItems(ids);
+
+                            closeCallback();
+                        });
+                    }
                 });
             };
 
@@ -422,10 +437,49 @@ angular.module('application')
             };
 
             $scope.showWorkspaceManager = function () {
+                var workspace = $scope.currentWorkspace;
+
                 dialogsService.showWorkspaceManager({
                     userId: $scope.user['userId'],
-                    workspace: $scope.currentWorkspace,
-                    socketConnection: $scope.socketConnection
+                    defaultWorkspaceId: $scope.user['defaultWorkspaceId'],
+                    workspace: workspace,
+                    onUpdate: function (name, closeCallback) {
+
+                        var workspaceId = getWorkspaceId();
+                        var data = {
+                            name: name
+                        };
+
+                        apiService.updateWorkspace(workspaceId, data, function () {
+
+                            var activeNode = $scope.activeNode;
+                            activeNode.item['name'] = name;
+
+                            var currentWorkspace = $scope.currentWorkspace;
+                            currentWorkspace.name = name;
+
+                            var socketConnection = $scope.socketConnection;
+                            socketConnection.updatedWorkspace(workspaceId, data);
+
+                            closeCallback();
+                        });
+                    },
+                    onRemove: function (closeCallback) {
+                        var activeNode = $scope.activeNode;
+                        activeNode.remove();
+
+                        closeCallback();
+                    },
+                    onUpdatePermissions: function (collection, closeCallback) {
+                        var workspaceId = getWorkspaceId();
+
+                        apiService.setUsersPermissionsForWorkspace(workspaceId, collection, function () {
+                            var socketConnection = $scope.socketConnection;
+                            socketConnection.permissionsChanged(collection, workspaceId);
+
+                            closeCallback();
+                        });
+                    }
                 });
             };
 
@@ -436,26 +490,53 @@ angular.module('application')
                 });
             };
 
-            $scope.isItemLocked = function (itemId) {
-                return false;
-            };
-
             $scope.showWorkspaceCreator = function () {
                 dialogsService.showWorkspaceCreator({
-                    workspaceId: getWorkspaceId(),
-                    createCallback: function (workspace, switchWorkspace, callback) {
-                        var activeNode = $scope.activeNode;
+                    onCreate: function (workspaceName, switchWorkspace, closeCallback) {
+                        apiService.createWorkspace(workspaceName, getWorkspaceId(), function (data) {
+                            var workspace = data.workspace;
+                            var activeNode = $scope.activeNode;
 
-                        var item = workspaceToItem(workspace);
-                        activeNode.insert(item, function (node) {
-                            if (switchWorkspace) {
-                                updateActiveNode(node);
-                            }
-                            callback();
+                            var item = workspaceToItem(workspace);
+                            activeNode.insert(item, function (node) {
+                                if (switchWorkspace) {
+                                    updateActiveNode(node);
+                                }
+                                closeCallback();
+                            });
                         });
                     }
                 });
+
                 $scope.workspaceDropdown['isOpen'] = false;
+            };
+
+            $scope.showWorkspaceInfo = function () {
+                apiService.getUser($scope.currentWorkspace['creatorId'], function (user) {
+                    dialogsService.showAlert({
+                        context: {
+                            name: $scope.currentWorkspace['name'],
+                            author: user.displayName,
+                            creationDate: $scope.currentWorkspace['creationDate']
+                        },
+                        title: 'Information',
+                        message: "" +
+                            "Name" +
+                            "<br>" +
+                            "<b>{{ name }}</b>" +
+                            "<br>" +
+                            "<br>" +
+                            "Author" +
+                            "<br>" +
+                            "<b>{{ author }}</b>" +
+                            "<br>" +
+                            "<br>" +
+                            "Creation date" +
+                            "<br>" +
+                            "<span><b>{{ creationDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}</b></span>" +
+                            ""
+                    });
+                });
             };
 
             $scope.logout = function () {

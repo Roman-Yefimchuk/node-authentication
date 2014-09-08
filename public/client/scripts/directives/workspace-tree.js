@@ -53,6 +53,16 @@ angular.module('application')
 
                     var Node = (function () {
 
+                        function triggerSelection(node) {
+                            if (scope.activeNode != node) {
+                                if (scope.onSelection) {
+                                    scope.onSelection({
+                                        node: node
+                                    });
+                                }
+                            }
+                        }
+
                         function Node(nodeScope, item, element, parentNode, level) {
                             this.nodeScope = nodeScope;
                             this.item = item;
@@ -67,16 +77,14 @@ angular.module('application')
                         }
 
                         Node.prototype.onSelection = function ($event) {
-                            if (scope.activeNode != this) {
-                                if (scope.onSelection) {
-                                    scope.onSelection({
-                                        node: this
-                                    });
-                                }
-                            }
+                            triggerSelection(this);
 
                             scope.activeNode = this;
                             $event.stopPropagation();
+                        };
+
+                        Node.prototype.getParent = function () {
+                            return this.parentNode;
                         };
 
                         Node.prototype.setActive = function () {
@@ -96,7 +104,7 @@ angular.module('application')
                         Node.prototype.isEmpty = function () {
                             var item = this.item;
 
-                            return !(item.childrenCount || item.children['length']);
+                            return !((item.childrenCount && !this.isLoaded) || item.children['length']);
                         };
 
                         Node.prototype.toggle = function ($event) {
@@ -209,9 +217,11 @@ angular.module('application')
                                 var activeNode = scope.activeNode;
 
                                 if (activeNode == context) {
+                                    triggerSelection(parentNode);
                                     scope.activeNode = parentNode;
                                 } else {
                                     if (activeNode && context.level < activeNode.level) {
+                                        triggerSelection(parentNode);
                                         scope.activeNode = parentNode;
                                     }
                                 }
