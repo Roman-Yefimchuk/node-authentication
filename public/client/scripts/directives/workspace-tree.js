@@ -83,6 +83,14 @@ angular.module('application')
                             $event.stopPropagation();
                         };
 
+                        Node.prototype.getRoot = function () {
+                            var node = this;
+                            while (node.parentNode) {
+                                node = node.parentNode;
+                            }
+                            return node;
+                        };
+
                         Node.prototype.getParent = function () {
                             return this.parentNode;
                         };
