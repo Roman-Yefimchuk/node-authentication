@@ -113,6 +113,38 @@ module.exports = function (db, developmentMode) {
         });
     }
 
+    function addOwnWorkspace(userId, workspaceId, callback) {
+        db.query("" +
+            "UPDATE User " +
+            "ADD ownWorkspaces = :workspaceId " +
+            "WHERE @rid = :id", {
+            params: {
+                id: decodeId(userId),
+                workspaceId: decodeId(workspaceId)
+            }
+        }).then(function (results) {
+            callback();
+        }).catch(function (error) {
+            throw error;
+        });
+    }
+
+    function removeOwnWorkspace(userId, workspaceId, callback) {
+        db.query("" +
+            "UPDATE User " +
+            "REMOVE ownWorkspaces = :workspaceId " +
+            "WHERE @rid = :id", {
+            params: {
+                id: decodeId(userId),
+                workspaceId: decodeId(workspaceId)
+            }
+        }).then(function (results) {
+            callback();
+        }).catch(function (error) {
+            throw error;
+        });
+    }
+
     function createWorkspace(name, creatorId, parentWorkspaceId, isDefault, callback) {
         db.query("" +
             "INSERT INTO Workspace (name, creatorId, parentWorkspaceId, creationDate) " +
@@ -127,28 +159,30 @@ module.exports = function (db, developmentMode) {
             var workspace = results[0];
             var workspaceId = encodeId(workspace);
 
-            db.query("" +
-                "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, readOnly, collectionManager, accessManager, parentWorkspaceId) " +
-                "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :readOnly, :collectionManager, :accessManager, :parentWorkspaceId)", {
-                params: {
-                    userId: creatorId,
-                    workspaceId: workspaceId,
-                    isOwn: true,
-                    isDefault: isDefault,
-                    readOnly: true,
-                    collectionManager: true,
-                    accessManager: true,
-                    parentWorkspaceId: parentWorkspaceId || ROOT_ID
-                }
-            }).then(function (results) {
-                callback({
-                    id: workspaceId,
-                    name: workspace.name,
-                    creatorId: workspace.creatorId,
-                    creationDate: workspace.creationDate
+            addOwnWorkspace(creatorId, workspaceId, function () {
+                db.query("" +
+                    "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, readOnly, collectionManager, accessManager, parentWorkspaceId) " +
+                    "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :readOnly, :collectionManager, :accessManager, :parentWorkspaceId)", {
+                    params: {
+                        userId: creatorId,
+                        workspaceId: workspaceId,
+                        isOwn: true,
+                        isDefault: isDefault,
+                        readOnly: true,
+                        collectionManager: true,
+                        accessManager: true,
+                        parentWorkspaceId: parentWorkspaceId || ROOT_ID
+                    }
+                }).then(function (results) {
+                    callback({
+                        id: workspaceId,
+                        name: workspace.name,
+                        creatorId: workspace.creatorId,
+                        creationDate: workspace.creationDate
+                    });
+                }).catch(function (error) {
+                    throw error;
                 });
-            }).catch(function (error) {
-                throw error;
             });
         }).catch(function (error) {
             throw error;
@@ -488,20 +522,21 @@ module.exports = function (db, developmentMode) {
                 throw error;
             });
         },
-        //TODO: return not only ID
         getWorkspaces: function (userId, callback) {
             db.query("" +
-                "SELECT workspaceId " +
-                "FROM OwnWorkspace " +
-                "WHERE userId = :userId", {
+                "SELECT expand(ownWorkspaces) " +
+                "FROM User " +
+                "WHERE @rid = :id", {
                 params: {
-                    userId: userId
+                    id: decodeId(userId)
                 }
             }).then(function (results) {
 
                 var result = [];
 
-                _.forEach(results, function (workspaceId) {
+                _.forEach(results, function (item) {
+                    var value = item.value;
+                    var workspaceId = security.encodeBase64(value);
                     result.push(workspaceId);
                 });
 
@@ -702,7 +737,11 @@ module.exports = function (db, developmentMode) {
                 if (count > 0) {
                     db.query("" +
                         "SELECT userId, displayName, registeredDate " +
-                        "FROM UserAccount SKIP " + skip + " LIMIT " + limit, {
+                        "FROM UserAccount SKIP :skip LIMIT :limit", {
+                        params: {
+                            skip: skip,
+                            limit: limit
+                        }
                     }).then(function (results) {
                         var usersAccount = results;
 
@@ -738,7 +777,11 @@ module.exports = function (db, developmentMode) {
                 if (count > 0) {
                     db.query("" +
                         "SELECT userId, displayName, registeredDate " +
-                        "FROM UserAccount SKIP " + skip + " LIMIT " + limit, {
+                        "FROM UserAccount SKIP :skip LIMIT :limit", {
+                        params: {
+                            skip: skip,
+                            limit: limit
+                        }
                     }).then(function (results) {
                         var usersAccount = results;
 

@@ -20,7 +20,36 @@ module.exports = {
             password: databaseConfig.db_password
         });
 
-        var dbProvider = require('./db-provider')(db, developmentMode);
+        var dbWrapper = (function () {
+
+            function formatCommand(command, params) {
+                var value = command;
+                if (params) {
+                    for (var key in params) {
+                        if (params[key] != undefined) {
+                            var pattern = new RegExp(':' + key, 'g');
+                            if (typeof params[key] == 'string') {
+                                value = value.replace(pattern, "'" + params[key] + "'");
+                            } else {
+                                value = value.replace(pattern, params[key]);
+                            }
+                        }
+                    }
+                }
+                return value;
+            }
+
+            return {
+                query: function (command, options) {
+                    options = options || {};
+                    command = formatCommand(command, options.params);
+                    options.params = null;
+                    return db.query(command, options);
+                }
+            }
+        })();
+
+        var dbProvider = require('./db-provider')(dbWrapper, developmentMode);
         callback(dbProvider);
     }
 };
