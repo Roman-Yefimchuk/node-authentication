@@ -15,8 +15,9 @@ angular.module('application')
         'loaderService',
         'dialogsService',
         'SOCKET_URL',
+        'DEBUG_MODE',
 
-        function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL) {
+        function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL, DEBUG_MODE) {
 
             var BreadcrumbItem = (function () {
                 function BreadcrumbItem(node) {
@@ -161,19 +162,27 @@ angular.module('application')
 
                             var ready = $scope.$on('workspaceTree[home-tree]:ready', function () {
                                 $rootScope.$broadcast('workspaceTree[home-tree]:search', user.workspaceId, function (node) {
+
+                                    function onReady() {
+                                        loaderService.hideLoader();
+
+                                        if (externalNotification) {
+                                            notificationsService.notify(externalNotification.message, externalNotification.type);
+                                        }
+
+                                        notificationsService.info("Hello @{userName}!", {
+                                            userName: user.displayName
+                                        });
+                                    }
+
                                     if (node) {
                                         updateActiveNode(node);
+                                        onReady();
+                                    } else {
+                                        apiService.fetchWorkspaces(user.workspaceId, '@root', function (result) {
+                                            onReady();
+                                        });
                                     }
-
-                                    loaderService.hideLoader();
-
-                                    if (externalNotification) {
-                                        notificationsService.notify(externalNotification.message, externalNotification.type);
-                                    }
-
-                                    notificationsService.info("Hello @{userName}!", {
-                                        userName: user.displayName
-                                    });
                                 });
 
                                 ready();
@@ -190,6 +199,15 @@ angular.module('application')
                     loaderService.hideLoader();
                 }
             });
+
+            $scope.showWorkspaceId = function () {
+                if (DEBUG_MODE) {
+                    dialogsService.showAlert({
+                        title: 'Workspace ID',
+                        message: getWorkspaceId()
+                    });
+                }
+            };
 
             $scope.onWorkspaceChanged = function (node) {
                 updateActiveNode(node);

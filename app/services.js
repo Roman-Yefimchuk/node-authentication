@@ -169,6 +169,22 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
+    serviceProvider.post('/api/fetch-workspaces', function (request, response, resultCallback) {
+        var userId = getUserId(request);
+
+        var workspaceId = request.body['workspaceId'];
+        var rootWorkspaceId = request.body['rootWorkspaceId'];
+
+        dbProvider.fetchWorkspaces(userId, workspaceId, rootWorkspaceId, function (result, status) {
+            resultCallback({
+                data: {
+                    status: status,
+                    result: result
+                }
+            });
+        });
+    });
+
     serviceProvider.post('/api/update-workspace/:workspaceId', function (request, response, resultCallback) {
         var userId = getUserId(request);
 

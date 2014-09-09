@@ -176,6 +176,18 @@ angular.module('application')
                         success: callback
                     });
                 },
+                fetchWorkspaces: function (workspaceId, rootWorkspaceId, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: '/api/fetch-workspaces',
+                        data: {
+                            workspaceId: workspaceId,
+                            rootWorkspaceId: rootWorkspaceId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
                 updateWorkspace: function (workspaceId, data, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',

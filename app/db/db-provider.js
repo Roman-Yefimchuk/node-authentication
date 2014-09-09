@@ -744,6 +744,80 @@ module.exports = function (db, developmentMode) {
                 callback(result);
             });
         },
+        fetchWorkspaces: function (userId, workspaceId, rootWorkspaceId, callback) {
+
+            var result = [];
+
+            function fetchWorkspaces(parentWorkspaceId) {
+                if (parentWorkspaceId == workspaceId) {
+                    callback(result, 'SUCCESS');
+                } else {
+                    db.query("" +
+                        "SELECT * " +
+                        "FROM PermittedWorkspace " +
+                        "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
+                        params: {
+                            userId: userId,
+                            parentWorkspaceId: parentWorkspaceId
+                        }
+                    }).then(function (results) {
+                        if (results.length > 0) {
+                            var permittedWorkspace = results[0];
+
+                            dbProvider.isAccessGrantedForWorkspace(userId, workspaceId, function (isAccessGranted) {
+                                if (isAccessGranted) {
+
+                                    db.query("" +
+                                        "SELECT * " +
+                                        "FROM Workspace " +
+                                        "WHERE @rid = :id", {
+                                        params: {
+                                            id: decodeId(permittedWorkspace.workspaceId)
+                                        }
+                                    }).then(function (results) {
+                                        var workspace = results[0];
+                                        var workspaceId = permittedWorkspace.workspaceId;
+
+                                        getPermittedChildrenCount(userId, workspaceId, function (childrenCount) {
+
+                                            dbProvider.getPermittedWorkspaces(userId, workspaceId, function (workspaces) {
+                                                result.push({
+                                                    workspace: {
+                                                        id: permittedWorkspace.workspaceId,
+                                                        name: workspace.name,
+                                                        creatorId: workspace.creatorId,
+                                                        creationDate: workspace.creationDate,
+                                                        childrenCount: childrenCount,
+                                                        permissions: {
+                                                            readOnly: permittedWorkspace.readOnly,
+                                                            collectionManager: permittedWorkspace.collectionManager,
+                                                            accessManager: permittedWorkspace.accessManager
+                                                        }
+                                                    },
+                                                    children: workspaces
+                                                });
+
+                                                fetchWorkspaces(workspaceId);
+                                            });
+                                        });
+                                    }).catch(function (error) {
+                                        throw error;
+                                    });
+                                } else {
+                                    callback(result, 'ACCESS_DENIED');
+                                }
+                            });
+                        } else {
+                            callback(result, 'NOT_FOUND');
+                        }
+                    }).catch(function (error) {
+                        throw error;
+                    });
+                }
+            }
+
+            fetchWorkspaces(rootWorkspaceId);
+        },
         getPermittedWorkspaces: function (userId, parentWorkspaceId, callback) {
             db.query("" +
                 "SELECT * " +
