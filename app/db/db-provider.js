@@ -9,16 +9,22 @@ module.exports = function (db, developmentMode) {
     var _ = require('underscore');
 
     function extractId(entity) {
-        return entity['@rid'].toString();
+        if (entity) {
+            return entity['@rid'].toString();
+        }
     }
 
     function encodeId(entity) {
-        var id = extractId(entity);
-        return security.encodeBase64(id);
+        if (entity) {
+            var id = extractId(entity);
+            return security.encodeBase64(id);
+        }
     }
 
     function decodeId(id) {
-        return security.decodeBase64(id);
+        if (id) {
+            return security.decodeBase64(id);
+        }
     }
 
     function getUserPermissionsForWorkspace(userId, workspaceId, callback) {
