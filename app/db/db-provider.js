@@ -522,6 +522,82 @@ module.exports = function (db, developmentMode) {
                 throw error;
             });
         },
+        removeWorkspace: function (workspaceId, callback) {
+
+            var removedWorkspaces = [];
+
+            function pushWorkspace(workspace) {
+                removedWorkspaces.push({
+                    id: encodeId(workspace),
+                    name: workspace.name
+                });
+            }
+
+            function removeChildren(stack) {
+                if (stack.length > 0) {
+                    var parentWorkspaceId = stack.pop();
+
+                    db.query("" +
+                        "DELETE FROM Workspace " +
+                        "RETURN BEFORE " +
+                        "WHERE parentWorkspaceId = :parentWorkspaceId", {
+                        params: {
+                            parentWorkspaceId: parentWorkspaceId
+                        }
+                    }).then(function (results) {
+                        db.query("" +
+                            "DELETE FROM PermittedWorkspace " +
+                            "WHERE parentWorkspaceId = :parentWorkspaceId", {
+                            params: {
+                                parentWorkspaceId: parentWorkspaceId
+                            }
+                        }).then(function () {
+                            _.forEach(results, function (workspace) {
+                                pushWorkspace(workspace);
+
+                                var workspaceId = encodeId(workspace);
+                                stack.push(workspaceId);
+                            });
+
+                            removeChildren(stack);
+                        }).catch(function (error) {
+                            throw error;
+                        });
+                    }).catch(function (error) {
+                        throw error;
+                    });
+                } else {
+                    callback(removedWorkspaces);
+                }
+            }
+
+            db.query("" +
+                "DELETE FROM Workspace " +
+                "RETURN BEFORE " +
+                "WHERE @rid = :id", {
+                params: {
+                    id: decodeId(workspaceId)
+                }
+            }).then(function (results) {
+
+                var workspace = results[0];
+                pushWorkspace(workspace);
+
+                db.query("" +
+                    "DELETE FROM PermittedWorkspace " +
+                    "WHERE workspaceId = :workspaceId", {
+                    params: {
+                        workspaceId: workspaceId
+                    }
+                }).then(function () {
+                    removeChildren([workspaceId]);
+                }).catch(function (error) {
+                    throw error;
+                });
+            }).catch(function (error) {
+                throw error;
+            });
+        },
         getWorkspaces: function (userId, callback) {
             db.query("" +
                 "SELECT expand(ownWorkspaces) " +

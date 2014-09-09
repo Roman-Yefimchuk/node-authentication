@@ -169,12 +169,25 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/update-workspace', function (request, response, resultCallback) {
+    serviceProvider.post('/api/update-workspace/:workspaceId', function (request, response, resultCallback) {
         var userId = getUserId(request);
-        var workspaceId = request.body['workspaceId'];
+
+        var workspaceId = getParam('workspaceId', request);
         var data = request.body['data'];
         dbProvider.updateWorkspace(workspaceId, data, function () {
             resultCallback();
+        });
+    });
+
+    serviceProvider.get('/api/remove-workspace/:workspaceId', function (request, response, resultCallback) {
+        var userId = getUserId(request);
+
+        var workspaceId = getParam('workspaceId', request);
+        dbProvider.removeWorkspace(workspaceId, function (removedWorkspaces) {
+            resultCallback({
+                message: 'Removed ' + removedWorkspaces.length + ' workspace(s)',
+                data: removedWorkspaces
+            });
         });
     });
 

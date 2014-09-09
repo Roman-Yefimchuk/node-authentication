@@ -179,11 +179,18 @@ angular.module('application')
                 updateWorkspace: function (workspaceId, data, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/update-workspace',
+                        url: '/api/update-workspace/' + workspaceId,
                         data: {
-                            workspaceId: workspaceId,
                             data: data
                         }
+                    }, {
+                        success: callback
+                    });
+                },
+                removeWorkspace: function (workspaceId, callback) {
+                    httpClientService.sendRequest({
+                        method: 'GET',
+                        url: '/api/remove-workspace/' + workspaceId
                     }, {
                         success: callback
                     });

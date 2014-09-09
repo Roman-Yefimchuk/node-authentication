@@ -29,10 +29,11 @@ angular.module('application')
                             workspaceId: workspaceId
                         });
                     },
-                    removedWorkspace: function (workspaceId) {
+                    removedWorkspace: function (workspaceId, removedWorkspaces) {
                         emit('workspace_removed', {
                             userId: userId,
-                            workspaceId: workspaceId
+                            workspaceId: workspaceId,
+                            removedWorkspaces: removedWorkspaces
                         });
                     },
                     updatedWorkspace: function (workspaceId, data) {

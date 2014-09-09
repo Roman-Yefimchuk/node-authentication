@@ -466,10 +466,18 @@ angular.module('application')
                         });
                     },
                     onRemove: function (closeCallback) {
-                        var activeNode = $scope.activeNode;
-                        activeNode.remove();
 
-                        closeCallback();
+                        var workspaceId = getWorkspaceId();
+
+                        apiService.removeWorkspace(workspaceId, function (removedWorkspaces) {
+                            var activeNode = $scope.activeNode;
+                            activeNode.remove();
+
+                            var socketConnection = $scope.socketConnection;
+                            socketConnection.removedWorkspace(workspaceId, removedWorkspaces);
+
+                            closeCallback();
+                        });
                     },
                     onUpdatePermissions: function (collection, closeCallback) {
                         var workspaceId = getWorkspaceId();
