@@ -183,7 +183,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var userId = getUserId(request);
 
         var workspaceId = getParam('workspaceId', request);
-        dbProvider.removeWorkspace(workspaceId, function (removedWorkspaces) {
+        dbProvider.removeWorkspace(userId, workspaceId, function (removedWorkspaces) {
             resultCallback({
                 message: 'Removed ' + removedWorkspaces.length + ' workspace(s)',
                 data: removedWorkspaces

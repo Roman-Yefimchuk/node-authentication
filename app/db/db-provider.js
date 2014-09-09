@@ -528,7 +528,7 @@ module.exports = function (db, developmentMode) {
                 throw error;
             });
         },
-        removeWorkspace: function (workspaceId, callback) {
+        removeWorkspace: function (userId, workspaceId, callback) {
 
             var removedWorkspaces = [];
 
@@ -551,21 +551,34 @@ module.exports = function (db, developmentMode) {
                             parentWorkspaceId: parentWorkspaceId
                         }
                     }).then(function (results) {
+
+                        _.forEach(results, function (workspace) {
+                            pushWorkspace(workspace);
+
+                            var workspaceId = encodeId(workspace);
+                            stack.push(workspaceId);
+                        });
+
                         db.query("" +
                             "DELETE FROM PermittedWorkspace " +
+                            "RETURN BEFORE " +
                             "WHERE parentWorkspaceId = :parentWorkspaceId", {
                             params: {
                                 parentWorkspaceId: parentWorkspaceId
                             }
-                        }).then(function () {
-                            _.forEach(results, function (workspace) {
-                                pushWorkspace(workspace);
+                        }).then(function (results) {
 
-                                var workspaceId = encodeId(workspace);
-                                stack.push(workspaceId);
+                            asyncCycle(results, function (permittedWorkspace, index, next) {
+                                if (permittedWorkspace.isOwn) {
+                                    removeOwnWorkspace(userId, permittedWorkspace.workspaceId, function () {
+                                        next();
+                                    });
+                                } else {
+                                    next();
+                                }
+                            }, function () {
+                                removeChildren(stack);
                             });
-
-                            removeChildren(stack);
                         }).catch(function (error) {
                             throw error;
                         });
@@ -591,12 +604,20 @@ module.exports = function (db, developmentMode) {
 
                 db.query("" +
                     "DELETE FROM PermittedWorkspace " +
+                    "RETURN BEFORE " +
                     "WHERE workspaceId = :workspaceId", {
                     params: {
                         workspaceId: workspaceId
                     }
-                }).then(function () {
-                    removeChildren([workspaceId]);
+                }).then(function (results) {
+                    var permittedWorkspace = results[0];
+                    if (permittedWorkspace.isOwn) {
+                        removeOwnWorkspace(userId, permittedWorkspace.workspaceId, function () {
+                            removeChildren([workspaceId]);
+                        });
+                    } else {
+                        removeChildren([workspaceId]);
+                    }
                 }).catch(function (error) {
                     throw error;
                 });
