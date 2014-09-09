@@ -163,10 +163,11 @@ angular.module('application')
 
             $scope.removeWorkspace = function () {
                 dialogsService.showConfirmation({
-                    title: 'Remove workspace',
-                    message: 'Do you want remove workspace <b>@{workspaceName}</b>?'.format({
+                    context: {
                         workspaceName: options.workspace['name']
-                    }),
+                    },
+                    title: 'Remove workspace',
+                    message: 'Do you want remove workspace <b>{{ workspaceName }}</b>?',
                     onAccept: function (closeCallback) {
                         onRemove(function () {
                             closeCallback();

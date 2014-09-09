@@ -275,10 +275,11 @@ module.exports = function (db, developmentMode) {
                 var userAccount = results[0];
 
                 db.query("" +
-                    "INSERT INTO User (accountId) " +
-                    "VALUES (:accountId)", {
+                    "INSERT INTO User (accountId, role) " +
+                    "VALUES (:accountId, :role)", {
                     params: {
-                        accountId: encodeId(userAccount)
+                        accountId: encodeId(userAccount),
+                        role: 'user'
                     }
                 }).then(function (results) {
                     var user = results[0];

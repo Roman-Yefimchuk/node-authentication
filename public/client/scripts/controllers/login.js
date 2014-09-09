@@ -10,8 +10,10 @@ angular.module('application')
         'apiService',
         'loaderService',
         'DEBUG_MODE',
+        'EMAIL_PATTERN',
+        'PASSWORD_PATTERN',
 
-        function ($scope, $rootScope, $location, apiService, loaderService, DEBUG_MODE) {
+        function ($scope, $rootScope, $location, apiService, loaderService, DEBUG_MODE, EMAIL_PATTERN, PASSWORD_PATTERN) {
 
             function getWorkspaceId() {
                 if ($scope.currentWorkspace) {
@@ -19,9 +21,7 @@ angular.module('application')
                 }
             }
 
-            var emailPattern = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
-            var passwordPattern = /^(([a-z]|[A-Z]|[0-9]|\u005F)+){6}$/;
-
+            $scope.isSystemEmpty = false;
             $scope.treeModel = [];
             $scope.errorMessage = null;
             $scope.currentWorkspace = undefined;
@@ -84,16 +84,19 @@ angular.module('application')
 
                 } else {
                     $scope.errorMessage = 'System empty';
+                    $scope.isSystemEmpty = true;
                     loaderService.hideLoader();
                 }
             });
 
             $scope.isEmailValid = function () {
-                return emailPattern.test($scope['email']);
+                var email = ($scope['email'] || '').toLowerCase();
+                return EMAIL_PATTERN.test(email);
             };
 
             $scope.isPasswordValid = function () {
-                return passwordPattern.test($scope['password']);
+                var password = ($scope['password'] || '').toLowerCase();
+                return PASSWORD_PATTERN.test(password);
             };
 
             $scope.quickLogin = function () {

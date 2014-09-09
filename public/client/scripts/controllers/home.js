@@ -386,10 +386,11 @@ angular.module('application')
                 });
 
                 dialogsService.showConfirmation({
-                    title: 'Remove completed items',
-                    message: 'Remove <b>@{count}</b> completed item(s)?'.format({
+                    context: {
                         count: ids.length
-                    }),
+                    },
+                    title: 'Remove completed items',
+                    message: 'Remove <b>{{ count }}</b> completed item(s)?',
                     onAccept: function (closeCallback) {
                         apiService.remove(getWorkspaceId(), ids, function () {
                             $scope.todos = _.filter($scope.todos, function (item) {

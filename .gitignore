@@ -2,5 +2,6 @@
 local_db/
 node_modules/
 temp/
+command_line/
 *.log
 *.lnk

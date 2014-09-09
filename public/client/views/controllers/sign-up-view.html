@@ -4,40 +4,60 @@
 
     <div ng-show="errorMessage != null">
         <alert type="danger" close="errorMessage = null" class="text-center">
+            <span class="pull-left">
+                <i class="fa fa-exclamation-triangle" style="font-size: 1.5em;"></i>
+            </span>
             {{ errorMessage }}
         </alert>
     </div>
 
     <form ng-submit="signUp()" autocomplete="off">
 
-        <div class="form-group" ng-class="{ 'has-error' : !isNameValid() }">
+        <div class="form-group">
             <label>Name</label>
-            <input type="text" class="form-control" name="name" ng-model="name"
-                   autocomplete="off">
+
+            <div class="input-group" ng-class="{ 'has-error' : !isNameValid() }">
+                <div class="input-group-addon"><i class="fa fa-user"></i></div>
+                <input class="form-control" type="text" ng-model="name" placeholder="Enter name"
+                       autocomplete="off">
+            </div>
         </div>
 
-        <div class="form-group" ng-class="{ 'has-error' : !isEmailValid() }">
+        <div class="form-group">
             <label>Email</label>
-            <input type="text" class="form-control" name="email" ng-model="email"
-                   autocomplete="off">
+
+            <div class="input-group" ng-class="{ 'has-error' : !isEmailValid() }">
+                <div class="input-group-addon"><i class="fa fa-at"></i></i></div>
+                <input class="form-control" type="email" ng-model="email" placeholder="Enter email"
+                       autocomplete="off">
+            </div>
         </div>
 
-        <div class="form-group" ng-class="{ 'has-error' : !isPasswordValid() }">
+        <div class="form-group">
             <label>Password</label>
-            <input type="password" class="form-control" name="password" ng-model="password"
-                   autocomplete="off">
+
+            <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
+                <div class="input-group-addon"><i class="fa fa-key"></i></i></i></div>
+                <input class="form-control" type="password" ng-model="password" placeholder="Enter password"
+                       autocomplete="off">
+            </div>
         </div>
 
-        <div class="form-group" ng-class="{ 'has-error' : !isPasswordValid() }">
-            <label>Confirm password</label>
-            <input type="password" class="form-control" ng-model="confirmedPassword"
-                   autocomplete="off">
+        <div class="form-group">
+            <label>Retype password</label>
+
+            <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
+                <div class="input-group-addon"><i class="fa fa-key"></i></i></i></div>
+                <input class="form-control" type="password" ng-model="retypedPassword"
+                       placeholder="Enter retyped password"
+                       autocomplete="off">
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-warning"
-                ng-disabled="!isEmailValid() || !isPasswordValid()">
+        <span ng-click="signUp()" class="btn btn-warning"
+              ng-disabled="!(isNameValid() && isEmailValid() && isPasswordValid())">
             Sign Up
-        </button>
+        </span>
     </form>
 
     <hr>

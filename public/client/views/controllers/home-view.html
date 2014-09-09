@@ -91,19 +91,23 @@
 
     <div class="col-md-8 column">
 
-        <ol class="panel breadcrumb" ng-show="breadcrumb.length">
-            <li ng-repeat="item in breadcrumb" ng-class="{ 'active' : $last }"><a ng-if="!$last"
-                                                                                  href="javascript:void(0)"
-                                                                                  ng-click="item.click()">{{ item.getTitle() }}
-            </a><span ng-if="$last">{{ item.getTitle() }}</span>
-            </li>
-        </ol>
-
         <div ng-show="errorMessage != null">
             <alert type="danger" close="errorMessage = null" class="text-center">
+            <span class="pull-left">
+                <i class="fa fa-exclamation-triangle" style="font-size: 1.5em;"></i>
+            </span>
                 {{ errorMessage }}
             </alert>
         </div>
+
+        <ol class="panel breadcrumb" ng-show="breadcrumb.length">
+            <li ng-repeat="item in breadcrumb" ng-class="{ 'active' : $last }"><a ng-if="!$last"
+                                                                                  href="javascript:void(0)"
+                                                                                  ng-click="item.click()">{{
+                item.getTitle() }}
+            </a><span ng-if="$last">{{ item.getTitle() }}</span>
+            </li>
+        </ol>
 
         <section class="panel tasks-widget">
             <header class="panel-heading text-center"

@@ -8,36 +8,39 @@ angular.module('application')
         '$location',
         'loaderService',
         'apiService',
+        'NAME_PATTERN',
+        'EMAIL_PATTERN',
+        'PASSWORD_PATTERN',
 
-        function ($scope, $location, loaderService, apiService) {
-
-            var emailPattern = /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/;
-            var passwordPattern = /^(([a-z]|[A-Z]|[0-9]|\u005F)+){6}$/;
+        function ($scope, $location, loaderService, apiService, NAME_PATTERN, EMAIL_PATTERN, PASSWORD_PATTERN) {
 
             $scope.errorMessage = null;
 
             $scope.name = "";
             $scope.email = "";
             $scope.password = "";
-            $scope.confirmedPassword = "";
+            $scope.retypedPassword = "";
 
             $scope.isNameValid = function () {
-                return $scope.name.length >= 6;
+                var name = ($scope.name || '');
+                return NAME_PATTERN.test(name);
             };
 
             $scope.isEmailValid = function () {
-                return emailPattern.test($scope['email']);
+                var email = ($scope['email'] || '').toLowerCase();
+                return EMAIL_PATTERN.test(email);
             };
 
             $scope.isPasswordValid = function () {
-                return passwordPattern.test($scope['password']) && $scope.password == $scope.confirmedPassword;
+                var password = ($scope['password'] || '').toLowerCase();
+                return PASSWORD_PATTERN.test(password) && $scope.password == $scope.retypedPassword;
             };
 
             $scope.quickSingUp = function () {
                 $scope.name = 'Roman Yefimchuk';
                 $scope.email = 'roman@gmail.com';
                 $scope.password = 'qwerty';
-                $scope.confirmedPassword = 'qwerty';
+                $scope.retypedPassword = 'qwerty';
 
                 $scope.$watch('email', function () {
                     $scope.signUp();
