@@ -102,9 +102,11 @@ angular.module('application')
 
             $scope.$watch('currentWorkspace', function (workspace) {
                 if (workspace) {
-                    var workspaceId = getWorkspaceId();
 
-                    apiService.setUserWorkspace(workspaceId, function (data) {
+                    var workspaceId = getWorkspaceId();
+                    var rootWorkspaceId = getRootWorkspaceId();
+
+                    apiService.setUserWorkspace(workspaceId, rootWorkspaceId, function (data) {
 
                         var socketConnection = $scope.socketConnection;
 
@@ -163,7 +165,7 @@ angular.module('application')
                             var ready = $scope.$on('workspaceTree[home-tree]:ready', function () {
                                 $rootScope.$broadcast('workspaceTree[home-tree]:search', user.workspaceId, function (node) {
 
-                                    function onReady() {
+                                    function onLoadingReady() {
                                         loaderService.hideLoader();
 
                                         if (externalNotification) {
@@ -177,10 +179,10 @@ angular.module('application')
 
                                     if (node) {
                                         updateActiveNode(node);
-                                        onReady();
+                                        onLoadingReady();
                                     } else {
                                         apiService.fetchWorkspaces(user.workspaceId, '@root', function (result) {
-                                            onReady();
+                                            onLoadingReady();
                                         });
                                     }
                                 });
@@ -614,6 +616,15 @@ angular.module('application')
             function getWorkspaceId() {
                 if ($scope.currentWorkspace) {
                     return $scope.currentWorkspace['id'];
+                }
+            }
+
+            function getRootWorkspaceId() {
+                var activeNode = $scope.activeNode;
+                if (activeNode) {
+                    var activeRootNode = activeNode.getRoot();
+                    var item = activeRootNode.item;
+                    return item.id;
                 }
             }
 

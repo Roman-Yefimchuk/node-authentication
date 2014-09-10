@@ -75,10 +75,14 @@ angular.module('application')
                         success: callback
                     });
                 },
-                setUserWorkspace: function (workspaceId, callback) {
+                setUserWorkspace: function (workspaceId, rootWorkspaceId, callback) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/set-user-workspace/' + workspaceId
+                        method: 'POST',
+                        url: '/api/set-user-workspace',
+                        data: {
+                            workspaceId: workspaceId,
+                            rootWorkspaceId: rootWorkspaceId
+                        }
                     }, {
                         success: callback
                     });

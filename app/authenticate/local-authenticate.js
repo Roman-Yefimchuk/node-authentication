@@ -66,7 +66,11 @@ module.exports = function (app, passport, dbProvider, developmentMode) {
     app.post('/api/authenticate/login', function (request, response, next) {
 
         var authenticateHandler = getAuthenticateHandler(request, response, function (user, callback) {
-            dbProvider.setUserWorkspaceId(user.userId, request.body['workspaceId'], callback)
+
+            var workspaceId = request.body['workspaceId'];
+            var rootWorkspaceId = request.body['rootWorkspaceId'];
+
+            dbProvider.setUserWorkspaceId(user.userId, workspaceId, rootWorkspaceId, callback)
         });
 
         passport.authenticate('local-login', authenticateHandler)(request, response, next);

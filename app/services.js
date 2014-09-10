@@ -131,20 +131,24 @@ module.exports = function (app, dbProvider, serviceProvider) {
 
     serviceProvider.get('/api/get-user-workspace', function (request, response, resultCallback) {
         var userId = getUserId(request);
-        dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
+        dbProvider.getUserWorkspaceId(userId, function (workspaceId, rootWorkspaceId) {
             resultCallback({
                 message: 'Current user workspace ID: ' + workspaceId,
                 data: {
-                    workspaceId: workspaceId
+                    workspaceId: workspaceId,
+                    rootWorkspaceId: rootWorkspaceId
                 }
             });
         });
     });
 
-    serviceProvider.get('/api/set-user-workspace/:workspaceId', function (request, response, resultCallback) {
+    serviceProvider.post('/api/set-user-workspace', function (request, response, resultCallback) {
         var userId = getUserId(request);
-        var workspaceId = getParam('workspaceId', request);
-        dbProvider.setUserWorkspaceId(userId, workspaceId, function (permissions, isOwnWorkspace) {
+
+        var workspaceId = request.body['workspaceId'];
+        var rootWorkspaceId = request.body['rootWorkspaceId'];
+
+        dbProvider.setUserWorkspaceId(userId, workspaceId, rootWorkspaceId, function (permissions, isOwnWorkspace) {
             resultCallback({
                 message: 'New workspace ID: ' + workspaceId,
                 data: {

@@ -341,7 +341,7 @@ module.exports = function (db, developmentMode) {
 
                         dbProvider.createDefaultWorkspace(workspaceName, userId, function (workspace) {
                             var workspaceId = workspace.id;
-                            dbProvider.setUserWorkspaceId(userId, workspaceId, function () {
+                            dbProvider.setUserWorkspaceId(userId, workspaceId, workspaceId, function () {
                                 successCallback(wrapUserAccount(userAccount));
                             });
                         });
@@ -464,13 +464,14 @@ module.exports = function (db, developmentMode) {
                 callback();
             });
         },
-        setUserWorkspaceId: function (userId, workspaceId, callback) {
+        setUserWorkspaceId: function (userId, workspaceId, rootWorkspaceId, callback) {
             db.query("" +
                 "UPDATE User " +
-                "SET currentWorkspaceId = :currentWorkspaceId " +
+                "SET currentWorkspaceId = :currentWorkspaceId, currentRootWorkspaceId = :currentRootWorkspaceId " +
                 "WHERE @rid = :id", {
                 params: {
                     currentWorkspaceId: workspaceId,
+                    currentRootWorkspaceId: rootWorkspaceId,
                     id: decodeId(userId)
                 }
             }).then(function (total) {
@@ -489,7 +490,7 @@ module.exports = function (db, developmentMode) {
         },
         getUserWorkspaceId: function (userId, callback) {
             db.query("" +
-                "SELECT currentWorkspaceId " +
+                "SELECT currentWorkspaceId, currentRootWorkspaceId " +
                 "FROM User " +
                 "WHERE @rid = :id", {
                 params: {
@@ -498,8 +499,11 @@ module.exports = function (db, developmentMode) {
             }).then(function (results) {
                 if (results.length > 0) {
                     var user = results[0];
+
                     var workspaceId = user.currentWorkspaceId;
-                    callback(workspaceId);
+                    var rootWorkspaceId = user.currentRootWorkspaceId;
+
+                    callback(workspaceId, rootWorkspaceId);
                 } else {
                     throw 'User not found';
                 }
@@ -552,35 +556,27 @@ module.exports = function (db, developmentMode) {
                         }
                     }).then(function (results) {
 
-                        _.forEach(results, function (workspace) {
+                        asyncCycle(results, function (workspace, index, next) {
                             pushWorkspace(workspace);
 
                             var workspaceId = encodeId(workspace);
                             stack.push(workspaceId);
-                        });
 
-                        db.query("" +
-                            "DELETE FROM PermittedWorkspace " +
-                            "RETURN BEFORE " +
-                            "WHERE parentWorkspaceId = :parentWorkspaceId", {
-                            params: {
-                                parentWorkspaceId: parentWorkspaceId
-                            }
-                        }).then(function (results) {
-
-                            asyncCycle(results, function (permittedWorkspace, index, next) {
-                                if (permittedWorkspace.isOwn) {
-                                    removeOwnWorkspace(userId, permittedWorkspace.workspaceId, function () {
-                                        next();
-                                    });
-                                } else {
-                                    next();
-                                }
-                            }, function () {
-                                removeChildren(stack);
+                            removeOwnWorkspace(workspace.creatorId, workspaceId, function () {
+                                next();
                             });
-                        }).catch(function (error) {
-                            throw error;
+                        }, function () {
+                            db.query("" +
+                                "DELETE FROM PermittedWorkspace " +
+                                "WHERE parentWorkspaceId = :parentWorkspaceId", {
+                                params: {
+                                    parentWorkspaceId: parentWorkspaceId
+                                }
+                            }).then(function (results) {
+                                removeChildren(stack);
+                            }).catch(function (error) {
+                                throw error;
+                            });
                         });
                     }).catch(function (error) {
                         throw error;
@@ -602,24 +598,18 @@ module.exports = function (db, developmentMode) {
                 var workspace = results[0];
                 pushWorkspace(workspace);
 
-                db.query("" +
-                    "DELETE FROM PermittedWorkspace " +
-                    "RETURN BEFORE " +
-                    "WHERE workspaceId = :workspaceId", {
-                    params: {
-                        workspaceId: workspaceId
-                    }
-                }).then(function (results) {
-                    var permittedWorkspace = results[0];
-                    if (permittedWorkspace.isOwn) {
-                        removeOwnWorkspace(userId, permittedWorkspace.workspaceId, function () {
-                            removeChildren([workspaceId]);
-                        });
-                    } else {
+                removeOwnWorkspace(workspace.creatorId, encodeId(workspace), function () {
+                    db.query("" +
+                        "DELETE FROM PermittedWorkspace " +
+                        "WHERE workspaceId = :workspaceId", {
+                        params: {
+                            workspaceId: workspaceId
+                        }
+                    }).then(function (results) {
                         removeChildren([workspaceId]);
-                    }
-                }).catch(function (error) {
-                    throw error;
+                    }).catch(function (error) {
+                        throw error;
+                    });
                 });
             }).catch(function (error) {
                 throw error;

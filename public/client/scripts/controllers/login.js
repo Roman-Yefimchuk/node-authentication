@@ -21,6 +21,15 @@ angular.module('application')
                 }
             }
 
+            function getRootWorkspaceId() {
+                var activeNode = $scope.activeNode;
+                if (activeNode) {
+                    var activeRootNode = activeNode.getRoot();
+                    var item = activeRootNode.item;
+                    return item.id;
+                }
+            }
+
             $scope.isSystemEmpty = false;
             $scope.treeModel = [];
             $scope.errorMessage = null;
@@ -32,6 +41,7 @@ angular.module('application')
             };
 
             $scope.onWorkspaceChanged = function (node) {
+                $scope.activeNode = node;
                 $scope.currentWorkspace = node.item['workspace'];
                 $scope.workspaceDropdown['isOpen'] = false;
             };
@@ -72,6 +82,7 @@ angular.module('application')
                     var ready = $scope.$on('workspaceTree[login-tree]:ready', function () {
                         $rootScope.$broadcast('workspaceTree[login-tree]:search', getWorkspaceId(), function (node) {
                             if (node) {
+                                $scope.activeNode = node;
                                 node.setActive();
                             }
                             loaderService.hideLoader();
@@ -117,7 +128,8 @@ angular.module('application')
                 apiService.login({
                     email: $scope.email,
                     password: $scope.password,
-                    workspaceId: getWorkspaceId()
+                    workspaceId: getWorkspaceId(),
+                    rootWorkspaceId: getRootWorkspaceId()
                 }, {
                     success: function () {
                         $location.path('/home');

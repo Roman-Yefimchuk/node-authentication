@@ -30,7 +30,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
 
             var userId = userAccount.userId;
 
-            var sendResponse = function (workspaceId, defaultWorkspaceId, externalNotification) {
+            var sendResponse = function (workspaceId, rootWorkspaceId, defaultWorkspaceId, externalNotification) {
                 resultCallback({
                     data: {
                         user: {
@@ -39,6 +39,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
                             displayName: userAccount.displayName,
                             authorizationProvider: userAccount.authorizationProvider,
                             workspaceId: workspaceId,
+                            rootWorkspaceId: rootWorkspaceId,
                             defaultWorkspaceId: defaultWorkspaceId
                         },
                         externalNotification: externalNotification
@@ -46,14 +47,14 @@ module.exports = function (app, dbProvider, serviceProvider) {
                 });
             };
 
-            var checkWorkspace = function (workspaceId) {
+            var checkWorkspace = function (workspaceId, rootWorkspaceId) {
                 dbProvider.isAccessGrantedForWorkspace(userId, workspaceId, function (isAccessGranted) {
                     dbProvider.getDefaultWorkspaceId(userId, function (defaultWorkspaceId) {
                         if (isAccessGranted) {
-                            sendResponse(workspaceId, defaultWorkspaceId);
+                            sendResponse(workspaceId, rootWorkspaceId, defaultWorkspaceId);
                         } else {
                             dbProvider.getWorkspace(workspaceId, function (workspace) {
-                                sendResponse(defaultWorkspaceId, defaultWorkspaceId, {
+                                sendResponse(defaultWorkspaceId, rootWorkspaceId, defaultWorkspaceId, {
                                     type: 'warning',
                                     message: 'Access to workspace ' + workspace.name + ' closed'
                                 });
@@ -63,8 +64,8 @@ module.exports = function (app, dbProvider, serviceProvider) {
                 });
             };
 
-            dbProvider.getUserWorkspaceId(userId, function (workspaceId) {
-                checkWorkspace(workspaceId);
+            dbProvider.getUserWorkspaceId(userId, function (workspaceId, rootWorkspaceId) {
+                checkWorkspace(workspaceId, rootWorkspaceId);
             });
 
         } else {
