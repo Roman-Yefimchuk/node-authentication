@@ -173,17 +173,17 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/fetch-workspaces', function (request, response, resultCallback) {
+    serviceProvider.post('/api/load-hierarchy', function (request, response, resultCallback) {
         var userId = getUserId(request);
 
         var workspaceId = request.body['workspaceId'];
         var rootWorkspaceId = request.body['rootWorkspaceId'];
 
-        dbProvider.fetchWorkspaces(userId, workspaceId, rootWorkspaceId, function (result, status) {
+        dbProvider.loadHierarchy(userId, workspaceId, rootWorkspaceId, function (status, result) {
             resultCallback({
                 data: {
                     status: status,
-                    result: result
+                    workspaces: status == 'success' ? result : []
                 }
             });
         });

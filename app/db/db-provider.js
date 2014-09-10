@@ -4,7 +4,7 @@ module.exports = function (db, developmentMode) {
 
     var ROOT_ID = '@root';
 
-    var asyncCycle = require('../utils/async-cycle');
+    var syncCycle = require('../utils/sync-cycle');
     var security = require('../utils/security');
     var _ = require('underscore');
 
@@ -428,7 +428,7 @@ module.exports = function (db, developmentMode) {
             });
         },
         updateItems: function (workspaceId, userId, todoModels, callback) {
-            asyncCycle(todoModels, function (todoModel, index, next) {
+            syncCycle(todoModels, function (todoModel, index, next) {
                 db.query("" +
                     "UPDATE Todo " +
                     "SET title = :title, completed = :completed " +
@@ -448,7 +448,7 @@ module.exports = function (db, developmentMode) {
             });
         },
         removeItems: function (workspaceId, userId, todoIds, callback) {
-            asyncCycle(todoIds, function (todoId, index, next) {
+            syncCycle(todoIds, function (todoId, index, next) {
                 db.query("" +
                     "DELETE FROM Todo " +
                     "WHERE @rid = :id", {
@@ -543,6 +543,20 @@ module.exports = function (db, developmentMode) {
                 });
             }
 
+            function removeRecords(workspaceId, callback) {
+                db.query("" +
+                    "DELETE FROM Todo " +
+                    "WHERE workspaceId = :workspaceId", {
+                    params: {
+                        workspaceId: workspaceId
+                    }
+                }).then(function (total) {
+                    callback();
+                }).catch(function (error) {
+                    throw error;
+                });
+            }
+
             function removeChildren(stack) {
                 if (stack.length > 0) {
                     var parentWorkspaceId = stack.pop();
@@ -556,7 +570,7 @@ module.exports = function (db, developmentMode) {
                         }
                     }).then(function (results) {
 
-                        asyncCycle(results, function (workspace, index, next) {
+                        syncCycle(results, function (workspace, index, next) {
                             pushWorkspace(workspace);
 
                             var workspaceId = encodeId(workspace);
@@ -708,7 +722,7 @@ module.exports = function (db, developmentMode) {
         getUsers: function (ids, callback) {
             var result = [];
 
-            asyncCycle(ids, function (userId, index, next) {
+            syncCycle(ids, function (userId, index, next) {
                 db.query("" +
                     "SELECT displayName, registeredDate " +
                     "FROM UserAccount " +
@@ -734,21 +748,21 @@ module.exports = function (db, developmentMode) {
                 callback(result);
             });
         },
-        fetchWorkspaces: function (userId, workspaceId, rootWorkspaceId, callback) {
+        loadHierarchy: function (userId, workspaceId, rootWorkspaceId, callback) {
 
             var result = [];
 
-            function fetchWorkspaces(parentWorkspaceId) {
-                if (parentWorkspaceId == workspaceId) {
-                    callback(result, 'SUCCESS');
+            function loadHierarchy(workspaceId) {
+                if (rootWorkspaceId == workspaceId) {
+                    callback('success', result.reverse());
                 } else {
                     db.query("" +
                         "SELECT * " +
                         "FROM PermittedWorkspace " +
-                        "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
+                        "WHERE userId = :userId AND workspaceId = :workspaceId", {
                         params: {
                             userId: userId,
-                            parentWorkspaceId: parentWorkspaceId
+                            workspaceId: workspaceId
                         }
                     }).then(function (results) {
                         if (results.length > 0) {
@@ -757,48 +771,16 @@ module.exports = function (db, developmentMode) {
                             dbProvider.isAccessGrantedForWorkspace(userId, workspaceId, function (isAccessGranted) {
                                 if (isAccessGranted) {
 
-                                    db.query("" +
-                                        "SELECT * " +
-                                        "FROM Workspace " +
-                                        "WHERE @rid = :id", {
-                                        params: {
-                                            id: decodeId(permittedWorkspace.workspaceId)
-                                        }
-                                    }).then(function (results) {
-                                        var workspace = results[0];
-                                        var workspaceId = permittedWorkspace.workspaceId;
+                                    var workspaceId = permittedWorkspace.workspaceId;
+                                    result.push(workspaceId);
 
-                                        getPermittedChildrenCount(userId, workspaceId, function (childrenCount) {
-
-                                            dbProvider.getPermittedWorkspaces(userId, workspaceId, function (workspaces) {
-                                                result.push({
-                                                    workspace: {
-                                                        id: permittedWorkspace.workspaceId,
-                                                        name: workspace.name,
-                                                        creatorId: workspace.creatorId,
-                                                        creationDate: workspace.creationDate,
-                                                        childrenCount: childrenCount,
-                                                        permissions: {
-                                                            readOnly: permittedWorkspace.readOnly,
-                                                            collectionManager: permittedWorkspace.collectionManager,
-                                                            accessManager: permittedWorkspace.accessManager
-                                                        }
-                                                    },
-                                                    children: workspaces
-                                                });
-
-                                                fetchWorkspaces(workspaceId);
-                                            });
-                                        });
-                                    }).catch(function (error) {
-                                        throw error;
-                                    });
+                                    loadHierarchy(permittedWorkspace.parentWorkspaceId);
                                 } else {
-                                    callback(result, 'ACCESS_DENIED');
+                                    callback('access_denied');
                                 }
                             });
                         } else {
-                            callback(result, 'NOT_FOUND');
+                            callback('not_found');
                         }
                     }).catch(function (error) {
                         throw error;
@@ -806,7 +788,7 @@ module.exports = function (db, developmentMode) {
                 }
             }
 
-            fetchWorkspaces(rootWorkspaceId);
+            loadHierarchy(workspaceId);
         },
         getPermittedWorkspaces: function (userId, parentWorkspaceId, callback) {
             db.query("" +
@@ -822,7 +804,7 @@ module.exports = function (db, developmentMode) {
 
                 var result = [];
 
-                asyncCycle(permittedWorkspaces, function (permittedWorkspace, index, next) {
+                syncCycle(permittedWorkspaces, function (permittedWorkspace, index, next) {
                     db.query("" +
                         "SELECT * " +
                         "FROM Workspace " +
@@ -873,7 +855,7 @@ module.exports = function (db, developmentMode) {
 
                 var result = [];
 
-                asyncCycle(workspaces, function (workspace, index, next) {
+                syncCycle(workspaces, function (workspace, index, next) {
 
                     var workspaceId = encodeId(workspace);
 
@@ -914,7 +896,7 @@ module.exports = function (db, developmentMode) {
 
                         var users = [];
 
-                        asyncCycle(usersAccount, function (userAccount, index, next) {
+                        syncCycle(usersAccount, function (userAccount, index, next) {
                             users.push({
                                 id: userAccount.userId,
                                 displayName: userAccount.displayName,
@@ -954,7 +936,7 @@ module.exports = function (db, developmentMode) {
 
                         var users = [];
 
-                        asyncCycle(usersAccount, function (userAccount, index, next) {
+                        syncCycle(usersAccount, function (userAccount, index, next) {
                             var userId = userAccount.userId;
 
                             getUserPermissionsForWorkspace(userId, workspaceId, function (permissions) {
@@ -997,7 +979,7 @@ module.exports = function (db, developmentMode) {
             });
         },
         setUsersPermissionsForWorkspace: function (workspaceId, collection, callback) {
-            asyncCycle(collection, function (collectionItem, index, next) {
+            syncCycle(collection, function (collectionItem, index, next) {
                 var userId = collectionItem.userId;
                 var permissions = collectionItem.permissions;
                 var isAccessGranted = permissions.readOnly || permissions.collectionManager || permissions.accessManager;

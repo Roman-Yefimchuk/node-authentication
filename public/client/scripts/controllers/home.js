@@ -162,8 +162,14 @@ angular.module('application')
                                 treeModel.push(item);
                             });
 
+                            function searchNode(workspaceId, callback) {
+                                $rootScope.$broadcast('workspaceTree[home-tree]:search', workspaceId, function (node) {
+                                    callback(node);
+                                });
+                            }
+
                             var ready = $scope.$on('workspaceTree[home-tree]:ready', function () {
-                                $rootScope.$broadcast('workspaceTree[home-tree]:search', user.workspaceId, function (node) {
+                                searchNode(user.workspaceId, function (node) {
 
                                     function onLoadingReady() {
                                         loaderService.hideLoader();
@@ -181,8 +187,42 @@ angular.module('application')
                                         updateActiveNode(node);
                                         onLoadingReady();
                                     } else {
-                                        apiService.fetchWorkspaces(user.workspaceId, '@root', function (result) {
-                                            onLoadingReady();
+                                        searchNode(user.rootWorkspaceId, function (rootNode) {
+
+                                            apiService.loadHierarchy(user.workspaceId, user.rootWorkspaceId, function (data) {
+
+                                                switch (data.status) {
+                                                    case 'success':
+                                                    {
+                                                        var activeNode = rootNode;
+
+                                                        syncCycle(data.workspaces, function (workspaceId, index, next) {
+                                                            activeNode.expand(function () {
+                                                                searchNode(workspaceId, function (node) {
+                                                                    activeNode = node;
+                                                                    next();
+                                                                });
+                                                            });
+                                                        }, function () {
+                                                            updateActiveNode(activeNode);
+                                                            onLoadingReady();
+                                                        });
+
+                                                        break;
+                                                    }
+                                                    case 'access_denied':
+                                                    case 'not_found':
+                                                    {
+                                                        searchNode(user.defaultWorkspaceId, function (node) {
+                                                            notificationsService.notify('Workspace was changed', 'warning');
+
+                                                            updateActiveNode(node);
+                                                            onLoadingReady();
+                                                        });
+                                                        break;
+                                                    }
+                                                }
+                                            });
                                         });
                                     }
                                 });
@@ -205,8 +245,18 @@ angular.module('application')
             $scope.showWorkspaceId = function () {
                 if (DEBUG_MODE) {
                     dialogsService.showAlert({
-                        title: 'Workspace ID',
-                        message: getWorkspaceId()
+                        context: {
+                            rootWorkspaceId: getRootWorkspaceId(),
+                            workspaceId: getWorkspaceId(),
+                            userId: $scope.user['userId']
+                        },
+                        title: 'Development info',
+                        message: '' +
+                            'rootWorkspaceId: <b>{{ rootWorkspaceId }}</b>' +
+                            '<br>' +
+                            'workspaceId: <b>{{ workspaceId }}</b>' +
+                            '<br>' +
+                            'userId: <b>{{ userId }}</b>'
                     });
                 }
             };

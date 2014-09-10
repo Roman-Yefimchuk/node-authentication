@@ -13,3 +13,23 @@ String.prototype.replaceAll = function (searchValue, replaceValue) {
     var pattern = new RegExp(searchValue, 'g');
     return this.replace(pattern, replaceValue);
 };
+
+function syncCycle(array, nextCallback, completedCallback) {
+
+    if (array instanceof Array) {
+        var index = 0;
+        var next = function () {
+            if (index == array.length) {
+                completedCallback();
+            } else {
+                var element = array[index];
+                nextCallback(element, index, next);
+                index++;
+            }
+        };
+
+        next();
+    } else {
+        completedCallback();
+    }
+}

@@ -80,7 +80,10 @@ angular.module('application')
                             triggerSelection(this);
 
                             scope.activeNode = this;
-                            $event.stopPropagation();
+
+                            if ($event) {
+                                $event.stopPropagation();
+                            }
                         };
 
                         Node.prototype.getRoot = function () {
@@ -115,7 +118,21 @@ angular.module('application')
                             return !((item.childrenCount && !this.isLoaded) || item.children['length']);
                         };
 
-                        Node.prototype.toggle = function ($event) {
+                        Node.prototype.expand = function (callback) {
+                            var context = this;
+                            if (!context.expanded) {
+                                context.toggle(null, callback);
+                            }
+                        };
+
+                        Node.prototype.collapse = function () {
+                            var context = this;
+                            if (context.expanded) {
+                                context.toggle();
+                            }
+                        };
+
+                        Node.prototype.toggle = function ($event, callback) {
                             var context = this;
 
                             function toggle() {
@@ -125,6 +142,8 @@ angular.module('application')
                                         node: this,
                                         expanded: context.expanded
                                     });
+
+                                    (callback || angular.noop)();
                                 }
                             }
 
@@ -154,7 +173,9 @@ angular.module('application')
                                 toggle();
                             }
 
-                            $event.stopPropagation();
+                            if ($event) {
+                                $event.stopPropagation();
+                            }
                         };
 
                         Node.prototype.insert = function (childItem, callback) {

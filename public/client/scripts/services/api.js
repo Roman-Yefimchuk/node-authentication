@@ -180,10 +180,10 @@ angular.module('application')
                         success: callback
                     });
                 },
-                fetchWorkspaces: function (workspaceId, rootWorkspaceId, callback) {
+                loadHierarchy: function (workspaceId, rootWorkspaceId, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/fetch-workspaces',
+                        url: '/api/load-hierarchy',
                         data: {
                             workspaceId: workspaceId,
                             rootWorkspaceId: rootWorkspaceId
