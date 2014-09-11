@@ -10,11 +10,11 @@ angular.module('application')
                 scope: {
                     user: '='
                 },
-                controller: function ($scope) {
+                controller: ['$scope', function ($scope) {
                     $scope.$watch('user', function (user) {
                         $scope.permissions = user.permissions;
                     });
-                }
+                }]
             };
         }
     ]
