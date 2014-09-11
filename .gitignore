@@ -3,5 +3,6 @@ local_db/
 node_modules/
 temp/
 command_line/
+production/
 *.log
 *.lnk
