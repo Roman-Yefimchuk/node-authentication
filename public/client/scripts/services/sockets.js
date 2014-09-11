@@ -5,8 +5,10 @@ angular.module('application')
     .service('socketsService', [
 
         '$rootScope',
+        '$log',
+        'DEBUG_MODE',
 
-        function ($rootScope) {
+        function ($rootScope, $log, DEBUG_MODE) {
 
             var socket = null;
             var socketConnection = null;
@@ -91,6 +93,33 @@ angular.module('application')
                             'force new connection': true
                         });
 
+                        var emit = function (command, data) {
+                            if (isConnected) {
+
+                                if (DEBUG_MODE) {
+                                    $log.debug('SOCKET >>> [' + command + ']');
+                                    $log.debug(data);
+                                }
+
+                                socket.emit(command, data);
+                            } else {
+                                throw 'Connection closed';
+                            }
+                        };
+
+                        var on = function (command, handler) {
+                            if (DEBUG_MODE) {
+                                socket.on(command, function (data) {
+                                    $log.debug('SOCKET <<< [' + command + ']');
+                                    $log.debug(data);
+
+                                    handler(data);
+                                });
+                            } else {
+                                socket.on(command, handler);
+                            }
+                        };
+
                         _.forEach({
                             'user_connected': 'userConnected',
                             'user_disconnected': 'userDisconnected',
@@ -107,20 +136,12 @@ angular.module('application')
 
                             'update_present_users': 'updatePresentUsers'
                         }, function (value, command) {
-                            socket.on(command, function (data) {
+                            on(command, function (data) {
                                 $rootScope.$broadcast('socketsService:' + value, data);
                             });
                         });
 
-                        var emit = function (command, data) {
-                            if (isConnected) {
-                                socket.emit(command, data);
-                            } else {
-                                throw 'Connection closed';
-                            }
-                        };
-
-                        socket.on('connect', function (data) {
+                        on('connect', function (data) {
                             isConnected = true;
 
                             emit('user_connection', {
@@ -132,14 +153,14 @@ angular.module('application')
                             callback(socketConnection);
                         });
 
-                        socket.on('disconnect', function (data) {
+                        on('disconnect', function (data) {
                             if (isConnected) {
                                 closeConnection();
                                 $rootScope.$broadcast('socketsService:disconnect', data);
                             }
                         });
 
-                        socket.on('error', function (error) {
+                        on('error', function (error) {
                             $rootScope.$broadcast('socketsService:error', error);
                         });
                     }
