@@ -1,6 +1,6 @@
 <div class="panel col-sm-4 col-sm-offset-4" style="margin-top: 80px">
 
-    <h1><span class="fa fa-sign-in" ng-click="quickLogin()"></span> Login</h1>
+    <h1><span class="fa fa-sign-in" ng-click="quickLogin()"></span> {{ 'login.title' | translate }}</h1>
 
     <div ng-show="errorMessage != null">
         <alert type="danger" close="errorMessage = null" class="text-center">
@@ -15,7 +15,7 @@
 
         <div class="form-group" ng-show="treeModel.length > 0">
 
-            <label>Select workspace</label>
+            <label>{{ 'login.select_workspace' | translate }}</label>
 
             <br>
 
@@ -42,36 +42,42 @@
         </div>
 
         <div class="form-group">
-            <label>Email</label>
+            <label>{{ 'login.email' | translate }}</label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isEmailValid() }">
                 <div class="input-group-addon"><i class="fa fa-at"></i></div>
-                <input class="form-control" type="email" ng-model="email" placeholder="Enter email"
+                <input class="form-control" type="email" ng-model="email"
+                       placeholder="{{ 'login.email_placeholder' | translate }}"
                        autocomplete="off">
             </div>
         </div>
 
         <div class="form-group">
-            <label>Password</label>
+            <label>{{ 'login.password' | translate }}</label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
                 <div class="input-group-addon"><i class="fa fa-key"></i></div>
-                <input class="form-control" type="password" ng-model="password" placeholder="Enter password"
+                <input class="form-control" type="password" ng-model="password"
+                       placeholder="{{ 'login.password_placeholder' | translate }}"
                        autocomplete="off">
             </div>
         </div>
 
         <span ng-click="login()" class="btn btn-warning"
               ng-disabled="!(isEmailValid() && isPasswordValid()) || isSystemEmpty">
-            Login
+            {{ 'login.btn_login' | translate }}
         </span>
 
     </form>
 
     <hr>
 
-    <p>Need an account? <a href="#/sign-up">Signup</a></p>
+    <p>{{ 'login.need_an_account' | translate }}?
+        <a href="#/sign-up">{{ 'login.sign_up' | translate }}</a>
+    </p>
 
-    <p>Or go <a href="#/">home</a>.</p>
+    <p>{{ 'login.or_go' | translate }}
+        <a href="#/">{{ 'login.home' | translate }}</a>
+    </p>
 
 </div>

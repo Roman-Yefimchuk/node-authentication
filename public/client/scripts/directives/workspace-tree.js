@@ -33,7 +33,7 @@ angular.module('application')
                         '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
                         '            ng-class="{ \'fa-folder-open\' : node.expanded, \'fa-folder\' : !node.expanded }">' +
                         '         </i>&nbsp;<a href="javascript:void(0)" style="cursor: pointer" ng-click="node.onSelection($event)"' +
-                        '               ng-class="{ \'bold-fond\' : node.isActive() }" href>{{ node.item["name"] }}<span ng-show="node.isLoading">&nbsp;<i class="fa fa-refresh fa-spin" style="color: #000"></i></span>' +
+                        '               ng-class="{ \'bold-fond\' : node.isActive() }" href>{{ node.getLabel() }}<span ng-show="node.isLoading">&nbsp;<i class="fa fa-refresh fa-spin" style="color: #000"></i></span>' +
                         '         </a>' +
                         '     </span>' +
                         '     <div style="padding-left: 15px" children ng-show="node.expanded">' +
@@ -54,12 +54,10 @@ angular.module('application')
                     var Node = (function () {
 
                         function triggerSelection(node) {
-                            if (scope.activeNode != node) {
-                                if (scope.onSelection) {
-                                    scope.onSelection({
-                                        node: node
-                                    });
-                                }
+                            if (scope.activeNode && scope.onSelection) {
+                                scope.onSelection({
+                                    node: node
+                                });
                             }
                         }
 
@@ -76,131 +74,78 @@ angular.module('application')
                             this.isLoading = false;
                         }
 
-                        Node.prototype.onSelection = function ($event) {
-                            triggerSelection(this);
+                        Node.prototype = {
+                            getLabel: function () {
+                                var workspace = this.getWorkspace();
+                                return workspace.name;
+                            },
+                            getWorkspace: function () {
+                                return this.item['workspace'];
+                            },
+                            onSelection: function ($event) {
+                                triggerSelection(this);
 
-                            scope.activeNode = this;
+                                scope.activeNode = this;
 
-                            if ($event) {
-                                $event.stopPropagation();
-                            }
-                        };
-
-                        Node.prototype.getRoot = function () {
-                            var node = this;
-                            while (node.parentNode) {
-                                node = node.parentNode;
-                            }
-                            return node;
-                        };
-
-                        Node.prototype.getParent = function () {
-                            return this.parentNode;
-                        };
-
-                        Node.prototype.setActive = function () {
-                            var node = this.parentNode;
-                            while (node) {
-                                node.expanded = true;
-                                node = node.parentNode;
-                            }
-
-                            scope.activeNode = this;
-                        };
-
-                        Node.prototype.isActive = function () {
-                            return scope.activeNode == this;
-                        };
-
-                        Node.prototype.isEmpty = function () {
-                            var item = this.item;
-
-                            return !((item.childrenCount && !this.isLoaded) || item.children['length']);
-                        };
-
-                        Node.prototype.expand = function (callback) {
-                            var context = this;
-                            if (!context.expanded) {
-                                context.toggle(null, callback);
-                            }
-                        };
-
-                        Node.prototype.collapse = function () {
-                            var context = this;
-                            if (context.expanded) {
-                                context.toggle();
-                            }
-                        };
-
-                        Node.prototype.toggle = function ($event, callback) {
-                            var context = this;
-
-                            function toggle() {
-                                context.expanded = !context.expanded;
-                                if (scope.onToggle) {
-                                    scope.onToggle({
-                                        node: this,
-                                        expanded: context.expanded
-                                    });
-
-                                    (callback || angular.noop)();
+                                if ($event) {
+                                    $event.stopPropagation();
                                 }
-                            }
-
-                            if (!context.expanded && !context.isLoaded) {
-                                if (scope.onLoading) {
-                                    context.isLoading = true;
-                                    scope.onLoading({
-                                        item: context.item,
-                                        callback: function (data, wrapItem) {
-                                            context.isLoaded = true;
-
-                                            _.forEach(data, function (item) {
-                                                item = wrapItem(item);
-                                                context.insert(item);
-                                            });
-
-                                            context.isLoading = false;
-
-                                            toggle();
-                                        }
-                                    })
-                                } else {
-                                    context.isLoaded = true;
-                                    toggle();
+                            },
+                            getRoot: function () {
+                                var node = this;
+                                while (node.parentNode) {
+                                    node = node.parentNode;
                                 }
-                            } else {
-                                toggle();
-                            }
+                                return node;
+                            },
+                            getParent: function () {
+                                return this.parentNode;
+                            },
+                            setActive: function () {
+                                var node = this.parentNode;
+                                while (node) {
+                                    node.expanded = true;
+                                    node = node.parentNode;
+                                }
 
-                            if ($event) {
-                                $event.stopPropagation();
-                            }
-                        };
+                                scope.activeNode = this;
+                            },
+                            isActive: function () {
+                                return scope.activeNode == this;
+                            },
+                            isEmpty: function () {
+                                var item = this.item;
 
-                        Node.prototype.insert = function (childItem, callback) {
-                            var context = this;
+                                return !((item.childrenCount && !this.isLoaded) || item.children['length']);
+                            },
+                            expand: function (callback) {
+                                var context = this;
+                                if (!context.expanded) {
+                                    context.toggle(null, callback);
+                                }
+                            },
+                            collapse: function () {
+                                var context = this;
+                                if (context.expanded) {
+                                    context.toggle();
+                                }
+                            },
+                            toggle: function ($event, callback) {
+                                var context = this;
 
-                            if (childItem) {
+                                function toggle() {
+                                    context.expanded = !context.expanded;
+                                    if (scope.onToggle) {
+                                        scope.onToggle({
+                                            node: this,
+                                            expanded: context.expanded
+                                        });
 
-                                var insert = function () {
-                                    childItem.children = childItem.children || [];
+                                        (callback || angular.noop)();
+                                    }
+                                }
 
-                                    var children = context.item['children'];
-                                    children.push(childItem);
-
-                                    var nodeScope = context.nodeScope;
-                                    var childrenElement = context.childrenElement;
-                                    var level = context.level;
-
-                                    var childNode = makeTreeNodes(nodeScope, [childItem], childrenElement, context, level + 1)[0];
-
-                                    (callback || angular.noop)(childNode);
-                                };
-
-                                if (context.isLoaded) {
-                                    insert();
-                                } else {
+                                if (!context.expanded && !context.isLoaded) {
                                     if (scope.onLoading) {
                                         context.isLoading = true;
                                         scope.onLoading({
@@ -215,53 +160,114 @@ angular.module('application')
 
                                                 context.isLoading = false;
 
-                                                var childNode = nodes[data[data.length - 1].id];
-                                                (callback || angular.noop)(childNode)
+                                                toggle();
                                             }
                                         })
                                     } else {
                                         context.isLoaded = true;
+                                        toggle();
+                                    }
+                                } else {
+                                    toggle();
+                                }
+
+                                if ($event) {
+                                    $event.stopPropagation();
+                                }
+                            },
+                            childOf: function (parentNode) {
+                                var node = this;
+                                while (node) {
+                                    if (node.parentNode == parentNode) {
+                                        return true;
+                                    }
+                                    node = node.parentNode;
+                                }
+                                return false;
+                            },
+                            insert: function (childItem, callback) {
+                                var context = this;
+
+                                if (childItem) {
+
+                                    var insert = function () {
+                                        childItem.children = childItem.children || [];
+
+                                        var children = context.item['children'];
+                                        children.push(childItem);
+
+                                        var nodeScope = context.nodeScope;
+                                        var childrenElement = context.childrenElement;
+                                        var level = context.level;
+
+                                        var childNode = makeTreeNodes(nodeScope, [childItem], childrenElement, context, level + 1)[0];
+
+                                        (callback || angular.noop)(childNode);
+                                    };
+
+                                    if (context.isLoaded) {
                                         insert();
+                                    } else {
+                                        if (scope.onLoading) {
+                                            context.isLoading = true;
+                                            scope.onLoading({
+                                                item: context.item,
+                                                callback: function (data, wrapItem) {
+                                                    context.isLoaded = true;
+
+                                                    _.forEach(data, function (item) {
+                                                        item = wrapItem(item);
+                                                        context.insert(item);
+                                                    });
+
+                                                    context.isLoading = false;
+
+                                                    var childNode = nodes[data[data.length - 1].id];
+                                                    (callback || angular.noop)(childNode)
+                                                }
+                                            })
+                                        } else {
+                                            context.isLoaded = true;
+                                            insert();
+                                        }
                                     }
                                 }
-                            }
-                        };
+                            },
+                            update: function (item) {
+                                this.item = item;
+                            },
+                            remove: function () {
+                                var context = this;
+                                var parentNode = context.parentNode;
 
-                        Node.prototype.update = function (item) {
-                            this.item = item;
-                        };
+                                if (parentNode) {
+                                    var children = parentNode.item['children'];
 
-                        Node.prototype.remove = function () {
-                            var context = this;
-                            var parentNode = context.parentNode;
+                                    children = _.without(children, context.item);
 
-                            if (parentNode) {
-                                var children = parentNode.item['children'];
+                                    parentNode.item['children'] = children;
+                                    parentNode.expanded = children.length > 0;
 
-                                children = _.without(children, context.item);
+                                    var activeNode = scope.activeNode;
 
-                                parentNode.item['children'] = children;
-                                parentNode.expanded = children.length > 0;
-
-                                var activeNode = scope.activeNode;
-
-                                if (activeNode == context) {
-                                    triggerSelection(parentNode);
-                                    scope.activeNode = parentNode;
-                                } else {
-                                    if (activeNode && context.level < activeNode.level) {
+                                    if (activeNode == context) {
                                         triggerSelection(parentNode);
                                         scope.activeNode = parentNode;
+                                    } else {
+                                        if (activeNode && context.level < activeNode.level) {
+                                            triggerSelection(parentNode);
+                                            scope.activeNode = parentNode;
+                                        }
                                     }
+                                } else {
+                                    scope.activeNode = null;
                                 }
-                            } else {
-                                scope.activeNode = null;
-                            }
-                            var element = context.element;
-                            element.remove();
+                                var element = context.element;
+                                element.remove();
 
-                            var nodeScope = context.nodeScope;
-                            nodeScope.$destroy();
+                                var nodeScope = context.nodeScope;
+                                nodeScope.$destroy();
+                            }
                         };
 
                         return Node;
@@ -376,6 +382,15 @@ angular.module('application')
                     scope.$on('workspaceTree[' + treeId + ']:search', function (event, id, callback) {
                         if (typeof callback == 'function') {
                             callback(nodes[id]);
+                        } else {
+                            $log.debug('callback is not function');
+                        }
+                    });
+
+                    scope.$on('workspaceTree[' + treeId + ']:insertRoot', function (event, item, callback) {
+                        if (typeof callback == 'function') {
+                            var node = makeTreeNodes(treeScope, [item], element)[0];
+                            callback(node);
                         } else {
                             $log.debug('callback is not function');
                         }

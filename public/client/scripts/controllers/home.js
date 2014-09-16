@@ -16,8 +16,9 @@ angular.module('application')
         'dialogsService',
         'SOCKET_URL',
         'DEBUG_MODE',
+        'ROOT_ID',
 
-        function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL, DEBUG_MODE) {
+        function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL, DEBUG_MODE, ROOT_ID) {
 
             var BreadcrumbItem = (function () {
                 function BreadcrumbItem(node) {
@@ -29,9 +30,9 @@ angular.module('application')
                     updateActiveNode(node);
                 };
 
-                BreadcrumbItem.prototype.getTitle = function () {
+                BreadcrumbItem.prototype.getLabel = function () {
                     var node = this.node;
-                    return node.item['name'];
+                    return node.getLabel();
                 };
 
                 return BreadcrumbItem;
@@ -153,7 +154,7 @@ angular.module('application')
 
                         subscribeForSocketEvent();
 
-                        apiService.getPermittedWorkspaces('@root', function (workspaces) {
+                        apiService.getPermittedWorkspaces(ROOT_ID, function (workspaces) {
 
                             var treeModel = [];
 
@@ -161,12 +162,6 @@ angular.module('application')
                                 var item = workspaceToItem(workspace);
                                 treeModel.push(item);
                             });
-
-                            function searchNode(workspaceId, callback) {
-                                $rootScope.$broadcast('workspaceTree[home-tree]:search', workspaceId, function (node) {
-                                    callback(node);
-                                });
-                            }
 
                             var ready = $scope.$on('workspaceTree[home-tree]:ready', function () {
                                 searchNode(user.workspaceId, function (node) {
@@ -279,16 +274,57 @@ angular.module('application')
                 $scope.currentViewMode = viewMode;
             };
 
-            $scope.updatePermissions = function (userId, workspaceId, permissions) {
+            $scope.updatePermissions = function (userId, workspaceId, parentWorkspaceId, permissions) {
                 permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
 
-                    if (_.findWhere($scope.workspaces, { id: workspaceId })) {
-                        if (getWorkspaceId() == workspaceId) {
-                            $scope.permissions = permissions;
-                        }
+                    if (parentWorkspaceId == ROOT_ID) {
+
+                        searchNode(workspaceId, function (node) {
+
+                            if (node) {
+                                var workspace = node.getWorkspace();
+                                workspace.permissions = permissions;
+
+                                if (getWorkspaceId() == workspaceId) {
+                                    $scope.permissions = permissions;
+                                }
+                            } else {
+
+                                apiService.getPermittedWorkspaces(parentWorkspaceId, function (workspaces) {
+
+                                    var workspace = _.find(workspaces, function (workspace) {
+                                        return workspace.id == workspaceId;
+                                    });
+
+                                    var item = workspaceToItem(workspace);
+                                    insertRootNode(item);
+                                });
+                            }
+                        });
                     } else {
-                        apiService.getWorkspace(workspaceId, function (workspace) {
-                            $scope.workspaces.push(workspace);
+                        searchNode(workspaceId, function (node) {
+
+                            if (node) {
+                                var workspace = node.getWorkspace();
+                                workspace.permissions = permissions;
+
+                                if (getWorkspaceId() == workspaceId) {
+                                    $scope.permissions = permissions;
+                                }
+                            } else {
+
+                                searchNode(parentWorkspaceId, function (node) {
+
+                                    if (node) {
+                                        apiService.getPermittedWorkspaces(parentWorkspaceId, function (workspaces) {
+                                            _.forEach(workspaces, function (workspace) {
+                                                var item = workspaceToItem(workspace);
+                                                node.insert(item);
+                                            });
+                                        });
+                                    }
+                                });
+                            }
                         });
                     }
 
@@ -299,20 +335,24 @@ angular.module('application')
                 });
             };
 
-            $scope.closeAccess = function (userId, workspaceId) {
+            $scope.closeAccess = function (userId, workspaceId, parentWorkspaceId) {
                 permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
 
-                    $scope.workspaces = _.filter($scope.workspaces, function (workspace) {
-                        return workspace.id != workspaceId;
-                    });
+                    searchNode(workspaceId, function (node) {
+                        if (node) {
 
-                    if (getWorkspaceId() == workspaceId) {
-                        $rootScope.$broadcast('workspaceTree:search', $scope.user['defaultWorkspaceId'], function (node) {
-                            if (node) {
-                                updateActiveNode(node);
+                            node.remove();
+
+                            if (parentWorkspaceId = ROOT_ID) {
+
+                                searchNode($scope.user['defaultWorkspaceId'], function (node) {
+                                    if (node) {
+                                        updateActiveNode(node);
+                                    }
+                                });
                             }
-                        });
-                    }
+                        }
+                    });
 
                     return "User @{userName} closed access for you to workspace @{workspaceName}".format({
                         userName: userName,
@@ -523,11 +563,7 @@ angular.module('application')
 
                         apiService.updateWorkspace(workspaceId, data, function () {
 
-                            var activeNode = $scope.activeNode;
-                            activeNode.item['name'] = name;
-
-                            var currentWorkspace = $scope.currentWorkspace;
-                            currentWorkspace.name = name;
+                            $scope.currentWorkspace['name'] = name;
 
                             var socketConnection = $scope.socketConnection;
                             socketConnection.updatedWorkspace(workspaceId, data);
@@ -551,10 +587,11 @@ angular.module('application')
                     },
                     onUpdatePermissions: function (collection, closeCallback) {
                         var workspaceId = getWorkspaceId();
+                        var parentWorkspaceId = getParentWorkspaceId();
 
-                        apiService.setUsersPermissionsForWorkspace(workspaceId, collection, function () {
+                        apiService.setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function () {
                             var socketConnection = $scope.socketConnection;
-                            socketConnection.permissionsChanged(collection, workspaceId);
+                            socketConnection.permissionsChanged(collection, workspaceId, parentWorkspaceId);
 
                             closeCallback();
                         });
@@ -612,7 +649,7 @@ angular.module('application')
                             "<br>" +
                             "Creation date" +
                             "<br>" +
-                            "<span><b>{{ creationDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}</b></span>" +
+                            "<span><b>{{ creationDate | formatDate:'mmmm d, yyyy, h:MM TT' }}</b></span>" +
                             ""
                     });
                 });
@@ -624,9 +661,20 @@ angular.module('application')
                 });
             };
 
+            function searchNode(workspaceId, callback) {
+                $rootScope.$broadcast('workspaceTree[home-tree]:search', workspaceId, function (node) {
+                    callback(node);
+                });
+            }
+
+            function insertRootNode(item, callback) {
+                $rootScope.$broadcast('workspaceTree[home-tree]:insertRoot', item, function (node) {
+                    callback(node);
+                });
+            }
+
             function workspaceToItem(workspace) {
                 return {
-                    name: workspace.name,
                     id: workspace.id,
                     childrenCount: workspace.childrenCount || 0,
                     children: [],
@@ -635,10 +683,12 @@ angular.module('application')
             }
 
             function updateActiveNode(node) {
-                $scope.activeNode = node;
-                $scope.breadcrumb = getBreadcrumb();
-                $scope.currentWorkspace = node.item['workspace'];
-                node.setActive();
+                if (node) {
+                    $scope.activeNode = node;
+                    $scope.breadcrumb = getBreadcrumb();
+                    $scope.currentWorkspace = node.getWorkspace();
+                    node.setActive();
+                }
             }
 
             function getBreadcrumb() {
@@ -663,18 +713,29 @@ angular.module('application')
                 return items;
             }
 
-            function getWorkspaceId() {
-                if ($scope.currentWorkspace) {
-                    return $scope.currentWorkspace['id'];
-                }
-            }
-
             function getRootWorkspaceId() {
                 var activeNode = $scope.activeNode;
                 if (activeNode) {
                     var activeRootNode = activeNode.getRoot();
                     var item = activeRootNode.item;
                     return item.id;
+                }
+            }
+
+            function getParentWorkspaceId() {
+                var activeNode = $scope.activeNode;
+                if (activeNode) {
+                    var parentNode = activeNode.getParent();
+                    if (parentNode) {
+                        var item = parentNode.item;
+                        return item.id;
+                    }
+                }
+            }
+
+            function getWorkspaceId() {
+                if ($scope.currentWorkspace) {
+                    return $scope.currentWorkspace['id'];
                 }
             }
 
@@ -737,6 +798,36 @@ angular.module('application')
                     }
                 });
 
+                $scope.$on('socketsService:updatedWorkspace', function (event, data) {
+
+                    var userId = data['userId'];
+                    var workspaceId = data['workspaceId'];
+
+                    changeNotification(userId, function (userName) {
+
+                        searchNode(workspaceId, function (node) {
+                            if (node) {
+                                data = data['data'];
+                                var workspace = node.getWorkspace();
+                                workspace.name = data['name'];
+                                $scope.$apply();
+                            }
+                        });
+
+                        return "User @{userName} updated workspace".format({
+                            userName: userName
+                        });
+                    });
+                });
+
+                $scope.$on('socketsService:removedWorkspace', function (event, data) {
+                    searchNode(data['workspaceId'], function (node) {
+                        if (node) {
+                            node.remove();
+                        }
+                    });
+                });
+
                 $scope.$on('socketsService:addedItem', function (event, data) {
                     $scope.addedItem(data['userId'], data['item']);
                 });
@@ -752,12 +843,13 @@ angular.module('application')
                 $scope.$on('socketsService:permissionsChanged', function (event, data) {
                     var userId = data['userId'];
                     var workspaceId = data['workspaceId'];
+                    var parentWorkspaceId = data['parentWorkspaceId'];
 
                     if (data['access']) {
                         var permissions = data['permissions'];
-                        $scope.updatePermissions(userId, workspaceId, permissions);
+                        $scope.updatePermissions(userId, workspaceId, parentWorkspaceId, permissions);
                     } else {
-                        $scope.closeAccess(userId, workspaceId);
+                        $scope.closeAccess(userId, workspaceId, parentWorkspaceId);
                     }
                 });
 

@@ -61,11 +61,14 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/set-users-permissions-for-workspace/:workspaceId', function (request, response, resultCallback) {
+    serviceProvider.post('/api/set-users-permissions-for-workspace', function (request, response, resultCallback) {
         var userId = getUserId(request);
-        var workspaceId = getParam('workspaceId', request);
+
+        var workspaceId = request.body['workspaceId'];
+        var parentWorkspaceId = request.body['parentWorkspaceId'];
         var collection = request.body['collection'];
-        dbProvider.setUsersPermissionsForWorkspace(workspaceId, collection, function () {
+
+        dbProvider.setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function () {
             resultCallback('Updated ' + collection.length + ' permission(s)');
         });
     });

@@ -6,26 +6,26 @@
         </alert>
     </div>
 
-    <p>Login or Register with:</p>
+    <p>{{ 'index.title' | translate }}:</p>
 
     <a href="#/login" class="btn btn-default">
-        <span class="fa fa-user"></span> Local Login
+        <span class="fa fa-user"></span> {{ 'index.local_login' | translate }}
     </a>
 
     <a href="#/sign-up" class="btn btn-default">
-        <span class="fa fa-user"></span> Local Signup
+        <span class="fa fa-user"></span> {{ 'index.local_signup' | translate }}
     </a>
 
     <a href="/auth/facebook" class="btn btn-primary" ng-click="showLoader()">
-        <span class="fa fa-facebook"></span> Facebook
+        <span class="fa fa-facebook"></span> {{ 'index.facebook' | translate }}
     </a>
 
     <a href="/auth/twitter" class="btn btn-info" ng-click="showLoader()">
-        <span class="fa fa-twitter"></span> Twitter
+        <span class="fa fa-twitter"></span> {{ 'index.twitter' | translate }}
     </a>
 
     <a href="/auth/google" class="btn btn-danger" ng-click="showLoader()">
-        <span class="fa fa-google-plus"></span> Google+
+        <span class="fa fa-google-plus"></span> {{ 'index.google_plus' | translate }}
     </a>
 
 </div>

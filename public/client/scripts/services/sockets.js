@@ -31,18 +31,18 @@ angular.module('application')
                             workspaceId: workspaceId
                         });
                     },
-                    removedWorkspace: function (workspaceId, removedWorkspaces) {
-                        emit('workspace_removed', {
-                            userId: userId,
-                            workspaceId: workspaceId,
-                            removedWorkspaces: removedWorkspaces
-                        });
-                    },
                     updatedWorkspace: function (workspaceId, data) {
-                        emit('workspace_updated', {
+                        emit('updated_workspace', {
                             userId: userId,
                             workspaceId: workspaceId,
                             data: data
+                        });
+                    },
+                    removedWorkspace: function (workspaceId, removedWorkspaces) {
+                        emit('removed_workspace', {
+                            userId: userId,
+                            workspaceId: workspaceId,
+                            removedWorkspaces: removedWorkspaces
                         });
                     },
                     addedItem: function (item) {
@@ -63,10 +63,11 @@ angular.module('application')
                             itemIds: itemIds
                         });
                     },
-                    permissionsChanged: function (collection, workspaceId) {
+                    permissionsChanged: function (collection, workspaceId, parentWorkspaceId) {
                         emit('permissions_changed', {
                             userId: userId,
                             workspaceId: workspaceId,
+                            parentWorkspaceId: parentWorkspaceId,
                             collection: collection
                         });
                     },

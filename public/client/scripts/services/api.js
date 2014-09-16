@@ -122,11 +122,13 @@ angular.module('application')
                         success: callback
                     });
                 },
-                setUsersPermissionsForWorkspace: function (workspaceId, collection, callback) {
+                setUsersPermissionsForWorkspace: function (workspaceId, parentWorkspaceId, collection, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/set-users-permissions-for-workspace/' + workspaceId,
+                        url: '/api/set-users-permissions-for-workspace',
                         data: {
+                            workspaceId: workspaceId,
+                            parentWorkspaceId: parentWorkspaceId,
                             collection: collection
                         }
                     }, {

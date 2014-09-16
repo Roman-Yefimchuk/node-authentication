@@ -119,9 +119,34 @@ module.exports = function (io, dbProvider, developmentMode) {
             }
         });
 
+        onCommand('updated_workspace', function (data) {
+            var userId = data.userId;
+            var workspaceId = data.workspaceId;
+            var data = data.data;
+
+            sendBroadcast('updated_workspace', {
+                userId: userId,
+                workspaceId: workspaceId,
+                data: data
+            });
+        });
+
+        onCommand('removed_workspace', function (data) {
+            var userId = data.userId;
+            var workspaceId = data.workspaceId;
+            var removedWorkspaces = data.removedWorkspaces;
+
+            sendBroadcast('removed_workspace', {
+                userId: userId,
+                workspaceId: workspaceId,
+                removedWorkspaces: removedWorkspaces
+            });
+        });
+
         onCommand('added_item', function (data) {
             var userId = data.userId;
             var item = data.item;
+
             sendBroadcast('added_item', {
                 userId: userId,
                 item: item
@@ -131,6 +156,7 @@ module.exports = function (io, dbProvider, developmentMode) {
         onCommand('updated_items', function (data) {
             var userId = data.userId;
             var items = data.items;
+
             sendBroadcast('updated_items', {
                 userId: userId,
                 items: items
@@ -140,6 +166,7 @@ module.exports = function (io, dbProvider, developmentMode) {
         onCommand('removed_items', function (data) {
             var userId = data.userId;
             var itemIds = data.itemIds;
+
             sendBroadcast('removed_items', {
                 userId: userId,
                 itemIds: itemIds
@@ -149,41 +176,41 @@ module.exports = function (io, dbProvider, developmentMode) {
         onCommand('permissions_changed', function (data) {
             var userId = data.userId;
             var workspaceId = data.workspaceId;
+            var parentWorkspaceId = data.parentWorkspaceId || '@root';
             var collection = data.collection;
 
             function isAccessDenied(permissions) {
                 return !permissions.readOnly && !permissions.collectionManager && !permissions.accessManager;
             }
 
-            dbProvider.setUsersPermissionsForWorkspace(workspaceId, collection, function () {
+            _.forEach(socketsSession, function (socketSession, sessionId) {
+                if (socketSession && sessionId != socket.id) {
 
-                _.forEach(socketsSession, function (socketSession, sessionId) {
-                    if (socketSession && sessionId != socket.id) {
+                    var collectionItem = _.findWhere(collection, {
+                        'userId': socketSession.userId
+                    });
 
-                        var collectionItem = _.findWhere(collection, {
-                            'userId': socketSession.userId
-                        });
+                    if (collectionItem) {
+                        var permissions = collectionItem.permissions;
 
-                        if (collectionItem) {
-                            var permissions = collectionItem.permissions;
-
-                            if (isAccessDenied(permissions)) {
-                                socketSession.sendCommand('permissions_changed', {
-                                    userId: userId,
-                                    workspaceId: workspaceId,
-                                    access: false
-                                });
-                            } else {
-                                socketSession.sendCommand('permissions_changed', {
-                                    userId: userId,
-                                    workspaceId: workspaceId,
-                                    access: true,
-                                    permissions: permissions
-                                });
-                            }
+                        if (isAccessDenied(permissions)) {
+                            socketSession.sendCommand('permissions_changed', {
+                                userId: userId,
+                                workspaceId: workspaceId,
+                                parentWorkspaceId: parentWorkspaceId,
+                                access: false
+                            });
+                        } else {
+                            socketSession.sendCommand('permissions_changed', {
+                                userId: userId,
+                                workspaceId: workspaceId,
+                                parentWorkspaceId: parentWorkspaceId,
+                                access: true,
+                                permissions: permissions
+                            });
                         }
                     }
-                });
+                }
             });
         });
 

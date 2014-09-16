@@ -7,9 +7,12 @@ angular.module('application')
         '$http',
         '$log',
         '$location',
+        'translator',
         'DEBUG_MODE',
 
-        function ($http, $log, $location, DEBUG_MODE) {
+        function ($http, $log, $location, translator, DEBUG_MODE) {
+
+            translator = translator.getSector('http_client_errors');
 
             function traceResponse(params, response) {
                 if (DEBUG_MODE) {
@@ -24,6 +27,30 @@ angular.module('application')
                 }
             }
 
+            var statuses = {};
+
+            _.forEach([
+                'NOT_AUTHENTICATED',
+                'INTERNAL_SERVER_ERROR',
+                'UNHANDLED_EXCEPTION',
+                'PAGE_NOT_FOUND',
+                'INVALID_PASSWORD',
+                'IO_EXCEPTION',
+                'USER_NOT_FOUND',
+                'EMAIL_ALREADY_EXIST'
+            ], function (value) {
+                statuses[value] = value.toLowerCase();
+            });
+
+            function translateError(error) {
+                var key = statuses[error.status];
+
+                if (key) {
+                    return translator.translate(key);
+                }
+                return error.message;
+            }
+
             return {
                 sendRequest: function (params, handler) {
                     var successCallback = handler.success || angular.noop;
@@ -32,7 +59,9 @@ angular.module('application')
                     var request = $http(params);
 
                     request.success(function (response, status, headers, config) {
+
                         if (response) {
+
                             if (response.status) {
 
                                 $log.debug('URL[' + params.method + '] -> ' + params.url);
@@ -40,12 +69,18 @@ angular.module('application')
 
                                 successCallback(response.data || {});
                             } else {
-                                failureCallback(response.error);
+                                var error = response.error;
+
+                                failureCallback({
+                                    status: error.status,
+                                    message: translateError(error),
+                                    data: error.data
+                                });
                             }
                         } else {
                             failureCallback({
-                                status: 'EMPTY_RESPONSE',
-                                message: 'Empty response'
+                                status: 'EMPTY_SERVER_RESPONSE',
+                                message: translator.translate('empty_server_response')
                             });
                         }
                     });

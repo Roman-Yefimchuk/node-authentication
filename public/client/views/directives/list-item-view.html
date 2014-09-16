@@ -1,6 +1,8 @@
 <div class="text-center">
     <div class="row clearfix">
+
         <div class="col-md-7 column">
+
             <span class="pull-left">
                 User ID: <b>{{ user.id }}</b>
             </span>
@@ -14,14 +16,16 @@
             <br>
 
             <span class="pull-left">
-                Registered date: <b>{{ user.registeredDate | dateFilter:'mmmm d, yyyy, h:MM TT' }}</b>
+                Registered date: <b>{{ user.registeredDate | formatDate:'mmmm d, yyyy, h:MM TT' }}</b>
             </span>
         </div>
+
         <div class="col-md-1 column text-center" style="margin-top: 18px;">
             <div ng-show="user.isCreator">
-                <i class="fa fa-user" title="Creator of this workspace"></i>
+                <i class="fa fa-user" tooltip="Creator of this workspace"></i>
             </div>
         </div>
+
         <div class="col-md-4 column">
             <div>
                 <span class="pull-left" btn-checkbox ng-model="permissions.readOnly">
@@ -53,5 +57,6 @@
                 </span>
             </div>
         </div>
+
     </div>
 </div>

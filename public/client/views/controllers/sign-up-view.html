@@ -1,6 +1,6 @@
 <div class="panel col-sm-4 col-sm-offset-4" style="margin-top: 80px">
 
-    <h1><span class="fa fa-sign-in" ng-click="quickSingUp()"></span> Sign Up</h1>
+    <h1><span class="fa fa-sign-in" ng-click="quickSingUp()"></span> {{ 'sign_up.title' | translate }}</h1>
 
     <div ng-show="errorMessage != null">
         <alert type="danger" close="errorMessage = null" class="text-center">
@@ -14,55 +14,62 @@
     <form ng-submit="signUp()" autocomplete="off">
 
         <div class="form-group">
-            <label>Name</label>
+            <label>{{ 'sign_up.name' | translate }}</label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isNameValid() }">
                 <div class="input-group-addon"><i class="fa fa-user"></i></div>
-                <input class="form-control" type="text" ng-model="name" placeholder="Enter name"
+                <input class="form-control" type="text" ng-model="name"
+                       placeholder="{{ 'sign_up.name_placeholder' | translate }}"
                        autocomplete="off">
             </div>
         </div>
 
         <div class="form-group">
-            <label>Email</label>
+            <label>{{ 'sign_up.email' | translate }}</label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isEmailValid() }">
                 <div class="input-group-addon"><i class="fa fa-at"></i></i></div>
-                <input class="form-control" type="email" ng-model="email" placeholder="Enter email"
+                <input class="form-control" type="email" ng-model="email"
+                       placeholder="{{ 'sign_up.email_placeholder' | translate }}"
                        autocomplete="off">
             </div>
         </div>
 
         <div class="form-group">
-            <label>Password</label>
+            <label>{{ 'sign_up.password' | translate }}</label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
                 <div class="input-group-addon"><i class="fa fa-key"></i></i></i></div>
-                <input class="form-control" type="password" ng-model="password" placeholder="Enter password"
+                <input class="form-control" type="password" ng-model="password"
+                       placeholder="{{ 'sign_up.password_placeholder' | translate }}"
                        autocomplete="off">
             </div>
         </div>
 
         <div class="form-group">
-            <label>Retype password</label>
+            <label>{{ 'sign_up.retype_password' | translate }}</label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
                 <div class="input-group-addon"><i class="fa fa-key"></i></i></i></div>
                 <input class="form-control" type="password" ng-model="retypedPassword"
-                       placeholder="Enter retyped password"
+                       placeholder="{{ 'sign_up.retype_password_placeholder' | translate }}"
                        autocomplete="off">
             </div>
         </div>
 
         <span ng-click="signUp()" class="btn btn-warning"
               ng-disabled="!(isNameValid() && isEmailValid() && isPasswordValid())">
-            Sign Up
+            {{ 'sign_up.btn_sign_up' | translate }}
         </span>
     </form>
 
     <hr>
 
-    <p>Already have an account? <a href="#/login">Login</a></p>
+    <p>{{ 'sign_up.already_have_an_account' | translate }}?
+        <a href="#/login">{{ 'sign_up.login' | translate }}</a>
+    </p>
 
-    <p>Or go <a href="#/">home</a>.</p>
+    <p>{{ 'login.or_go' | translate }}
+        <a href="#/">{{ 'login.home' | translate }}</a>
+    </p>
 </div>

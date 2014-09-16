@@ -587,7 +587,9 @@ module.exports = function (db, developmentMode) {
                                     parentWorkspaceId: parentWorkspaceId
                                 }
                             }).then(function (results) {
-                                removeChildren(stack);
+                                removeRecords(workspaceId, function () {
+                                    removeChildren(stack);
+                                });
                             }).catch(function (error) {
                                 throw error;
                             });
@@ -610,9 +612,11 @@ module.exports = function (db, developmentMode) {
             }).then(function (results) {
 
                 var workspace = results[0];
+                var workspaceId = encodeId(workspace);
+
                 pushWorkspace(workspace);
 
-                removeOwnWorkspace(workspace.creatorId, encodeId(workspace), function () {
+                removeOwnWorkspace(workspace.creatorId, workspaceId, function () {
                     db.query("" +
                         "DELETE FROM PermittedWorkspace " +
                         "WHERE workspaceId = :workspaceId", {
@@ -620,7 +624,9 @@ module.exports = function (db, developmentMode) {
                             workspaceId: workspaceId
                         }
                     }).then(function (results) {
-                        removeChildren([workspaceId]);
+                        removeRecords(workspaceId, function () {
+                            removeChildren([workspaceId]);
+                        });
                     }).catch(function (error) {
                         throw error;
                     });
@@ -978,8 +984,9 @@ module.exports = function (db, developmentMode) {
                 }
             });
         },
-        setUsersPermissionsForWorkspace: function (workspaceId, collection, callback) {
+        setUsersPermissionsForWorkspace: function (workspaceId, parentWorkspaceId, collection, callback) {
             syncCycle(collection, function (collectionItem, index, next) {
+
                 var userId = collectionItem.userId;
                 var permissions = collectionItem.permissions;
                 var isAccessGranted = permissions.readOnly || permissions.collectionManager || permissions.accessManager;
@@ -1013,8 +1020,8 @@ module.exports = function (db, developmentMode) {
                             });
                         } else {
                             db.query("" +
-                                "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, readOnly, collectionManager, accessManager) " +
-                                "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :readOnly, :collectionManager, :accessManager)", {
+                                "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, readOnly, collectionManager, accessManager, parentWorkspaceId) " +
+                                "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :readOnly, :collectionManager, :accessManager, :parentWorkspaceId)", {
                                 params: {
                                     userId: userId,
                                     workspaceId: workspaceId,
@@ -1022,7 +1029,8 @@ module.exports = function (db, developmentMode) {
                                     isDefault: false,
                                     readOnly: permissions.readOnly,
                                     collectionManager: permissions.collectionManager,
-                                    accessManager: permissions.accessManager
+                                    accessManager: permissions.accessManager,
+                                    parentWorkspaceId: parentWorkspaceId || ROOT_ID
                                 }
                             }).then(function (results) {
                                 next();
@@ -1036,13 +1044,45 @@ module.exports = function (db, developmentMode) {
                 } else {
                     db.query("" +
                         "DELETE FROM PermittedWorkspace " +
+                        "RETURN BEFORE " +
                         "WHERE userId = :userId AND workspaceId = :workspaceId", {
                         params: {
                             userId: userId,
                             workspaceId: workspaceId
                         }
-                    }).then(function (total) {
-                        next();
+                    }).then(function (results) {
+
+                        var workspaceId = results[0].workspaceId;
+
+                        function closeAccessForChildren(stack) {
+                            if (stack.length > 0) {
+                                var parentWorkspaceId = stack.pop();
+
+                                db.query("" +
+                                    "DELETE FROM PermittedWorkspace " +
+                                    "RETURN BEFORE " +
+                                    "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
+                                    params: {
+                                        userId: userId,
+                                        parentWorkspaceId: parentWorkspaceId
+                                    }
+                                }).then(function (results) {
+
+                                    _.forEach(results, function (permittedWorkspace) {
+                                        var workspaceId = permittedWorkspace.workspaceId;
+                                        stack.push(workspaceId);
+                                    });
+
+                                    closeAccessForChildren(stack);
+                                }).catch(function (error) {
+                                    throw error;
+                                });
+                            } else {
+                                next();
+                            }
+                        }
+
+                        closeAccessForChildren([workspaceId]);
                     }).catch(function (error) {
                         throw error;
                     });
