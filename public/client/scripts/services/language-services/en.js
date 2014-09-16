@@ -8,6 +8,11 @@ angular.module('application')
             "config": {
             },
             "translations": {
+                "languages": {
+                    "en-us": "English",
+                    "ru": "Russian",
+                    "uk": "Ukrainian"
+                },
                 "index": {
                     "title": "Login or Register",
                     "local_login": "Local login",
@@ -24,7 +29,7 @@ angular.module('application')
                     "password": "Password",
                     "password_placeholder": "Enter password",
                     "btn_login": "Login",
-                    "need_an_account": "Need an account",
+                    "need_an_account": "Need an account?",
                     "sign_up": "Sign up",
                     "or_go": "Or go",
                     "home": "home",
@@ -41,10 +46,16 @@ angular.module('application')
                     "retype_password": "Retype password",
                     "retype_password_placeholder": "Enter retyped password",
                     "btn_sign_up": "Sign Up",
-                    "already_have_an_account": "Already have an account",
+                    "already_have_an_account": "Already have an account?",
                     "login": "Login",
                     "or_go": "Or go",
                     "home": "home"
+                },
+                "home": {
+                    "create_workspace": "Create workspace",
+                    "settings": "Settings",
+                    "edit_profile": "Edit profile",
+                    "logout": "Logout"
                 },
                 "http_client_errors": {
                     "empty_server_response": "Empty server response",

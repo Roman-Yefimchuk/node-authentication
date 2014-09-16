@@ -1,0 +1,14 @@
+<div ng-repeat="(languageCode, language) in languages">
+    <div ng-switch="languageCode == currentLanguageCode"
+         ng-click="setLanguage(languageCode)"
+         style="cursor: pointer;padding-left: 2px;padding-right: 2px"
+         l10n-title title-key="{{ language.translationKey }}">
+
+        <div ng-switch-when="true">
+            <img ng-src="{{ language.enabledIcon }}" alt="{{ languageCode }}">
+        </div>
+        <div ng-switch-when="false">
+            <img ng-src="{{ language.disabledIcon }}" alt="{{ languageCode }}">
+        </div>
+    </div>
+</div>

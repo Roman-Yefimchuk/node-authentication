@@ -8,6 +8,11 @@ angular.module('application')
             "config": {
             },
             "translations": {
+                "languages": {
+                    "en-us": "Английский",
+                    "ru": "Русский",
+                    "uk": "Украинский"
+                },
                 "index": {
                     "title": "Войдите или Зарегистрируйтесь",
                     "local_login": "Войти локально",
@@ -24,7 +29,7 @@ angular.module('application')
                     "password": "Пароль",
                     "password_placeholder": "Введите пароль",
                     "btn_login": "Войти",
-                    "need_an_account": "Нужен аккуант",
+                    "need_an_account": "Нужен аккуант?",
                     "sign_up": "Зарегистрироваться",
                     "or_go": "Или перейти",
                     "home": "домой",
@@ -41,7 +46,7 @@ angular.module('application')
                     "retype_password": "Повторите пароль",
                     "retype_password_placeholder": "Введите повторенный пароль",
                     "btn_sign_up": "Регистрация",
-                    "already_have_an_account": "Уже есть аккаунт",
+                    "already_have_an_account": "Уже есть аккаунт?",
                     "login": "Войти",
                     "or_go": "Или перейти",
                     "home": "домой"

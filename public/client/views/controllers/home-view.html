@@ -28,7 +28,7 @@
                         <a href ng-click="showWorkspaceCreator()">
                             <i class="fa fa-plus"></i>
                             &nbsp;
-                            Create workspace
+                            <l10n key="home.create_workspace"></l10n>
                         </a>
                     </li>
                 </ul>
@@ -58,14 +58,14 @@
                             <a href="#/settings">
                                 <i class="fa fa-cog"></i>
                                 &nbsp;
-                                Settings
+                                <l10n key="home.settings"></l10n>
                             </a>
                         </li>
                         <li>
                             <a href="#/profile">
                                 <i class="fa fa-pencil-square-o"></i>
                                 &nbsp;
-                                Edit profile
+                                <l10n key="home.edit_profile"></l10n>
                             </a>
                         </li>
                         <li class="divider"></li>
@@ -73,7 +73,7 @@
                             <a href ng-click="logout()">
                                 <i class="fa fa-sign-out"></i>
                                 &nbsp;
-                                Logout
+                                <l10n key="home.logout"></l10n>
                             </a>
                         </li>
                     </ul>
@@ -91,27 +91,27 @@
 
 <div class="col-md-8 column">
 
-<div ng-show="errorMessage != null">
-    <alert type="danger" close="errorMessage = null" class="text-center">
+    <div ng-show="errorMessage != null">
+        <alert type="danger" close="errorMessage = null" class="text-center">
             <span class="pull-left">
                 <i class="fa fa-exclamation-triangle" style="font-size: 1.5em;"></i>
             </span>
-        {{ errorMessage }}
-    </alert>
-</div>
+            {{ errorMessage }}
+        </alert>
+    </div>
 
-<ol class="panel breadcrumb" ng-show="breadcrumb.length">
-    <li ng-repeat="item in breadcrumb" ng-class="{ 'active' : $last }"><a ng-if="!$last"
-                                                                          href="javascript:void(0)"
-                                                                          ng-click="item.click()">{{
-        item.getLabel() }}
-    </a><span ng-if="$last">{{ item.getLabel() }}</span>
-    </li>
-</ol>
+    <ol class="panel breadcrumb" ng-show="breadcrumb.length">
+        <li ng-repeat="item in breadcrumb" ng-class="{ 'active' : $last }"><a ng-if="!$last"
+                                                                              href="javascript:void(0)"
+                                                                              ng-click="item.click()">{{
+            item.getLabel() }}
+        </a><span ng-if="$last">{{ item.getLabel() }}</span>
+        </li>
+    </ol>
 
-<section class="panel tasks-widget">
-    <header class="panel-heading text-center"
-            ng-class="{'header' : canManageCollection(), 'header-min' : !canManageCollection()}">
+    <section class="panel tasks-widget">
+        <header class="panel-heading text-center"
+                ng-class="{'header' : canManageCollection(), 'header-min' : !canManageCollection()}">
 
             <span class="pull-left"
                   style="cursor: pointer"
@@ -147,55 +147,55 @@
 
                 </span>
 
-    </header>
+        </header>
 
-    <form ng-submit="addTodo()" ng-show="canManageCollection()">
+        <form ng-submit="addTodo()" ng-show="canManageCollection()">
 
-        <div class="input-group task-add">
-            <input class="form-control input-sm" type="text" placeholder="What needs to be done?"
-                   ng-model="newTodo" autofocus autocomplete="off">
+            <div class="input-group task-add">
+                <input class="form-control input-sm" type="text" placeholder="What needs to be done?"
+                       ng-model="newTodo" autofocus autocomplete="off">
                     <span class="btn btn-success btn-sm input-group-addon"
                           ng-click="addTodo()">
                         <i class="fa fa-plus"></i>
                         &nbsp;
                         Add task
                     </span>
-        </div>
+            </div>
 
-    </form>
+        </form>
 
-    <div class="panel-body">
+        <div class="panel-body">
 
-        <div class="task-content">
+            <div class="task-content">
 
-            <div ng-switch="loading">
-                <div ng-switch-when="true">
-                    <div ng-include="'/client/views/common/loader-view.html'"></div>
-                </div>
-                <div ng-switch-when="false">
+                <div ng-switch="loading">
+                    <div ng-switch-when="true">
+                        <div ng-include="'/client/views/common/loader-view.html'"></div>
+                    </div>
+                    <div ng-switch-when="false">
 
-                    <div ng-switch="todos.length > 0">
-                        <div ng-switch-when="true">
+                        <div ng-switch="todos.length > 0">
+                            <div ng-switch-when="true">
 
-                            <ul class="task-list">
+                                <ul class="task-list">
 
-                                <li ng-repeat="todo in todos | filter:statusFilter"
-                                    ng-class="{ 'task-done' : todo.completed }"
-                                    is-lats-item="{{ $last }}">
+                                    <li ng-repeat="todo in todos | filter:statusFilter"
+                                        ng-class="{ 'task-done' : todo.completed }"
+                                        is-lats-item="{{ $last }}">
 
-                                    <div class="task-checkbox" ng-show="canManageCollection()">
-                                        <input type="checkbox" class="list-child"
-                                               ng-model="todo.completed" ng-change="mark(todo)">
-                                    </div>
+                                        <div class="task-checkbox" ng-show="canManageCollection()">
+                                            <input type="checkbox" class="list-child"
+                                                   ng-model="todo.completed" ng-change="mark(todo)">
+                                        </div>
 
-                                    <div class="task-title">
+                                        <div class="task-title">
 
                                 <span class="task-title-sp"
                                       style="vertical-align: sub;">
                                     {{ todo.title }}
                                 </span>
 
-                                        <div class="pull-right hidden-phone">
+                                            <div class="pull-right hidden-phone">
 
                                         <span style="padding-right: 8px;vertical-align: sub;">
                                             {{ todo.creationDate | formatDate:'mmmm d, yyyy, h:MM TT' }}
@@ -211,35 +211,35 @@
                                                           ng-show="canManageCollection()">
                                                         <i class="fa fa-trash-o"></i>
                                                     </span>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                </ul>
+
+                            </div>
+                            <div ng-switch-when="false">
+
+                                <div class="text-center">
+                                    <div class="row clearfix">
+                                        <div class="col-md-12 column">
+                                            <b>No records</b>
                                         </div>
                                     </div>
-                                </li>
-
-                            </ul>
-
-                        </div>
-                        <div ng-switch-when="false">
-
-                            <div class="text-center">
-                                <div class="row clearfix">
-                                    <div class="col-md-12 column">
-                                        <b>No records</b>
-                                    </div>
                                 </div>
+
                             </div>
-
                         </div>
-                    </div>
 
+                    </div>
                 </div>
+
             </div>
 
-        </div>
+            <div class="add-task-row">
 
-        <div class="add-task-row">
-
-            <div class="row clearfix">
-                <div class="col-md-3 column">
+                <div class="row clearfix">
+                    <div class="col-md-3 column">
                             <span class="btn btn-primary btn-sm pull-left"
                                   ng-model="allChecked" ng-click="markAll(!allChecked)"
                                   ng-class="{ 'disabled' : !todos.length }"
@@ -249,23 +249,23 @@
                                 &nbsp;
                                 Select all
                             </span>
-                </div>
-
-                <div class="col-md-6 column text-center">
-                    <div class="btn-group">
-                        <label ng-repeat="viewMode in viewModes"
-                               class="btn btn-success btn-sm"
-                               ng-model="currentViewMode"
-                               ng-click="setViewMode(viewMode)"
-                               btn-radio="viewMode">
-                            <i class="fa {{ viewMode.icon }}"></i>
-                            &nbsp;
-                            {{ viewMode.title }}
-                        </label>
                     </div>
-                </div>
 
-                <div class="col-md-3 column">
+                    <div class="col-md-6 column text-center">
+                        <div class="btn-group">
+                            <label ng-repeat="viewMode in viewModes"
+                                   class="btn btn-success btn-sm"
+                                   ng-model="currentViewMode"
+                                   ng-click="setViewMode(viewMode)"
+                                   btn-radio="viewMode">
+                                <i class="fa {{ viewMode.icon }}"></i>
+                                &nbsp;
+                                {{ viewMode.title }}
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 column">
                             <span class="btn btn-danger btn-sm pull-right"
                                   ng-show="remainingCount < todos.length && canManageCollection()"
                                   ng-click="clearDoneTodos()">
@@ -273,12 +273,12 @@
                                 &nbsp;
                                 Clear completed ({{ todos.length - remainingCount }})
                             </span>
+                    </div>
                 </div>
-            </div>
 
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
 </div>
 

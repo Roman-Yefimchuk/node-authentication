@@ -6,8 +6,9 @@ angular.module('application')
 
         '$locale',
         '$rootScope',
+        '$log',
 
-        function ($locale, $rootScope) {
+        function ($locale, $rootScope, $log) {
 
             var languages = {};
             var currentLanguageCode = null;
@@ -85,7 +86,17 @@ angular.module('application')
                         }
                     }
                 },
+                getCurrentLanguageCode: function () {
+                    return currentLanguageCode;
+                },
                 translate: function (key, languageCode) {
+
+
+                    var context = this;
+                    window.LANG = function (languageCode) {
+                        context.setLanguage(languageCode);
+                    };
+
                     var language = getLanguage(languageCode || currentLanguageCode);
 
                     if (language) {

@@ -1,6 +1,10 @@
 <div class="panel col-sm-4 col-sm-offset-4" style="margin-top: 80px">
 
-    <h1><span class="fa fa-sign-in" ng-click="quickLogin()"></span> {{ 'login.title' | translate }}</h1>
+    <h1>
+        <span class="fa fa-sign-in" ng-click="quickLogin()">
+        </span>
+        <l10n key="login.title"></l10n>
+    </h1>
 
     <div ng-show="errorMessage != null">
         <alert type="danger" close="errorMessage = null" class="text-center">
@@ -15,7 +19,9 @@
 
         <div class="form-group" ng-show="treeModel.length > 0">
 
-            <label>{{ 'login.select_workspace' | translate }}</label>
+            <label>
+                <l10n key="login.select_workspace"></l10n>
+            </label>
 
             <br>
 
@@ -42,42 +48,56 @@
         </div>
 
         <div class="form-group">
-            <label>{{ 'login.email' | translate }}</label>
+            <label>
+                <l10n key="login.email"></l10n>
+            </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isEmailValid() }">
-                <div class="input-group-addon"><i class="fa fa-at"></i></div>
+                <div class="input-group-addon">
+                    <i class="fa fa-at"></i>
+                </div>
                 <input class="form-control" type="email" ng-model="email"
-                       placeholder="{{ 'login.email_placeholder' | translate }}"
+                       l10n-placeholder placeholder-key="login.email_placeholder"
                        autocomplete="off">
             </div>
         </div>
 
         <div class="form-group">
-            <label>{{ 'login.password' | translate }}</label>
+            <label>
+                <l10n key="login.password"></l10n>
+            </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
-                <div class="input-group-addon"><i class="fa fa-key"></i></div>
+                <div class="input-group-addon">
+                    <i class="fa fa-key"></i>
+                </div>
                 <input class="form-control" type="password" ng-model="password"
-                       placeholder="{{ 'login.password_placeholder' | translate }}"
+                       l10n-placeholder placeholder-key="login.password_placeholder"
                        autocomplete="off">
             </div>
         </div>
 
         <span ng-click="login()" class="btn btn-warning"
               ng-disabled="!(isEmailValid() && isPasswordValid()) || isSystemEmpty">
-            {{ 'login.btn_login' | translate }}
+            <l10n key="login.btn_login"></l10n>
         </span>
 
     </form>
 
     <hr>
 
-    <p>{{ 'login.need_an_account' | translate }}?
-        <a href="#/sign-up">{{ 'login.sign_up' | translate }}</a>
+    <p>
+        <l10n key="login.need_an_account"></l10n>
+        <a href="#/sign-up">
+            <l10n key="login.sign_up"></l10n>
+        </a>
     </p>
 
-    <p>{{ 'login.or_go' | translate }}
-        <a href="#/">{{ 'login.home' | translate }}</a>
+    <p>
+        <l10n key="login.or_go"></l10n>
+        <a href="#/">
+            <l10n key="login.home"></l10n>
+        </a>
     </p>
 
 </div>
