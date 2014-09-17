@@ -33,6 +33,20 @@ CREATE PROPERTY Workspace.creatorId STRING
 CREATE PROPERTY Workspace.creationDate LONG
 CREATE PROPERTY Workspace.parentWorkspaceId STRING
 
+CREATE CLASS Group
+CREATE PROPERTY Group.name STRING
+CREATE PROPERTY Group.creatorId STRING
+CREATE PROPERTY Group.creationDate LONG
+CREATE PROPERTY Group.organizationId STRING
+CREATE PROPERTY Group.users EMBEDDEDLIST STRING
+
+CREATE CLASS Organization
+CREATE PROPERTY Organization.name STRING
+CREATE PROPERTY Organization.creatorId STRING
+CREATE PROPERTY Organization.creationDate LONG
+CREATE PROPERTY Organization.workspaces EMBEDDEDLIST STRING
+CREATE PROPERTY Organization.groups EMBEDDEDLIST STRING
+
 CREATE CLASS PermittedWorkspace
 CREATE PROPERTY PermittedWorkspace.userId STRING
 CREATE PROPERTY PermittedWorkspace.workspaceId STRING
@@ -42,3 +56,10 @@ CREATE PROPERTY PermittedWorkspace.isDefault BOOLEAN
 CREATE PROPERTY PermittedWorkspace.readOnly BOOLEAN
 CREATE PROPERTY PermittedWorkspace.collectionManager BOOLEAN
 CREATE PROPERTY PermittedWorkspace.accessManager BOOLEAN
+
+INSERT INTO Organization (name, creatorId, creationDate) VALUES ('system', '@system', date());
+
+INSERT INTO Group (name, creatorId, creationDate, organizationId) VALUES ('users', '@system', date(), 'system');
+INSERT INTO Group (name, creatorId, creationDate, organizationId) VALUES ('admins', '@system', date(), 'system');
+
+UPDATE Organization ADD groups = (SELECT @rid FROM Group) WHERE name = 'system';
