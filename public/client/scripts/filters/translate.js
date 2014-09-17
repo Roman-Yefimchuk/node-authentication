@@ -4,11 +4,11 @@ angular.module('application')
 
     .filter("translate", [
 
-        'translator',
+        'translatorService',
 
-        function (translator) {
+        function (translatorService) {
             return function (key, languageCode) {
-                return translator.translate(key, languageCode);
+                return translatorService.translate(key, languageCode);
             }
         }
     ]);

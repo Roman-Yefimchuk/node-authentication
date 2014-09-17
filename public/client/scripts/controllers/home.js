@@ -14,13 +14,18 @@ angular.module('application')
         'userService',
         'loaderService',
         'dialogsService',
+        'translatorService',
         'SOCKET_URL',
         'DEBUG_MODE',
         'ROOT_ID',
 
-        function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, SOCKET_URL, DEBUG_MODE, ROOT_ID) {
+        function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, translatorService, SOCKET_URL, DEBUG_MODE, ROOT_ID) {
+
+            var errorsTranslator = translatorService.getSector('home.errors');
+            var notificationsTranslator = translatorService.getSector('home.notifications');
 
             var BreadcrumbItem = (function () {
+
                 function BreadcrumbItem(node) {
                     this.node = node;
                 }
@@ -58,17 +63,17 @@ angular.module('application')
             };
             $scope.viewModes = [
                 {
-                    title: 'All',
+                    titleKey: 'home.all',
                     name: 'all',
                     icon: 'fa-book'
                 },
                 {
-                    title: 'Active',
+                    titleKey: 'home.active',
                     name: 'active',
                     icon: 'fa-rocket'
                 },
                 {
-                    title: 'Completed',
+                    titleKey: 'home.completed',
                     name: 'completed',
                     icon: 'fa-flag'
                 }
@@ -141,7 +146,7 @@ angular.module('application')
                 success: function (user, externalNotification) {
 
                     $scope.$on('socketsService:error', function (event, error) {
-                        $scope.errorMessage = 'Connection problem with socket';
+                        $scope.errorMessage = errorsTranslator.translate('connection_problem_with_socket');
                         loaderService.hideLoader();
                     });
 
@@ -173,9 +178,10 @@ angular.module('application')
                                             notificationsService.notify(externalNotification.message, externalNotification.type);
                                         }
 
-                                        notificationsService.info("Hello @{userName}!", {
+                                        var notification = notificationsTranslator.format('greeting', {
                                             userName: user.displayName
                                         });
+                                        notificationsService.info(notification);
                                     }
 
                                     if (node) {
@@ -209,7 +215,9 @@ angular.module('application')
                                                     case 'not_found':
                                                     {
                                                         searchNode(user.defaultWorkspaceId, function (node) {
-                                                            notificationsService.notify('Workspace was changed', 'warning');
+
+                                                            var notification = notificationsTranslator.translate('workspace_was_changed');
+                                                            notificationsService.warning(notification);
 
                                                             updateActiveNode(node);
                                                             onLoadingReady();
@@ -328,7 +336,7 @@ angular.module('application')
                         });
                     }
 
-                    return "User @{userName} updated you permissions for workspace @{workspaceName}".format({
+                    return notificationsTranslator.format('user_updated_permissions', {
                         userName: userName,
                         workspaceName: workspaceName
                     });
@@ -354,10 +362,11 @@ angular.module('application')
                         }
                     });
 
-                    return "User @{userName} closed access for you to workspace @{workspaceName}".format({
+                    return notificationsTranslator.format('user_closed_access', {
                         userName: userName,
                         workspaceName: workspaceName
                     });
+
                 }, 'warning');
             };
 
@@ -400,7 +409,7 @@ angular.module('application')
 
                     $scope.todos.push(item);
 
-                    return "User @{userName} added item".format({
+                    return notificationsTranslator.format('user_added_item', {
                         userName: userName
                     });
                 });
@@ -419,7 +428,7 @@ angular.module('application')
                         todo.completed = item.completed;
                     });
 
-                    return "User @{userName} updated @{count} item(s)".format({
+                    return notificationsTranslator.format('user_updated_items', {
                         userName: userName,
                         count: items.length
                     });
@@ -433,7 +442,7 @@ angular.module('application')
                         return !_.contains(itemIds, todo.id);
                     });
 
-                    return "User @{userName} removed @{count} item(s)".format({
+                    return notificationsTranslator.format('user_removed_items', {
                         userName: userName,
                         count: itemIds.length
                     });
@@ -776,24 +785,30 @@ angular.module('application')
 
                 $scope.$on('socketsService:userDisconnected', function (event, data) {
                     $scope.userHasLeft(data['userId'], function (user) {
-                        notificationsService.info('User @{userName} disconnected', {
+
+                        var notification = notificationsTranslator.format('user_disconnected', {
                             userName: user.displayName
                         });
+                        notificationsService.info(notification);
                     });
                 });
 
                 $scope.$on('socketsService:changedWorkspace', function (event, data) {
                     if (data['workspaceId'] == getWorkspaceId()) {
                         $scope.userJoined(data['userId'], function (user) {
-                            notificationsService.success('User @{userName} joined to workspace', {
+
+                            var notification = notificationsTranslator.format('user_joined', {
                                 userName: user.displayName
                             });
+                            notificationsService.success(notification);
                         });
                     } else {
                         $scope.userHasLeft(data['userId'], function (user) {
-                            notificationsService.info('User @{userName} has left workspace', {
+
+                            var notification = notificationsTranslator.format('user_has_left', {
                                 userName: user.displayName
                             });
+                            notificationsService.info(notification);
                         });
                     }
                 });
@@ -814,7 +829,7 @@ angular.module('application')
                             }
                         });
 
-                        return "User @{userName} updated workspace".format({
+                        return notificationsTranslator.format('user_updated_workspace', {
                             userName: userName
                         });
                     });
@@ -858,7 +873,9 @@ angular.module('application')
                 });
 
                 $scope.$on('socketsService:disconnect', function (event, data) {
-                    notificationsService.error('You lost connection');
+
+                    var message = notificationsTranslator.translate('you_lost_connection');
+                    notificationsService.error(message);
                 });
             }
         }

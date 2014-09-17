@@ -7,10 +7,13 @@ angular.module('application')
         '$scope',
         '$modalInstance',
         '$log',
+        'translatorService',
         'apiService',
         'options',
 
-        function ($scope, $modalInstance, $log, apiService, options) {
+        function ($scope, $modalInstance, $log, translatorService, apiService, options) {
+
+            var presentUsersTranslator = translatorService.getSector('dialogs.present_users');
 
             var presentUsers = angular.copy(options['presentUsers']);
             var workspaceId = options.workspaceId;
@@ -23,7 +26,7 @@ angular.module('application')
             };
 
             function updateDialogTitle() {
-                $scope.dialogTitle = "Here @{usersCount} user(s)".format({
+                $scope.dialogTitle = presentUsersTranslator.format('title', {
                     usersCount: presentUsers.length
                 });
             }

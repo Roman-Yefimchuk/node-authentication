@@ -9,14 +9,14 @@ angular.module('application')
         '$location',
         'apiService',
         'loaderService',
-        'translator',
+        'translatorService',
         'DEBUG_MODE',
         'EMAIL_PATTERN',
         'PASSWORD_PATTERN',
 
-        function ($scope, $rootScope, $location, apiService, loaderService, translator, DEBUG_MODE, EMAIL_PATTERN, PASSWORD_PATTERN) {
+        function ($scope, $rootScope, $location, apiService, loaderService, translatorService, DEBUG_MODE, EMAIL_PATTERN, PASSWORD_PATTERN) {
 
-            translator = translator.getSector('login');
+            var loginTranslator = translatorService.getSector('login');
 
             function getWorkspaceId() {
                 if ($scope.currentWorkspace) {
@@ -97,7 +97,7 @@ angular.module('application')
                     $scope.treeModel = treeModel;
 
                 } else {
-                    $scope.errorMessage = translator.translate('system_empty');
+                    $scope.errorMessage = loginTranslator.translate('system_empty');
                     $scope.isSystemEmpty = true;
                     loaderService.hideLoader();
                 }

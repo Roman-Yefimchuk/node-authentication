@@ -4,7 +4,8 @@ angular.module('application', [
 
     'ui.bootstrap',
     'ngRoute',
-    'ngSanitize'
+    'ngSanitize',
+    'ngCookies'
 
 ])
     .config([
@@ -39,37 +40,37 @@ angular.module('application', [
                 templateUrl: '/client/views/controllers/index-view.html',
                 controller: 'IndexController',
                 options: {
-                    title: 'Index'
+                    title: 'routes.index'
                 }
             }).when('/login', {
                 templateUrl: '/client/views/controllers/login-view.html',
                 controller: 'LoginController',
                 options: {
-                    title: 'Login'
+                    title: 'routes.login'
                 }
             }).when('/sign-up', {
                 templateUrl: '/client/views/controllers/sign-up-view.html',
                 controller: 'SignUpController',
                 options: {
-                    title: 'Sign up'
+                    title: 'routes.sign_up'
                 }
             }).when('/home', {
                 templateUrl: '/client/views/controllers/home-view.html',
                 controller: 'HomeController',
                 options: {
-                    title: 'Home'
+                    title: 'routes.home'
                 }
             }).when('/profile', {
                 templateUrl: '/client/views/controllers/profile-view.html',
                 controller: 'ProfileController',
                 options: {
-                    title: 'Profile'
+                    title: 'routes.profile'
                 }
             }).when('/settings', {
                 templateUrl: '/client/views/controllers/settings-view.html',
                 controller: 'SettingsController',
                 options: {
-                    title: 'Settings'
+                    title: 'routes.settings'
                 }
             }).when('/logout', {
                 template: '',
@@ -78,8 +79,10 @@ angular.module('application', [
                 templateUrl: '/client/views/controllers/page-not-found-view.html',
                 controller: 'NotFoundController',
                 options: {
-                    title: function (currentPath) {
-                        return "Page '" + currentPath + "' not found";
+                    title: function (currentPath, translatorService) {
+                        return translatorService.format('routes.page_not_found', {
+                            page: currentPath
+                        });
                     }
                 }
             });
@@ -91,16 +94,42 @@ angular.module('application', [
         '$rootScope',
         '$location',
         '$document',
-        'translator',
+        'translatorService',
         'en-US',
         'ru-RU',
         'uk-UA',
 
-        function ($rootScope, $location, $document, translator, enUS, ruRU, ukUA) {
+        function ($rootScope, $location, $document, translatorService, enUS, ruRU, ukUA) {
 
-            translator.addLanguage('en-us', enUS);
-            translator.addLanguage('ru', ruRU);
-            translator.addLanguage('uk', ukUA);
+            _.forEach({
+                'en-us': enUS,
+                'ru': ruRU,
+                'uk': ukUA
+            }, function (localeData, localeCode) {
+                translatorService.addLocale(localeCode, localeData);
+            });
+
+            var routes = {};
+
+            function updatePageTitle(title) {
+                if (title) {
+                    if (typeof title == 'function') {
+                        var currentPath = $location.path();
+                        title = title(currentPath, translatorService);
+                        if (title) {
+                            $document.attr('title', title);
+                        }
+                    } else {
+                        title = translatorService.translate(title);
+                        $document.attr('title', title);
+                    }
+                }
+            }
+
+            translatorService.onLocaleChanged($rootScope, function () {
+                var title = routes[$location.path()];
+                updatePageTitle(title);
+            });
 
             $rootScope.$on('$routeChangeStart', function (event, nextRoute, currentRoute) {
             });
@@ -109,17 +138,8 @@ angular.module('application', [
                 var options = currentRoute['options'];
                 if (options) {
                     var title = options['title'];
-                    if (title) {
-                        if (typeof title == 'function') {
-                            var currentPath = $location.path();
-                            title = title(currentPath);
-                            if (title) {
-                                $document.attr('title', title);
-                            }
-                        } else {
-                            $document.attr('title', title);
-                        }
-                    }
+                    routes[$location.path()] = title;
+                    updatePageTitle(title);
                 }
             });
         }

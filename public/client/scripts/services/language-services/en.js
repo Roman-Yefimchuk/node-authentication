@@ -8,7 +8,16 @@ angular.module('application')
             "config": {
             },
             "translations": {
-                "languages": {
+                "routes": {
+                    "index": "Index",
+                    "login": "Login",
+                    "sign_up": "Sign Up",
+                    "home": "Home",
+                    "profile": "Profile",
+                    "settings": "Settings",
+                    "page_not_found": "Page @{page} not found"
+                },
+                "locales": {
                     "en-us": "English",
                     "ru": "Russian",
                     "uk": "Ukrainian"
@@ -55,7 +64,54 @@ angular.module('application')
                     "create_workspace": "Create workspace",
                     "settings": "Settings",
                     "edit_profile": "Edit profile",
-                    "logout": "Logout"
+                    "logout": "Logout",
+                    "third_party_users": "Third party users",
+                    "own_workspace": "Own workspace",
+                    "workspace_info": "Workspace info",
+                    "manage_workspace": "Manage workspace",
+                    "add_task": "Add task",
+                    "no_records": "No records",
+                    "select_all": "Select all",
+                    "clear_completed": "Clear completed",
+                    "all": "All",
+                    "active": "Active",
+                    "completed": "Completed",
+                    "what_needs_to_be_done": "What needs to be done?",
+                    "edit": "Edit",
+                    "remove": "Remove",
+                    "errors": {
+                        "connection_problem_with_socket": "Connection problem with socket"
+                    },
+                    "notifications": {
+                        "greeting": "Hello, @{userName}!",
+                        "workspace_was_changed": "Workspace was changed",
+                        "user_updated_workspace": "User @{userName} updated workspace",
+                        "user_updated_permissions": "User @{userName} updated your permissions for workspace @{workspaceName}",
+                        "user_closed_access": "User @{userName} closed access for you to workspace @{workspaceName}",
+                        "user_added_item": "User @{userName} added item",
+                        "user_updated_items": "User @{userName} updated @{count} item(s)",
+                        "user_removed_items": "User @{userName} removed @{count} item(s)",
+                        "user_disconnected": "User @{userName} disconnected",
+                        "user_joined": "User @{userName} joined to workspace",
+                        "user_has_left": "User @{userName} has left workspace",
+                        "you_lost_connection": "You lost connection"
+                    }
+                },
+                "dialogs": {
+                    "alert": {
+                        "ok": "Ok"
+                    },
+                    "confirmation": {
+                        "yes": "Yes",
+                        "no": "No"
+                    },
+                    "present_users": {
+                        "title": "Here @{usersCount} user(s)",
+                        "user_id": "User ID:",
+                        "user_name": "User name:",
+                        "registered_date": "Registered date:",
+                        "ok": "Ok"
+                    }
                 },
                 "http_client_errors": {
                     "empty_server_response": "Empty server response",
@@ -67,6 +123,9 @@ angular.module('application')
                     "io_exception": "IO exception",
                     "user_not_found": "User not found",
                     "email_already_exist": "E-mail already exist"
+                },
+                "common": {
+                    "loading": "Loading..."
                 }
             }
         };

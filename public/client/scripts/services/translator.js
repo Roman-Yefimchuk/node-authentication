@@ -2,24 +2,28 @@
 
 angular.module('application')
 
-    .service('translator', [
+    .service('translatorService', [
 
         '$locale',
         '$rootScope',
         '$log',
+        '$cookies',
 
-        function ($locale, $rootScope, $log) {
+        function ($locale, $rootScope, $log, $cookies) {
 
             var languages = {};
-            var currentLanguageCode = null;
+            var currentLocaleCode = null;
 
-            if (currentLanguageCode == null) {
-                currentLanguageCode = $locale.id;
+            if ($cookies.localeCode) {
+                currentLocaleCode = $cookies.localeCode;
+            } else {
+                currentLocaleCode = $locale.id;
+                $cookies.localeCode = currentLocaleCode;
             }
 
-            function getLanguage(languageCode) {
-                if (languageCode && languages[languageCode]) {
-                    return languages[languageCode];
+            function getLanguage(localeCode) {
+                if (localeCode && languages[localeCode]) {
+                    return languages[localeCode];
                 }
             }
 
@@ -60,44 +64,48 @@ angular.module('application')
             }
 
             return {
-                addLanguage: function (languageCode, languageData) {
-                    if (languages[languageCode]) {
-                        console.log("Language '" + languageCode + "' is already added");
+                onLocaleChanged: function (scope, handher) {
+                    if (scope) {
+                        scope.$on('translatorService:onLocaleChanged', function (event, localeCode, localeConfig) {
+                            (handher || angular.noop)(localeCode, localeConfig);
+                        });
+                    }
+                },
+                addLocale: function (localeCode, localeData) {
+                    if (languages[localeCode]) {
+                        console.log("Locale '" + localeCode + "' is already added");
                     } else {
-                        languages[languageCode] = {
-                            code: languageCode,
+                        var translations = getTransformedTranslations(localeData['translations']);
+
+                        languages[localeCode] = {
+                            code: localeCode,
                             data: {
-                                config: languageData['config'],
-                                translations: getTransformedTranslations(languageData['translations'])
+                                config: localeData['config'],
+                                translations: translations
                             }
                         };
                     }
                 },
-                setLanguage: function (languageCode) {
+                setLocale: function (localeCode) {
 
-                    if (currentLanguageCode != languageCode) {
-                        var language = getLanguage(languageCode);
+                    if (currentLocaleCode != localeCode) {
+                        var language = getLanguage(localeCode);
 
                         if (language) {
-                            currentLanguageCode = languageCode;
-                            $rootScope.$broadcast('translator:onLanguageChanged', languageCode, language.config);
+                            currentLocaleCode = localeCode;
+                            $cookies.localeCode = localeCode;
+
+                            $rootScope.$broadcast('translatorService:onLocaleChanged', localeCode, language.config);
                         } else {
-                            $log.debug("Language '" + languageCode + "' not found");
+                            $log.debug("Locale '" + localeCode + "' not found");
                         }
                     }
                 },
-                getCurrentLanguageCode: function () {
-                    return currentLanguageCode;
+                getCurrentLocaleCode: function () {
+                    return currentLocaleCode;
                 },
-                translate: function (key, languageCode) {
-
-
-                    var context = this;
-                    window.LANG = function (languageCode) {
-                        context.setLanguage(languageCode);
-                    };
-
-                    var language = getLanguage(languageCode || currentLanguageCode);
+                translate: function (key, localeCode) {
+                    var language = getLanguage(localeCode || currentLocaleCode);
 
                     if (language) {
                         var data = language.data;
@@ -106,12 +114,20 @@ angular.module('application')
 
                     return key;
                 },
+                format: function (key, context, localeCode) {
+                    var serviceContext = this;
+                    var text = serviceContext.translate(key, localeCode);
+                    return text.format(context);
+                },
                 getSector: function (sectorKey) {
                     var serviceContext = this;
 
                     return {
-                        translate: function (key, languageCode) {
-                            return serviceContext.translate(sectorKey + '.' + key, languageCode);
+                        translate: function (key, localeCode) {
+                            return serviceContext.translate(sectorKey + '.' + key, localeCode);
+                        },
+                        format: function (key, context, localeCode) {
+                            return serviceContext.format(sectorKey + '.' + key, context, localeCode);
                         }
                     }
                 }

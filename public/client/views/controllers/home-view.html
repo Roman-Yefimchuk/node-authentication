@@ -116,13 +116,13 @@
             <span class="pull-left"
                   style="cursor: pointer"
                   ng-click="showPresentUsers()">
-                <i class="fa fa-users" tooltip="Third party users"></i>
+                <i class="fa fa-users" tooltip="{{ 'home.third_party_users' | translate }}"></i>
                 &nbsp;
                 {{ presentUsers.length }}
             </span>
 
             <span ng-show="isOwnWorkspace">
-                <i class="fa fa-user" tooltip="Own workspace"></i>
+                <i class="fa fa-user" tooltip="{{ 'home.own_workspace' | translate }}"></i>
                 &nbsp;
             </span>
 
@@ -134,7 +134,7 @@
                       style="cursor: pointer"
                       ng-click="showWorkspaceInfo()">
 
-                    <i class="fa fa-info" tooltip="Workspace info"></i>
+                    <i class="fa fa-info" tooltip="{{ 'home.workspace_info' | translate }}"></i>
 
                 </span>
 
@@ -143,7 +143,7 @@
                       ng-click="showWorkspaceManager()"
                       ng-show="canManageAccess()">
 
-                    <i class="fa fa-cogs" tooltip="Manage workspace"></i>
+                    <i class="fa fa-cogs" tooltip="{{ 'home.manage_workspace' | translate }}"></i>
 
                 </span>
 
@@ -152,13 +152,14 @@
         <form ng-submit="addTodo()" ng-show="canManageCollection()">
 
             <div class="input-group task-add">
-                <input class="form-control input-sm" type="text" placeholder="What needs to be done?"
+                <input class="form-control input-sm" type="text"
+                       l10n="placeholder" placeholder-key="home.what_needs_to_be_done"
                        ng-model="newTodo" autofocus autocomplete="off">
                     <span class="btn btn-success btn-sm input-group-addon"
                           ng-click="addTodo()">
                         <i class="fa fa-plus"></i>
                         &nbsp;
-                        Add task
+                        <l10n key="home.add_task"></l10n>
                     </span>
             </div>
 
@@ -201,12 +202,14 @@
                                             {{ todo.creationDate | formatDate:'mmmm d, yyyy, h:MM TT' }}
                                         </span>
 
-                                                    <span class="btn btn-primary btn-xs" tooltip="Edit"
+                                                    <span class="btn btn-primary btn-xs"
+                                                          tooltip="{{ 'home.edit' | translate }}"
                                                           ng-click="showItemEditor(todo)"
                                                           ng-show="canManageCollection()">
                                                         <i class="fa fa-pencil"></i>
                                                     </span>
-                                                    <span class="btn btn-danger btn-xs" tooltip="Remove"
+                                                    <span class="btn btn-danger btn-xs"
+                                                          tooltip="{{ 'home.remove' | translate }}"
                                                           ng-click="removeTodo(todo)"
                                                           ng-show="canManageCollection()">
                                                         <i class="fa fa-trash-o"></i>
@@ -223,7 +226,9 @@
                                 <div class="text-center">
                                     <div class="row clearfix">
                                         <div class="col-md-12 column">
-                                            <b>No records</b>
+                                            <b>
+                                                <l10n key="home.no_records"></l10n>
+                                            </b>
                                         </div>
                                     </div>
                                 </div>
@@ -247,7 +252,7 @@
                                   btn-checkbox>
                                 <i class="fa fa-check"></i>
                                 &nbsp;
-                                Select all
+                                <l10n key="home.select_all"></l10n>
                             </span>
                     </div>
 
@@ -260,7 +265,7 @@
                                    btn-radio="viewMode">
                                 <i class="fa {{ viewMode.icon }}"></i>
                                 &nbsp;
-                                {{ viewMode.title }}
+                                <l10n key="{{ viewMode.titleKey }}"></l10n>
                             </label>
                         </div>
                     </div>
@@ -271,7 +276,7 @@
                                   ng-click="clearDoneTodos()">
                                 <i class="fa fa-trash-o"></i>
                                 &nbsp;
-                                Clear completed ({{ todos.length - remainingCount }})
+                                <l10n key="home.clear_completed"></l10n> ({{ todos.length - remainingCount }})
                             </span>
                     </div>
                 </div>

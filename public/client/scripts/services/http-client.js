@@ -7,12 +7,12 @@ angular.module('application')
         '$http',
         '$log',
         '$location',
-        'translator',
+        'translatorService',
         'DEBUG_MODE',
 
-        function ($http, $log, $location, translator, DEBUG_MODE) {
+        function ($http, $log, $location, translatorService, DEBUG_MODE) {
 
-            translator = translator.getSector('http_client_errors');
+            var httpClientErrorsTranslator = translatorService.getSector('http_client_errors');
 
             function traceResponse(params, response) {
                 if (DEBUG_MODE) {
@@ -46,7 +46,7 @@ angular.module('application')
                 var key = statuses[error.status];
 
                 if (key) {
-                    return translator.translate(key);
+                    return httpClientErrorsTranslator.translate(key);
                 }
                 return error.message;
             }
@@ -80,7 +80,7 @@ angular.module('application')
                         } else {
                             failureCallback({
                                 status: 'EMPTY_SERVER_RESPONSE',
-                                message: translator.translate('empty_server_response')
+                                message: httpClientErrorsTranslator.translate('empty_server_response')
                             });
                         }
                     });
