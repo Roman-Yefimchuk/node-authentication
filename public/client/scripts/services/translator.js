@@ -8,10 +8,11 @@ angular.module('application')
         '$rootScope',
         '$log',
         '$cookies',
+        '$parse',
 
-        function ($locale, $rootScope, $log, $cookies) {
+        function ($locale, $rootScope, $log, $cookies, $parse) {
 
-            var languages = {};
+            var locales = {};
             var currentLocaleCode = null;
 
             if ($cookies.localeCode) {
@@ -21,14 +22,14 @@ angular.module('application')
                 $cookies.localeCode = currentLocaleCode;
             }
 
-            function getLanguage(localeCode) {
-                if (localeCode && languages[localeCode]) {
-                    return languages[localeCode];
+            function getLocale(localeCode) {
+                if (localeCode && locales[localeCode]) {
+                    return locales[localeCode];
                 }
             }
 
-            function getTransformedTranslations(translations) {
-                var data = {};
+            function makeDictionary(translations) {
+                var dictionary = {};
 
                 var stack = [
                     {
@@ -55,12 +56,12 @@ angular.module('application')
                                 $value: value
                             });
                         } else {
-                            data[key] = value;
+                            dictionary[key] = value;
                         }
                     });
                 }
 
-                return data;
+                return dictionary;
             }
 
             return {
@@ -72,16 +73,24 @@ angular.module('application')
                     }
                 },
                 addLocale: function (localeCode, localeData) {
-                    if (languages[localeCode]) {
+                    if (locales[localeCode]) {
                         console.log("Locale '" + localeCode + "' is already added");
                     } else {
-                        var translations = getTransformedTranslations(localeData['translations']);
 
-                        languages[localeCode] = {
+                        var getDictionary = function () {
+                            if (localeCode == currentLocaleCode) {
+                                var translations = localeData['translations'];
+                                return makeDictionary(translations);
+                            }
+                            return null;
+                        };
+
+                        locales[localeCode] = {
                             code: localeCode,
                             data: {
                                 config: localeData['config'],
-                                translations: translations
+                                translations: localeData['translations'],
+                                dictionary: getDictionary()
                             }
                         };
                     }
@@ -89,13 +98,21 @@ angular.module('application')
                 setLocale: function (localeCode) {
 
                     if (currentLocaleCode != localeCode) {
-                        var language = getLanguage(localeCode);
+                        var locale = getLocale(localeCode);
 
-                        if (language) {
+                        if (locale) {
+
+                            var currentLocale = getLocale(currentLocaleCode);
+                            currentLocale.data['dictionary'] = null;
+
+                            var translations = locale.data['translations'];
+                            locale.data['dictionary'] = makeDictionary(translations);
+
                             currentLocaleCode = localeCode;
                             $cookies.localeCode = localeCode;
 
-                            $rootScope.$broadcast('translatorService:onLocaleChanged', localeCode, language.config);
+                            var config = locale.data['config'];
+                            $rootScope.$broadcast('translatorService:onLocaleChanged', localeCode, config);
                         } else {
                             $log.debug("Locale '" + localeCode + "' not found");
                         }
@@ -105,11 +122,16 @@ angular.module('application')
                     return currentLocaleCode;
                 },
                 translate: function (key, localeCode) {
-                    var language = getLanguage(localeCode || currentLocaleCode);
+                    var language = getLocale(localeCode || currentLocaleCode);
 
                     if (language) {
-                        var data = language.data;
-                        return data.translations[key] || key;
+                        var dictionary = language.data['dictionary'];
+                        if (dictionary) {
+                            return dictionary[key] || key;
+                        }
+
+                        var translations = language.data['translations'];
+                        return $parse(key)(translations) || key;
                     }
 
                     return key;
