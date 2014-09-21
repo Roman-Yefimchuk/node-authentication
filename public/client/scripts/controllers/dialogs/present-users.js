@@ -95,7 +95,9 @@ angular.module('application')
                 }
             }
 
-            updateDialogTitle();
+            function cancel() {
+                $modalInstance.dismiss('cancel');
+            }
 
             $scope.pagination = pagination;
             $scope.usersForPage = [];
@@ -103,10 +105,6 @@ angular.module('application')
             $scope.$watch('pagination.pageNumber', function () {
                 updatePage();
             });
-
-            $scope.cancel = function () {
-                $modalInstance.dismiss('cancel');
-            };
 
             $scope.$on('socketsService:userDisconnected', function (event, data) {
                 var userId = data['userId'];
@@ -121,6 +119,10 @@ angular.module('application')
                     removeUser(userId);
                 }
             });
+
+            $scope.cancel = cancel;
+
+            updateDialogTitle();
         }
     ]
 );

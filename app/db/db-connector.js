@@ -22,21 +22,25 @@ module.exports = {
 
         var dbWrapper = (function () {
 
+            var _ = require('underscore');
+
             function formatCommand(command, params) {
-                var value = command;
-                if (params) {
-                    for (var key in params) {
-                        if (params[key] != undefined) {
-                            var pattern = new RegExp(':' + key, 'g');
-                            if (typeof params[key] == 'string') {
-                                value = value.replace(pattern, "'" + params[key] + "'");
-                            } else {
-                                value = value.replace(pattern, params[key]);
-                            }
+                var formattedCommand = command;
+
+                _.forEach(params, function (value, key) {
+
+                    if (value != undefined) {
+                        var pattern = new RegExp(':' + key, 'g');
+
+                        if (typeof value == 'string') {
+                            formattedCommand = formattedCommand.replace(pattern, "'" + value + "'");
+                        } else {
+                            formattedCommand = formattedCommand.replace(pattern, value);
                         }
                     }
-                }
-                return value;
+                });
+
+                return formattedCommand;
             }
 
             return {

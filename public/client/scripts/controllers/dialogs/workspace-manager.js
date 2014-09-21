@@ -26,35 +26,11 @@ angular.module('application')
                 pageNumber: 1
             };
 
-            var onUpdate = options.onUpdate;
-            var onRemove = options.onRemove;
-            var onUpdatePermissions = options.onUpdatePermissions;
+            var onUpdate = options.onUpdate || angular.noop;
+            var onRemove = options.onRemove || angular.noop;
+            var onUpdatePermissions = options.onUpdatePermissions || angular.noop;
 
-            function updatePage() {
-                apiService.getAllUsersWithPermissions($scope.workspace['id'], {
-                    skip: (pagination.pageNumber - 1) * pagination.itemsPerPage,
-                    limit: pagination.itemsPerPage
-                }, function (result) {
-                    pagination.totalItems = result.count;
-
-                    if (result.count > 0) {
-                        $scope.users = result.users;
-                        originalCollection = angular.copy($scope.users);
-                    }
-                });
-            }
-
-            $scope.genericModel = angular.copy(defaultGenericModel);
-            $scope.permissionsModel = angular.copy(defaultPermissionsModel);
-
-            $scope.pagination = pagination;
-            $scope.users = [];
-
-            $scope.userId = options.userId;
-            $scope.defaultWorkspaceId = options.defaultWorkspaceId;
-            $scope.workspace = options.workspace;
-
-            $scope.tabs = [
+            var tabs = [
                 {
                     id: 'generic',
                     title: 'Generic',
@@ -71,20 +47,26 @@ angular.module('application')
                 }
             ];
 
-            $scope.tab = _.find($scope.tabs, function (tab) {
-                return tab.isActive;
-            });
+            function updatePage() {
+                apiService.getAllUsersWithPermissions($scope.workspace['id'], {
+                    skip: (pagination.pageNumber - 1) * pagination.itemsPerPage,
+                    limit: pagination.itemsPerPage
+                }, function (result) {
+                    pagination.totalItems = result.count;
 
-            $scope.setActiveTab = function (tab) {
+                    if (result.count > 0) {
+                        $scope.users = result.users;
+                        originalCollection = angular.copy($scope.users);
+                    }
+                });
+            }
+
+            function setActiveTab(tab) {
                 tab.isActive = true;
                 $scope.tab = tab;
-            };
+            }
 
-            $scope.$watch('pagination.pageNumber', function () {
-                updatePage();
-            });
-
-            $scope.save = function () {
+            function save() {
 
                 switch ($scope.tab['id']) {
                     case 'generic':
@@ -123,17 +105,17 @@ angular.module('application')
                         break;
                     }
                 }
-            };
+            }
 
-            $scope.cancel = function () {
+            function cancel() {
                 $modalInstance.dismiss('cancel');
-            };
+            }
 
-            $scope.canRemove = function () {
+            function canRemove() {
                 return $scope.workspace['id'] != $scope.defaultWorkspaceId;
-            };
+            }
 
-            $scope.isSaveDisabled = function () {
+            function isSaveDisabled() {
                 switch ($scope.tab['id']) {
                     case 'generic':
                     {
@@ -159,9 +141,9 @@ angular.module('application')
                         return collection.length == 0;
                     }
                 }
-            };
+            }
 
-            $scope.removeWorkspace = function () {
+            function removeWorkspace() {
                 dialogsService.showConfirmation({
                     context: {
                         workspaceName: options.workspace['name']
@@ -175,8 +157,30 @@ angular.module('application')
                         });
                     }
                 });
-            };
+            }
+
+            $scope.genericModel = angular.copy(defaultGenericModel);
+            $scope.permissionsModel = angular.copy(defaultPermissionsModel);
+            $scope.pagination = pagination;
+            $scope.users = [];
+            $scope.userId = options.userId;
+            $scope.defaultWorkspaceId = options.defaultWorkspaceId;
+            $scope.workspace = options.workspace;
+            $scope.tabs = tabs;
+            $scope.tab = _.find(tabs, function (tab) {
+                return tab.isActive;
+            });
+
+            $scope.$watch('pagination.pageNumber', function () {
+                updatePage();
+            });
+
+            $scope.setActiveTab = setActiveTab;
+            $scope.save = save;
+            $scope.cancel = cancel;
+            $scope.canRemove = canRemove;
+            $scope.isSaveDisabled = isSaveDisabled;
+            $scope.removeWorkspace = removeWorkspace;
         }
     ]
-)
-;
+);

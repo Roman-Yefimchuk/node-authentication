@@ -11,17 +11,23 @@ angular.module('application')
 
         function ($scope, $rootScope, $timeout, loaderService) {
 
-            $scope.showLoader = function () {
+            function showLoader() {
                 loaderService.showLoader();
-            };
+            }
 
             $scope.redirectReason = null;
 
-            $rootScope.$on('indexController:redirect', function (event, data) {
+            var removeRedirectEvent = $rootScope.$on('indexController:redirect', function (event, data) {
                 $timeout(function () {
                     $scope.redirectReason = data['redirectReason'];
                 });
             });
+
+            $scope.$on('$destroy', function () {
+                removeRedirectEvent();
+            });
+
+            $scope.showLoader = showLoader;
         }
     ]
 );

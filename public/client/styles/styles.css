@@ -35,3 +35,7 @@ a[workspace-tree]:focus, a[workspace-tree]:hover {
 .breadcrumb > .active {
     color: #777
 }
+
+ol[breadcrumb] > li[available='false'] {
+    opacity: 0.5;
+}

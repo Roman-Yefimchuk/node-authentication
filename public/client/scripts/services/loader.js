@@ -11,22 +11,28 @@ angular.module('application')
 
             var originalOverflow = body.css('overflow');
 
+            function isLoaderVisible() {
+                return loader.is(":visible");
+            }
+
+            function showLoader() {
+                body.css({
+                    overflow: 'hidden'
+                });
+                loader.show();
+            }
+
+            function hideLoader() {
+                body.css({
+                    overflow: originalOverflow
+                });
+                loader.hide();
+            }
+
             return {
-                isLoaderVisible: function () {
-                    return loader.is(":visible");
-                },
-                showLoader: function () {
-                    body.css({
-                        overflow: 'hidden'
-                    });
-                    loader.show();
-                },
-                hideLoader: function () {
-                    body.css({
-                        overflow: originalOverflow
-                    });
-                    loader.hide();
-                }
+                isLoaderVisible: isLoaderVisible,
+                showLoader: showLoader,
+                hideLoader: hideLoader
             };
         }
     ]

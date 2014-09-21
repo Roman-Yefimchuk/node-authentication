@@ -16,10 +16,10 @@ angular.module('application')
             $scope.title = $interpolate(options.title)(context);
             $scope.message = $interpolate(options.message)(context);
 
-            var onAccept = options.onAccept;
-            var onReject = options.onReject;
+            var onAccept = options.onAccept || angular.noop;
+            var onReject = options.onReject || angular.noop;
 
-            $scope.yes = function () {
+            function yes() {
                 if (onAccept) {
                     onAccept(function () {
                         $modalInstance.close();
@@ -27,9 +27,9 @@ angular.module('application')
                 } else {
                     $modalInstance.close();
                 }
-            };
+            }
 
-            $scope.no = function () {
+            function no() {
                 if (onReject) {
                     onReject(function () {
                         $modalInstance.close();
@@ -37,7 +37,10 @@ angular.module('application')
                 } else {
                     $modalInstance.close();
                 }
-            };
+            }
+
+            $scope.yes = yes;
+            $scope.no = no;
         }
     ]
 );

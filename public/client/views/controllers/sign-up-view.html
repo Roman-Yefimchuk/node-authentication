@@ -1,7 +1,7 @@
 <div class="panel col-sm-4 col-sm-offset-4" style="margin-top: 80px">
 
     <h1><span class="fa fa-sign-in" ng-click="quickSingUp()"></span>
-        <l10n key="sign_up.title"></l10n>
+        <span l10n key="sign_up.title"></span>
     </h1>
 
     <div ng-show="errorMessage != null">
@@ -17,7 +17,7 @@
 
         <div class="form-group">
             <label>
-                <l10n key="sign_up.name"></l10n>
+                <span l10n key="sign_up.name"></span>
             </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isNameValid() }">
@@ -32,7 +32,7 @@
 
         <div class="form-group">
             <label>
-                <l10n key="sign_up.email"></l10n>
+                <span l10n key="sign_up.email"></span>
             </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isEmailValid() }">
@@ -45,7 +45,7 @@
 
         <div class="form-group">
             <label>
-                <l10n key="sign_up.password"></l10n>
+                <span l10n key="sign_up.password"></span>
             </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
@@ -58,7 +58,7 @@
 
         <div class="form-group">
             <label>
-                <l10n key="sign_up.retype_password"></l10n>
+                <span l10n key="sign_up.retype_password"></span>
             </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
@@ -71,23 +71,23 @@
 
         <span ng-click="signUp()" class="btn btn-warning"
               ng-disabled="!(isNameValid() && isEmailValid() && isPasswordValid())">
-            <l10n key="sign_up.btn_sign_up"></l10n>
+            <span l10n key="sign_up.btn_sign_up"></span>
         </span>
     </form>
 
     <hr>
 
     <p>
-        <l10n key="sign_up.already_have_an_account"></l10n>
+        <span l10n key="sign_up.already_have_an_account"></span>
         <a href="#/login">
-            <l10n key="sign_up.login"></l10n>
+            <span l10n key="sign_up.login"></span>
         </a>
     </p>
 
     <p>
-        <l10n key="sign_up.or_go"></l10n>
+        <span l10n key="sign_up.or_go"></span>
         <a href="#/">
-            <l10n key="sign_up.home"></l10n>
+            <span l10n key="sign_up.home"></span>
         </a>
     </p>
 </div>

@@ -16,9 +16,11 @@ angular.module('application')
             $scope.title = $interpolate(options.title)(context);
             $scope.message = $interpolate(options.message)(context);
 
-            $scope.ok = function () {
+            function ok() {
                 $modalInstance.close();
-            };
+            }
+
+            $scope.ok = ok;
         }
     ]
 );

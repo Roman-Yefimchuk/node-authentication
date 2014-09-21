@@ -68,8 +68,11 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var parentWorkspaceId = request.body['parentWorkspaceId'];
         var collection = request.body['collection'];
 
-        dbProvider.setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function () {
-            resultCallback('Updated ' + collection.length + ' permission(s)');
+        dbProvider.setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function (result) {
+            resultCallback({
+                message: 'Updated ' + collection.length + ' permission(s)',
+                data: result
+            });
         });
     });
 

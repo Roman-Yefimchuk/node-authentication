@@ -40,212 +40,15 @@ angular.module('application')
                     return node.getLabel();
                 };
 
+                BreadcrumbItem.prototype.isAvailable = function () {
+                    var node = this.node;
+                    return node.isAvailable();
+                };
+
                 return BreadcrumbItem;
             })();
 
-            $scope.treeModel = [];
-            $scope.breadcrumb = [];
-            $scope.errorMessage = null;
-            $scope.currentWorkspace = undefined;
-            $scope.loading = true;
-            $scope.todos = [];
-            $scope.newTodo = '';
-            $scope.presentUsers = [];
-            $scope.workspaces = [];
-            $scope.user = {};
-            $scope.workspaceDropdown = {
-                isOpen: false
-            };
-            $scope.permissions = {
-                readOnly: false,
-                collectionManager: false,
-                accessManager: false
-            };
-            $scope.viewModes = [
-                {
-                    titleKey: 'home.all',
-                    name: 'all',
-                    icon: 'fa-book'
-                },
-                {
-                    titleKey: 'home.active',
-                    name: 'active',
-                    icon: 'fa-rocket'
-                },
-                {
-                    titleKey: 'home.completed',
-                    name: 'completed',
-                    icon: 'fa-flag'
-                }
-            ];
-            $scope.currentViewMode = _.find($scope.viewModes, function (viewMode) {
-                return viewMode.name == 'all';
-            });
-
-            $scope.$watch('currentViewMode', function (viewMode) {
-                switch (viewMode.name) {
-                    case 'active':
-                    {
-                        $scope.statusFilter = {
-                            completed: false
-                        };
-                        break;
-                    }
-                    case 'completed':
-                    {
-                        $scope.statusFilter = {
-                            completed: true
-                        };
-                        break;
-                    }
-                    default :
-                    {
-                        $scope.statusFilter = null;
-                        break
-                    }
-                }
-            });
-
-            $scope.$watch('currentWorkspace', function (workspace) {
-                if (workspace) {
-
-                    var workspaceId = getWorkspaceId();
-                    var rootWorkspaceId = getRootWorkspaceId();
-
-                    apiService.setUserWorkspace(workspaceId, rootWorkspaceId, function (data) {
-
-                        var socketConnection = $scope.socketConnection;
-
-                        socketConnection.changedWorkspace(workspaceId);
-                        socketConnection.updatePresentUsers(workspaceId);
-
-                        $scope.permissions = data.permissions;
-                        $scope.isOwnWorkspace = data.isOwnWorkspace;
-
-                        apiService.items(workspaceId, function (items) {
-                            $scope.todos = items;
-                            $scope.loading = false;
-                        });
-                    });
-                }
-            });
-
-            $scope.$watch('todos', function () {
-
-                $scope.remainingCount = filterFilter($scope.todos, {
-                    completed: false
-                }).length;
-
-                $scope.doneCount = $scope.todos.length - $scope.remainingCount;
-                $scope.allChecked = !$scope.remainingCount;
-            }, true);
-
-            loaderService.showLoader();
-
-            userService.getData({
-                success: function (user, externalNotification) {
-
-                    $scope.$on('socketsService:error', function (event, error) {
-                        $scope.errorMessage = errorsTranslator.translate('connection_problem_with_socket');
-                        loaderService.hideLoader();
-                    });
-
-                    socketsService.openCollection({
-                        url: SOCKET_URL,
-                        userId: user.userId,
-                        workspaceId: user.workspaceId
-                    }, function (socketConnection) {
-                        $scope.socketConnection = socketConnection;
-
-                        subscribeForSocketEvent();
-
-                        apiService.getPermittedWorkspaces(ROOT_ID, function (workspaces) {
-
-                            var treeModel = [];
-
-                            _.forEach(workspaces, function (workspace) {
-                                var item = workspaceToItem(workspace);
-                                treeModel.push(item);
-                            });
-
-                            var ready = $scope.$on('workspaceTree[home-tree]:ready', function () {
-                                searchNode(user.workspaceId, function (node) {
-
-                                    function onLoadingReady() {
-                                        loaderService.hideLoader();
-
-                                        if (externalNotification) {
-                                            notificationsService.notify(externalNotification.message, externalNotification.type);
-                                        }
-
-                                        var notification = notificationsTranslator.format('greeting', {
-                                            userName: user.displayName
-                                        });
-                                        notificationsService.info(notification);
-                                    }
-
-                                    if (node) {
-                                        updateActiveNode(node);
-                                        onLoadingReady();
-                                    } else {
-                                        searchNode(user.rootWorkspaceId, function (rootNode) {
-
-                                            apiService.loadHierarchy(user.workspaceId, user.rootWorkspaceId, function (data) {
-
-                                                switch (data.status) {
-                                                    case 'success':
-                                                    {
-                                                        var activeNode = rootNode;
-
-                                                        syncCycle(data.workspaces, function (workspaceId, index, next) {
-                                                            activeNode.expand(function () {
-                                                                searchNode(workspaceId, function (node) {
-                                                                    activeNode = node;
-                                                                    next();
-                                                                });
-                                                            });
-                                                        }, function () {
-                                                            updateActiveNode(activeNode);
-                                                            onLoadingReady();
-                                                        });
-
-                                                        break;
-                                                    }
-                                                    case 'access_denied':
-                                                    case 'not_found':
-                                                    {
-                                                        searchNode(user.defaultWorkspaceId, function (node) {
-
-                                                            var notification = notificationsTranslator.translate('workspace_was_changed');
-                                                            notificationsService.warning(notification);
-
-                                                            updateActiveNode(node);
-                                                            onLoadingReady();
-                                                        });
-                                                        break;
-                                                    }
-                                                }
-                                            });
-                                        });
-                                    }
-                                });
-
-                                ready();
-                            });
-
-                            $scope.treeModel = treeModel;
-                            $scope.workspaces = workspaces;
-                            $scope.user = user;
-                        });
-                    });
-                },
-                failure: function (error) {
-                    $location.path('/');
-                    loaderService.hideLoader();
-                }
-            });
-
-            $scope.showWorkspaceId = function () {
+            function showWorkspaceId() {
                 if (DEBUG_MODE) {
                     dialogsService.showAlert({
                         context: {
@@ -262,27 +65,27 @@ angular.module('application')
                             'userId: <b>{{ userId }}</b>'
                     });
                 }
-            };
+            }
 
-            $scope.onWorkspaceChanged = function (node) {
+            function onWorkspaceChanged(node) {
                 updateActiveNode(node);
                 $scope.workspaceDropdown['isOpen'] = false;
-            };
+            }
 
-            $scope.onWorkspaceLoading = function (item, callback) {
+            function onWorkspaceLoading(item, callback) {
                 var workspace = item.workspace;
                 apiService.getPermittedWorkspaces(workspace.id, function (data) {
                     callback(data, function (workspace) {
                         return workspaceToItem(workspace);
                     });
                 });
-            };
+            }
 
-            $scope.setViewMode = function (viewMode) {
+            function setViewMode(viewMode) {
                 $scope.currentViewMode = viewMode;
-            };
+            }
 
-            $scope.updatePermissions = function (userId, workspaceId, parentWorkspaceId, permissions) {
+            function updatePermissions(userId, workspaceId, parentWorkspaceId, permissions) {
                 permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
 
                     if (parentWorkspaceId == ROOT_ID) {
@@ -341,9 +144,9 @@ angular.module('application')
                         workspaceName: workspaceName
                     });
                 });
-            };
+            }
 
-            $scope.closeAccess = function (userId, workspaceId, parentWorkspaceId) {
+            function closeAccess(userId, workspaceId, parentWorkspaceId) {
                 permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
 
                     searchNode(workspaceId, function (node) {
@@ -368,43 +171,43 @@ angular.module('application')
                     });
 
                 }, 'warning');
-            };
+            }
 
-            $scope.userJoined = function (userId, callback) {
+            function userJoined(userId, callback) {
                 apiService.getUser(userId, function (user) {
                     $scope.presentUsers.push(userId);
                     callback(user);
                 });
-            };
+            }
 
-            $scope.userHasLeft = function (userId, callback) {
+            function userHasLeft(userId, callback) {
                 apiService.getUser(userId, function (user) {
                     $scope.presentUsers = _.filter($scope.presentUsers, function (value) {
                         return value != userId;
                     });
                     callback(user);
                 });
-            };
+            }
 
-            $scope.canReadOnly = function () {
+            function canReadOnly() {
                 var permissions = $scope.permissions;
                 if (permissions.readOnly && !permissions.collectionManager) {
                     return true;
                 }
                 return !permissions.collectionManager;
-            };
+            }
 
-            $scope.canManageCollection = function () {
+            function canManageCollection() {
                 var permissions = $scope.permissions;
                 return permissions.collectionManager;
-            };
+            }
 
-            $scope.canManageAccess = function () {
+            function canManageAccess() {
                 var permissions = $scope.permissions;
                 return permissions.accessManager;
-            };
+            }
 
-            $scope.addedItem = function (userId, item) {
+            function addedItem(userId, item) {
                 changeNotification(userId, function (userName) {
 
                     $scope.todos.push(item);
@@ -413,9 +216,9 @@ angular.module('application')
                         userName: userName
                     });
                 });
-            };
+            }
 
-            $scope.updatedItems = function (userId, items) {
+            function updatedItems(userId, items) {
                 changeNotification(userId, function (userName) {
 
                     _.forEach(items, function (item) {
@@ -433,9 +236,9 @@ angular.module('application')
                         count: items.length
                     });
                 });
-            };
+            }
 
-            $scope.removedItems = function (userId, itemIds) {
+            function removedItems(userId, itemIds) {
                 changeNotification(userId, function (userName) {
 
                     $scope.todos = _.filter($scope.todos, function (todo) {
@@ -447,9 +250,9 @@ angular.module('application')
                         count: itemIds.length
                     });
                 });
-            };
+            }
 
-            $scope.addTodo = function () {
+            function addTodo() {
                 var newTodo = $scope.newTodo.trim();
                 if (!newTodo.length) {
                     return;
@@ -470,9 +273,9 @@ angular.module('application')
                     var socketConnection = $scope.socketConnection;
                     socketConnection.addedItem(item);
                 });
-            };
+            }
 
-            $scope.showItemEditor = function (todo) {
+            function showItemEditor(todo) {
                 dialogsService.showItemEditor({
                     item: todo,
                     onUpdate: function (todo, closeCallback) {
@@ -484,18 +287,18 @@ angular.module('application')
                         });
                     }
                 });
-            };
+            }
 
-            $scope.removeTodo = function (todo) {
+            function removeTodo(todo) {
                 apiService.remove(getWorkspaceId(), [todo.id], function () {
                     $scope.todos.splice($scope.todos.indexOf(todo), 1);
 
                     var socketConnection = $scope.socketConnection;
                     socketConnection.removedItems([todo.id]);
                 });
-            };
+            }
 
-            $scope.clearDoneTodos = function () {
+            function clearDoneTodos() {
 
                 var ids = [];
                 _.forEach($scope.todos, function (todo) {
@@ -523,16 +326,16 @@ angular.module('application')
                         });
                     }
                 });
-            };
+            }
 
-            $scope.mark = function (todo) {
+            function mark(todo) {
                 apiService.update(getWorkspaceId(), [todo], function () {
                     var socketConnection = $scope.socketConnection;
                     socketConnection.updatedItems([todo]);
                 });
-            };
+            }
 
-            $scope.markAll = function (done) {
+            function markAll(done) {
                 var todos = [];
 
                 _.forEach($scope.todos, function (todo) {
@@ -554,9 +357,9 @@ angular.module('application')
                     var socketConnection = $scope.socketConnection;
                     socketConnection.updatedItems(todos);
                 });
-            };
+            }
 
-            $scope.showWorkspaceManager = function () {
+            function showWorkspaceManager() {
                 var workspace = $scope.currentWorkspace;
 
                 dialogsService.showWorkspaceManager({
@@ -606,16 +409,16 @@ angular.module('application')
                         });
                     }
                 });
-            };
+            }
 
-            $scope.showPresentUsers = function () {
+            function showPresentUsers() {
                 dialogsService.showPresentUsers({
                     workspaceId: getWorkspaceId(),
                     presentUsers: $scope.presentUsers
                 });
-            };
+            }
 
-            $scope.showWorkspaceCreator = function () {
+            function showWorkspaceCreator() {
                 dialogsService.showWorkspaceCreator({
                     onCreate: function (workspaceName, switchWorkspace, closeCallback) {
                         apiService.createWorkspace(workspaceName, getWorkspaceId(), function (data) {
@@ -634,9 +437,9 @@ angular.module('application')
                 });
 
                 $scope.workspaceDropdown['isOpen'] = false;
-            };
+            }
 
-            $scope.showWorkspaceInfo = function () {
+            function showWorkspaceInfo() {
                 apiService.getUser($scope.currentWorkspace['creatorId'], function (user) {
                     dialogsService.showAlert({
                         context: {
@@ -662,13 +465,13 @@ angular.module('application')
                             ""
                     });
                 });
-            };
+            }
 
-            $scope.logout = function () {
+            function logout() {
                 userService.logout(function () {
                     $location.path('/logout');
                 });
-            };
+            }
 
             function searchNode(workspaceId, callback) {
                 $rootScope.$broadcast('workspaceTree[home-tree]:search', workspaceId, function (node) {
@@ -784,7 +587,7 @@ angular.module('application')
                 });
 
                 $scope.$on('socketsService:userDisconnected', function (event, data) {
-                    $scope.userHasLeft(data['userId'], function (user) {
+                    userHasLeft(data['userId'], function (user) {
 
                         var notification = notificationsTranslator.format('user_disconnected', {
                             userName: user.displayName
@@ -795,7 +598,7 @@ angular.module('application')
 
                 $scope.$on('socketsService:changedWorkspace', function (event, data) {
                     if (data['workspaceId'] == getWorkspaceId()) {
-                        $scope.userJoined(data['userId'], function (user) {
+                        userJoined(data['userId'], function (user) {
 
                             var notification = notificationsTranslator.format('user_joined', {
                                 userName: user.displayName
@@ -803,7 +606,7 @@ angular.module('application')
                             notificationsService.success(notification);
                         });
                     } else {
-                        $scope.userHasLeft(data['userId'], function (user) {
+                        userHasLeft(data['userId'], function (user) {
 
                             var notification = notificationsTranslator.format('user_has_left', {
                                 userName: user.displayName
@@ -844,15 +647,15 @@ angular.module('application')
                 });
 
                 $scope.$on('socketsService:addedItem', function (event, data) {
-                    $scope.addedItem(data['userId'], data['item']);
+                    addedItem(data['userId'], data['item']);
                 });
 
                 $scope.$on('socketsService:updatedItems', function (event, data) {
-                    $scope.updatedItems(data['userId'], data['items']);
+                    updatedItems(data['userId'], data['items']);
                 });
 
                 $scope.$on('socketsService:removedItems', function (event, data) {
-                    $scope.removedItems(data['userId'], data['itemIds']);
+                    removedItems(data['userId'], data['itemIds']);
                 });
 
                 $scope.$on('socketsService:permissionsChanged', function (event, data) {
@@ -862,9 +665,9 @@ angular.module('application')
 
                     if (data['access']) {
                         var permissions = data['permissions'];
-                        $scope.updatePermissions(userId, workspaceId, parentWorkspaceId, permissions);
+                        updatePermissions(userId, workspaceId, parentWorkspaceId, permissions);
                     } else {
-                        $scope.closeAccess(userId, workspaceId, parentWorkspaceId);
+                        closeAccess(userId, workspaceId, parentWorkspaceId);
                     }
                 });
 
@@ -878,6 +681,233 @@ angular.module('application')
                     notificationsService.error(message);
                 });
             }
+
+            $scope.treeModel = [];
+            $scope.breadcrumb = [];
+            $scope.errorMessage = null;
+            $scope.currentWorkspace = undefined;
+            $scope.loading = true;
+            $scope.todos = [];
+            $scope.newTodo = '';
+            $scope.presentUsers = [];
+            $scope.workspaces = [];
+            $scope.user = {};
+            $scope.workspaceDropdown = {
+                isOpen: false
+            };
+            $scope.permissions = {
+                readOnly: false,
+                collectionManager: false,
+                accessManager: false
+            };
+            $scope.viewModes = [
+                {
+                    titleKey: 'home.all',
+                    name: 'all',
+                    icon: 'fa-book'
+                },
+                {
+                    titleKey: 'home.active',
+                    name: 'active',
+                    icon: 'fa-rocket'
+                },
+                {
+                    titleKey: 'home.completed',
+                    name: 'completed',
+                    icon: 'fa-flag'
+                }
+            ];
+            $scope.currentViewMode = _.find($scope.viewModes, function (viewMode) {
+                return viewMode.name == 'all';
+            });
+
+            $scope.$watch('currentViewMode', function (viewMode) {
+                switch (viewMode.name) {
+                    case 'active':
+                    {
+                        $scope.statusFilter = {
+                            completed: false
+                        };
+                        break;
+                    }
+                    case 'completed':
+                    {
+                        $scope.statusFilter = {
+                            completed: true
+                        };
+                        break;
+                    }
+                    default :
+                    {
+                        $scope.statusFilter = null;
+                        break
+                    }
+                }
+            });
+
+            $scope.$watch('currentWorkspace', function (workspace) {
+                if (workspace) {
+
+                    var workspaceId = getWorkspaceId();
+                    var rootWorkspaceId = getRootWorkspaceId();
+
+                    apiService.setUserWorkspace(workspaceId, rootWorkspaceId, function (data) {
+
+                        var socketConnection = $scope.socketConnection;
+
+                        socketConnection.changedWorkspace(workspaceId);
+                        socketConnection.updatePresentUsers(workspaceId);
+
+                        $scope.permissions = data.permissions;
+                        $scope.isOwnWorkspace = data.isOwnWorkspace;
+
+                        apiService.items(workspaceId, function (items) {
+                            $scope.todos = items;
+                            $scope.loading = false;
+                        });
+                    });
+                }
+            });
+
+            $scope.$watch('todos', function () {
+
+                $scope.remainingCount = filterFilter($scope.todos, {
+                    completed: false
+                }).length;
+
+                $scope.doneCount = $scope.todos.length - $scope.remainingCount;
+                $scope.allChecked = !$scope.remainingCount;
+            }, true);
+
+            $scope.showWorkspaceId = showWorkspaceId;
+            $scope.onWorkspaceChanged = onWorkspaceChanged;
+            $scope.onWorkspaceLoading = onWorkspaceLoading;
+            $scope.setViewMode = setViewMode;
+            $scope.updatePermissions = updatePermissions;
+            $scope.closeAccess = closeAccess;
+            $scope.userJoined = userJoined;
+            $scope.userHasLeft = userHasLeft;
+            $scope.canReadOnly = canReadOnly;
+            $scope.canManageCollection = canManageCollection;
+            $scope.canManageAccess = canManageAccess;
+            $scope.addedItem = addedItem;
+            $scope.updatedItems = updatedItems;
+            $scope.removedItems = removedItems;
+            $scope.addTodo = addTodo;
+            $scope.showItemEditor = showItemEditor;
+            $scope.removeTodo = removeTodo;
+            $scope.clearDoneTodos = clearDoneTodos;
+            $scope.mark = mark;
+            $scope.markAll = markAll;
+            $scope.showWorkspaceManager = showWorkspaceManager;
+            $scope.showPresentUsers = showPresentUsers;
+            $scope.showWorkspaceCreator = showWorkspaceCreator;
+            $scope.showWorkspaceInfo = showWorkspaceInfo;
+            $scope.logout = logout;
+
+            loaderService.showLoader();
+
+            userService.getData({
+                success: function (user, externalNotification) {
+
+                    $scope.$on('socketsService:error', function (event, error) {
+                        $scope.errorMessage = errorsTranslator.translate('connection_problem_with_socket');
+                        loaderService.hideLoader();
+                    });
+
+                    socketsService.openCollection({
+                        url: SOCKET_URL,
+                        userId: user.userId,
+                        workspaceId: user.workspaceId
+                    }, function (socketConnection) {
+                        $scope.socketConnection = socketConnection;
+
+                        subscribeForSocketEvent();
+
+                        apiService.getPermittedWorkspaces(ROOT_ID, function (workspaces) {
+
+                            var treeModel = [];
+
+                            _.forEach(workspaces, function (workspace) {
+                                var item = workspaceToItem(workspace);
+                                treeModel.push(item);
+                            });
+
+                            var ready = $scope.$on('workspaceTree[home-tree]:ready', function () {
+                                searchNode(user.workspaceId, function (node) {
+
+                                    function onLoadingReady() {
+                                        loaderService.hideLoader();
+
+                                        if (externalNotification) {
+                                            notificationsService.notify(externalNotification.message, externalNotification.type);
+                                        }
+
+                                        var notification = notificationsTranslator.format('greeting', {
+                                            userName: user.displayName
+                                        });
+                                        notificationsService.info(notification);
+                                    }
+
+                                    if (node) {
+                                        updateActiveNode(node);
+                                        onLoadingReady();
+                                    } else {
+                                        searchNode(user.rootWorkspaceId, function (rootNode) {
+
+                                            apiService.loadHierarchy(user.workspaceId, user.rootWorkspaceId, function (data) {
+
+                                                switch (data.status) {
+                                                    case 'success':
+                                                    {
+                                                        var activeNode = rootNode;
+
+                                                        asyncEach(data.workspaces, function (workspaceId, index, next) {
+                                                            activeNode.expand(function () {
+                                                                searchNode(workspaceId, function (node) {
+                                                                    activeNode = node;
+                                                                    next();
+                                                                });
+                                                            });
+                                                        }, function () {
+                                                            updateActiveNode(activeNode);
+                                                            onLoadingReady();
+                                                        });
+
+                                                        break;
+                                                    }
+                                                    case 'not_found':
+                                                    {
+                                                        searchNode(user.defaultWorkspaceId, function (node) {
+
+                                                            var notification = notificationsTranslator.translate('workspace_was_changed');
+                                                            notificationsService.warning(notification);
+
+                                                            updateActiveNode(node);
+                                                            onLoadingReady();
+                                                        });
+                                                        break;
+                                                    }
+                                                }
+                                            });
+                                        });
+                                    }
+                                });
+
+                                ready();
+                            });
+
+                            $scope.treeModel = treeModel;
+                            $scope.workspaces = workspaces;
+                            $scope.user = user;
+                        });
+                    });
+                },
+                failure: function (error) {
+                    $location.path('/');
+                    loaderService.hideLoader();
+                }
+            });
         }
     ]
 );

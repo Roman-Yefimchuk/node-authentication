@@ -11,8 +11,8 @@ CREATE CLASS User
 CREATE PROPERTY User.accountId STRING 
 CREATE PROPERTY User.currentWorkspaceId STRING
 CREATE PROPERTY User.currentRootWorkspaceId STRING
-CREATE PROPERTY User.role STRING
 CREATE PROPERTY User.ownWorkspaces EMBEDDEDLIST STRING
+CREATE PROPERTY User.ownGroups EMBEDDEDLIST STRING
 
 CREATE CLASS UserAccount
 CREATE PROPERTY UserAccount.userId STRING
@@ -32,6 +32,7 @@ CREATE PROPERTY Workspace.name STRING
 CREATE PROPERTY Workspace.creatorId STRING
 CREATE PROPERTY Workspace.creationDate LONG
 CREATE PROPERTY Workspace.parentWorkspaceId STRING
+CREATE PROPERTY Workspace.hierarchyLevel INTEGER
 
 CREATE CLASS Group
 CREATE PROPERTY Group.name STRING
@@ -56,6 +57,7 @@ CREATE PROPERTY PermittedWorkspace.isDefault BOOLEAN
 CREATE PROPERTY PermittedWorkspace.readOnly BOOLEAN
 CREATE PROPERTY PermittedWorkspace.collectionManager BOOLEAN
 CREATE PROPERTY PermittedWorkspace.accessManager BOOLEAN
+CREATE PROPERTY PermittedWorkspace.isAvailable BOOLEAN
 
 INSERT INTO Organization (name, creatorId, creationDate) VALUES ('system', '@system', date());
 

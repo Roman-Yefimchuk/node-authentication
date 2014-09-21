@@ -7,11 +7,27 @@ angular.module('application')
         '$compile',
         '$log',
         '$rootScope',
+        '$http',
 
-        function ($compile, $log, $rootScope) {
+        function ($compile, $log, $rootScope, $http) {
+
+            var NODE_TEMPLATE = null;
+
+            function loadNodeTemplate(callback) {
+                if (NODE_TEMPLATE) {
+                    callback();
+                } else {
+                    var request = $http.get('/client/views/directives/workspace-tree/workspace-tree-node-view.html');
+                    request.success(function (data) {
+                        NODE_TEMPLATE = data;
+                        callback();
+                    });
+                }
+            }
+
             return {
                 transclude: true,
-                templateUrl: '/client/views/directives/workspace-tree-view.html',
+                templateUrl: '/client/views/directives/workspace-tree/workspace-tree-view.html',
                 scope: {
                     treeModel: '=',
                     onSelection: '&',
@@ -21,24 +37,6 @@ angular.module('application')
                 link: function (scope, element, attr) {
 
                     element = element.find('[tree-view]');
-
-                    var NODE_TEMPLATE = '' +
-                        '<div style="display: table;">' +
-                        '     <span>' +
-                        '         <a href="javascript:void(0)"><i ng-show="!node.isEmpty()" class="fa" style="cursor: pointer;color: #000" ' +
-                        '            ng-class="{ \'fa-minus-square-o\' : node.expanded, \'fa-plus-square-o\' : !node.expanded }"' +
-                        '            ng-click="node.toggle($event)">' +
-                        '         </i></a><i ng-show="node.isEmpty()" class="fa fa-minus-square-o" ' +
-                        '            style="color: rgba(255, 255, 255, 0)">' +
-                        '         </i>&nbsp;<i class="fa" style="cursor: pointer" ' +
-                        '            ng-class="{ \'fa-folder-open\' : node.expanded, \'fa-folder\' : !node.expanded }">' +
-                        '         </i>&nbsp;<a href="javascript:void(0)" style="cursor: pointer" ng-click="node.onSelection($event)"' +
-                        '               ng-class="{ \'bold-fond\' : node.isActive() }" href>{{ node.getLabel() }}<span ng-show="node.isLoading">&nbsp;<i class="fa fa-refresh fa-spin" style="color: #000"></i></span>' +
-                        '         </a>' +
-                        '     </span>' +
-                        '     <div style="padding-left: 15px" children ng-show="node.expanded">' +
-                        '     </div>' +
-                        '</div>';
 
                     var treeId = attr['treeId'];
                     if (!treeId) {
@@ -75,6 +73,10 @@ angular.module('application')
                         }
 
                         Node.prototype = {
+                            isAvailable: function () {
+                                var workspace = this.getWorkspace();
+                                return workspace.isAvailable;
+                            },
                             getLabel: function () {
                                 var workspace = this.getWorkspace();
                                 return workspace.name;
@@ -405,12 +407,16 @@ angular.module('application')
                             treeScope.$destroy();
                         }
 
-                        if (treeModel) {
-                            treeScope = getTreeScope();
-                            makeTreeNodes(treeScope, treeModel, element);
-                        }
+                        if (treeModel && treeModel.length) {
 
-                        $rootScope.$broadcast('workspaceTree[' + treeId + ']:ready');
+                            loadNodeTemplate(function () {
+
+                                treeScope = getTreeScope();
+                                makeTreeNodes(treeScope, treeModel, element);
+
+                                $rootScope.$broadcast('workspaceTree[' + treeId + ']:ready');
+                            });
+                        }
                     });
                 }
             };

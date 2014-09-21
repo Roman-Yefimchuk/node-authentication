@@ -1,0 +1,17 @@
+<div style="display: table;"><span><a href="javascript:void(0)"><i ng-show="!node.isEmpty()" class="fa"
+                                                                   style="cursor: pointer;color: #000"
+                                                                   ng-class="{'fa-minus-square-o' : node.expanded, 'fa-plus-square-o' : !node.expanded}"
+                                                                   ng-click="node.toggle($event)"></i></a><i
+        ng-show="node.isEmpty()" class="fa fa-minus-square-o" style="color: rgba(255, 255, 255, 0)"></i>&nbsp;<i
+        class="fa" style="cursor: pointer"
+        ng-class="{'fa-folder-open' : node.expanded, 'fa-folder' : !node.expanded}"></i>&nbsp;<span
+        ng-switch="node.isAvailable()"><span ng-switch-when="true"><a style="cursor: pointer"
+                                                                      ng-click="node.onSelection($event)"
+                                                                      ng-class="{'bold-fond' : node.isActive()}"
+                                                                      href="javascript:void(0)">{{node.getLabel()}}<span
+        ng-show="node.isLoading">&nbsp;<i class="fa fa-refresh fa-spin" style="color: #000"></i></span></a></span><span
+        ng-switch-when="false"><span>{{node.getLabel()}}<span ng-show="node.isLoading">&nbsp;<i
+        class="fa fa-refresh fa-spin" style="color: #000"></i></span></span></span></span></span>
+
+    <div style="padding-left: 15px" children ng-show="node.expanded"></div>
+</div>

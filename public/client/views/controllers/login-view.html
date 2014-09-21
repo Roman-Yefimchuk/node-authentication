@@ -3,7 +3,7 @@
     <h1>
         <span class="fa fa-sign-in" ng-click="quickLogin()">
         </span>
-        <l10n key="login.title"></l10n>
+        <span l10n key="login.title"></span>
     </h1>
 
     <div ng-show="errorMessage != null">
@@ -20,7 +20,7 @@
         <div class="form-group" ng-show="treeModel.length > 0">
 
             <label>
-                <l10n key="login.select_workspace"></l10n>
+                <span l10n key="login.select_workspace"></span>
             </label>
 
             <br>
@@ -49,7 +49,7 @@
 
         <div class="form-group">
             <label>
-                <l10n key="login.email"></l10n>
+                <span l10n key="login.email"></span>
             </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isEmailValid() }">
@@ -64,7 +64,7 @@
 
         <div class="form-group">
             <label>
-                <l10n key="login.password"></l10n>
+                <span l10n key="login.password"></span>
             </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
@@ -79,7 +79,7 @@
 
         <span ng-click="login()" class="btn btn-warning"
               ng-disabled="!(isEmailValid() && isPasswordValid()) || isSystemEmpty">
-            <l10n key="login.btn_login"></l10n>
+            <span l10n key="login.btn_login"></span>
         </span>
 
     </form>
@@ -87,16 +87,16 @@
     <hr>
 
     <p>
-        <l10n key="login.need_an_account"></l10n>
+        <span l10n key="login.need_an_account"></span>
         <a href="#/sign-up">
-            <l10n key="login.sign_up"></l10n>
+            <span l10n key="login.sign_up"></span>
         </a>
     </p>
 
     <p>
-        <l10n key="login.or_go"></l10n>
+        <span l10n key="login.or_go"></span>
         <a href="#/">
-            <l10n key="login.home"></l10n>
+            <span l10n key="login.home"></span>
         </a>
     </p>
 

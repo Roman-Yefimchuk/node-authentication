@@ -15,17 +15,17 @@
                     <a ng-repeat="user in presentUsers"
                        href class="list-group-item">
 
-                        <l10n key="dialogs.present_users.user_id"></l10n>
+                        <span l10n key="dialogs.present_users.user_id"></span>
                         <b>{{ user.id }}</b>
 
                         <br>
 
-                        <l10n key="dialogs.present_users.user_name"></l10n>
+                        <span l10n key="dialogs.present_users.user_name"></span>
                         <b>{{ user.displayName }}</b>
 
                         <br>
 
-                        <l10n key="dialogs.present_users.registered_date"></l10n>
+                        <span l10n key="dialogs.present_users.registered_date"></span>
                         <b>{{ user.registeredDate | formatDate:'mmmm d, yyyy, h:MM TT' }}</b>
 
                     </a>
@@ -46,7 +46,7 @@
         <span class="btn btn-success btn-sm" ng-click="cancel()" href>
             <i class="fa fa-check"></i>
             &nbsp;
-            <l10n key="dialogs.present_users.ok"></l10n>
+            <span l10n key="dialogs.present_users.ok"></span>
         </span>
     </div>
 </div>

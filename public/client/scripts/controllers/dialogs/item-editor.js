@@ -16,7 +16,7 @@ angular.module('application')
             $scope.originItemModel = item.title;
             $scope.itemModel = item.title;
 
-            $scope.save = function (itemModel) {
+            function save(itemModel) {
                 var title = itemModel.trim();
 
                 if (title.length && title != item.title) {
@@ -25,11 +25,14 @@ angular.module('application')
                         $modalInstance.close();
                     });
                 }
-            };
+            }
 
-            $scope.cancel = function () {
+            function cancel() {
                 $modalInstance.dismiss('cancel');
-            };
+            }
+
+            $scope.save = save;
+            $scope.cancel = cancel;
         }
     ]
 );

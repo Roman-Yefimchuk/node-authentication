@@ -11,8 +11,14 @@ angular.module('application')
             return {
                 templateUrl: '/client/views/directives/language-switcher-view.html',
                 controller: ['$scope', function ($scope) {
-                    $scope.currentLocaleCode = translatorService.getCurrentLocaleCode();
 
+                    function setLocale(localeCode) {
+                        if (localeCode != $scope.currentLocaleCode) {
+                            translatorService.setLocale(localeCode);
+                        }
+                    }
+
+                    $scope.currentLocaleCode = translatorService.getCurrentLocaleCode();
                     $scope.locales = {
                         'en-us': {
                             enabledIcon: '/client/images/flags/us-enabled.png',
@@ -28,15 +34,11 @@ angular.module('application')
                         }
                     };
 
+                    $scope.setLocale = setLocale;
+
                     translatorService.onLocaleChanged($scope, function (localeCode) {
                         $scope.currentLocaleCode = localeCode;
                     });
-
-                    $scope.setLocale = function (localeCode) {
-                        if (localeCode != $scope.currentLocaleCode) {
-                            translatorService.setLocale(localeCode);
-                        }
-                    };
                 }]
             };
         }

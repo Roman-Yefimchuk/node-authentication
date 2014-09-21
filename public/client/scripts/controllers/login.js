@@ -33,23 +33,13 @@ angular.module('application')
                 }
             }
 
-            $scope.isSystemEmpty = false;
-            $scope.treeModel = [];
-            $scope.errorMessage = null;
-            $scope.currentWorkspace = undefined;
-            $scope.email = "";
-            $scope.password = "";
-            $scope.workspaceDropdown = {
-                isOpen: false
-            };
-
-            $scope.onWorkspaceChanged = function (node) {
+            function onWorkspaceChanged(node) {
                 $scope.activeNode = node;
                 $scope.currentWorkspace = node.item['workspace'];
                 $scope.workspaceDropdown['isOpen'] = false;
-            };
+            }
 
-            $scope.onWorkspaceLoading = function (item, callback) {
+            function onWorkspaceLoading(item, callback) {
                 var workspace = item.workspace;
                 apiService.getAllWorkspaces(workspace.id, function (data) {
                     callback(data, function (workspace) {
@@ -62,7 +52,65 @@ angular.module('application')
                         };
                     });
                 });
+            }
+
+            function isEmailValid() {
+                var email = ($scope['email'] || '').toLowerCase();
+                return EMAIL_PATTERN.test(email);
+            }
+
+            function isPasswordValid() {
+                var password = ($scope['password'] || '').toLowerCase();
+                return PASSWORD_PATTERN.test(password);
+            }
+
+            function quickLogin() {
+                if (DEBUG_MODE) {
+                    $scope.email = 'roman@gmail.com';
+                    $scope.password = 'qwerty';
+
+                    $scope.$watch('email', function () {
+                        $scope.login();
+                    });
+                }
+            }
+
+            function login() {
+
+                loaderService.showLoader();
+
+                apiService.login({
+                    email: $scope.email,
+                    password: $scope.password,
+                    workspaceId: getWorkspaceId(),
+                    rootWorkspaceId: getRootWorkspaceId()
+                }, {
+                    success: function () {
+                        $location.path('/home');
+                    },
+                    failure: function (error) {
+                        $scope.errorMessage = error.message;
+                        loaderService.hideLoader();
+                    }
+                });
+            }
+
+            $scope.isSystemEmpty = false;
+            $scope.treeModel = [];
+            $scope.errorMessage = null;
+            $scope.currentWorkspace = undefined;
+            $scope.email = "";
+            $scope.password = "";
+            $scope.workspaceDropdown = {
+                isOpen: false
             };
+
+            $scope.onWorkspaceChanged = onWorkspaceChanged;
+            $scope.onWorkspaceLoading = onWorkspaceLoading;
+            $scope.isEmailValid = isEmailValid;
+            $scope.isPasswordValid = isPasswordValid;
+            $scope.quickLogin = quickLogin;
+            $scope.login = login;
 
             loaderService.showLoader();
 
@@ -84,6 +132,7 @@ angular.module('application')
 
                     var ready = $scope.$on('workspaceTree[login-tree]:ready', function () {
                         $rootScope.$broadcast('workspaceTree[login-tree]:search', getWorkspaceId(), function (node) {
+
                             if (node) {
                                 $scope.activeNode = node;
                                 node.setActive();
@@ -102,47 +151,6 @@ angular.module('application')
                     loaderService.hideLoader();
                 }
             });
-
-            $scope.isEmailValid = function () {
-                var email = ($scope['email'] || '').toLowerCase();
-                return EMAIL_PATTERN.test(email);
-            };
-
-            $scope.isPasswordValid = function () {
-                var password = ($scope['password'] || '').toLowerCase();
-                return PASSWORD_PATTERN.test(password);
-            };
-
-            $scope.quickLogin = function () {
-                if (DEBUG_MODE) {
-                    $scope.email = 'roman@gmail.com';
-                    $scope.password = 'qwerty';
-
-                    $scope.$watch('email', function () {
-                        $scope.login();
-                    });
-                }
-            };
-
-            $scope.login = function () {
-
-                loaderService.showLoader();
-
-                apiService.login({
-                    email: $scope.email,
-                    password: $scope.password,
-                    workspaceId: getWorkspaceId(),
-                    rootWorkspaceId: getRootWorkspaceId()
-                }, {
-                    success: function () {
-                        $location.path('/home');
-                    },
-                    failure: function (error) {
-                        $scope.errorMessage = error.message;
-                        loaderService.hideLoader();
-                    }
-                });
-            };
         }
     ]
 );

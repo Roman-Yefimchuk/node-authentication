@@ -28,7 +28,7 @@
                         <a href ng-click="showWorkspaceCreator()">
                             <i class="fa fa-plus"></i>
                             &nbsp;
-                            <l10n key="home.create_workspace"></l10n>
+                            <span l10n key="home.create_workspace"></span>
                         </a>
                     </li>
                 </ul>
@@ -58,14 +58,14 @@
                             <a href="#/settings">
                                 <i class="fa fa-cog"></i>
                                 &nbsp;
-                                <l10n key="home.settings"></l10n>
+                                <span l10n key="home.settings"></span>
                             </a>
                         </li>
                         <li>
                             <a href="#/profile">
                                 <i class="fa fa-pencil-square-o"></i>
                                 &nbsp;
-                                <l10n key="home.edit_profile"></l10n>
+                                <span l10n key="home.edit_profile"></span>
                             </a>
                         </li>
                         <li class="divider"></li>
@@ -73,7 +73,7 @@
                             <a href ng-click="logout()">
                                 <i class="fa fa-sign-out"></i>
                                 &nbsp;
-                                <l10n key="home.logout"></l10n>
+                                <span l10n key="home.logout"></span>
                             </a>
                         </li>
                     </ul>
@@ -100,12 +100,14 @@
         </alert>
     </div>
 
-    <ol class="panel breadcrumb" ng-show="breadcrumb.length">
-        <li ng-repeat="item in breadcrumb" ng-class="{ 'active' : $last }"><a ng-if="!$last"
-                                                                              href="javascript:void(0)"
-                                                                              ng-click="item.click()">{{
-            item.getLabel() }}
-        </a><span ng-if="$last">{{ item.getLabel() }}</span>
+    <ol breadcrumb class="panel breadcrumb" ng-show="breadcrumb.length">
+        <li ng-repeat="item in breadcrumb"
+            ng-class="{ 'active' : $last }"
+            available="{{ item.isAvailable() }}"><a ng-if="!$last && item.isAvailable()"
+                                                    href="javascript:void(0)"
+                                                    ng-click="item.click()">
+            {{ item.getLabel() }}
+        </a><span ng-if="$last || !item.isAvailable()">{{ item.getLabel() }}</span>
         </li>
     </ol>
 
@@ -159,7 +161,7 @@
                           ng-click="addTodo()">
                         <i class="fa fa-plus"></i>
                         &nbsp;
-                        <l10n key="home.add_task"></l10n>
+                        <span l10n key="home.add_task"></span>
                     </span>
             </div>
 
@@ -227,7 +229,7 @@
                                     <div class="row clearfix">
                                         <div class="col-md-12 column">
                                             <b>
-                                                <l10n key="home.no_records"></l10n>
+                                                <span l10n key="home.no_records"></span>
                                             </b>
                                         </div>
                                     </div>
@@ -252,7 +254,7 @@
                                   btn-checkbox>
                                 <i class="fa fa-check"></i>
                                 &nbsp;
-                                <l10n key="home.select_all"></l10n>
+                                <span l10n key="home.select_all"></span>
                             </span>
                     </div>
 
@@ -265,7 +267,7 @@
                                    btn-radio="viewMode">
                                 <i class="fa {{ viewMode.icon }}"></i>
                                 &nbsp;
-                                <l10n key="{{ viewMode.titleKey }}"></l10n>
+                                <span l10n key="{{ viewMode.titleKey }}"></span>
                             </label>
                         </div>
                     </div>
@@ -276,7 +278,7 @@
                                   ng-click="clearDoneTodos()">
                                 <i class="fa fa-trash-o"></i>
                                 &nbsp;
-                                <l10n key="home.clear_completed"></l10n> ({{ todos.length - remainingCount }})
+                                <span l10n key="home.clear_completed"></span> ({{ todos.length - remainingCount }})
                             </span>
                     </div>
                 </div>

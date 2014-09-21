@@ -14,29 +14,22 @@ angular.module('application')
 
         function ($scope, $location, loaderService, apiService, NAME_PATTERN, EMAIL_PATTERN, PASSWORD_PATTERN) {
 
-            $scope.errorMessage = null;
-
-            $scope.name = "";
-            $scope.email = "";
-            $scope.password = "";
-            $scope.retypedPassword = "";
-
-            $scope.isNameValid = function () {
+            function isNameValid() {
                 var name = ($scope.name || '');
                 return NAME_PATTERN.test(name);
-            };
+            }
 
-            $scope.isEmailValid = function () {
+            function isEmailValid() {
                 var email = ($scope['email'] || '').toLowerCase();
                 return EMAIL_PATTERN.test(email);
-            };
+            }
 
-            $scope.isPasswordValid = function () {
+            function isPasswordValid() {
                 var password = ($scope['password'] || '').toLowerCase();
                 return PASSWORD_PATTERN.test(password) && $scope.password == $scope.retypedPassword;
-            };
+            }
 
-            $scope.quickSingUp = function () {
+            function quickSingUp() {
                 $scope.name = 'Roman Yefimchuk';
                 $scope.email = 'roman@gmail.com';
                 $scope.password = 'qwerty';
@@ -45,9 +38,9 @@ angular.module('application')
                 $scope.$watch('email', function () {
                     $scope.signUp();
                 });
-            };
+            }
 
-            $scope.signUp = function () {
+            function signUp() {
 
                 loaderService.showLoader();
 
@@ -64,7 +57,19 @@ angular.module('application')
                         loaderService.hideLoader();
                     }
                 });
-            };
+            }
+
+            $scope.errorMessage = null;
+            $scope.name = "";
+            $scope.email = "";
+            $scope.password = "";
+            $scope.retypedPassword = "";
+
+            $scope.isNameValid = isNameValid;
+            $scope.isEmailValid = isEmailValid;
+            $scope.isPasswordValid = isPasswordValid;
+            $scope.quickSingUp = quickSingUp;
+            $scope.signUp = signUp;
         }
     ]
 );

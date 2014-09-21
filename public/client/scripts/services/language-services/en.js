@@ -124,6 +124,9 @@ angular.module('application')
                     "user_not_found": "User not found",
                     "email_already_exist": "E-mail already exist"
                 },
+                "not_found": {
+                    "page_not_found": "Page not found"
+                },
                 "common": {
                     "loading": "Loading..."
                 }

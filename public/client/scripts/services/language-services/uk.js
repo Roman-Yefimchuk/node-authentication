@@ -124,6 +124,9 @@ angular.module('application')
                     "user_not_found": "Користувач не знайдений",
                     "email_already_exist": "E-mail вже існує"
                 },
+                "not_found": {
+                    "page_not_found": "Сторінка не знайдена"
+                },
                 "common": {
                     "loading": "Завантаження..."
                 }

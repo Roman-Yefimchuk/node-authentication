@@ -11,26 +11,30 @@ angular.module('application')
         function ($scope, $modalInstance, options) {
 
             var onCreate = options.onCreate;
-
-            $scope.creatorModel = {
+            var creatorModel = {
                 workspaceName: 'New workspace',
                 switchWorkspace: false
             };
 
-            $scope.createWorkspace = function () {
-                var workspaceName = $scope.creatorModel['workspaceName'];
+            function createWorkspace() {
+                var workspaceName = creatorModel.workspaceName;
                 workspaceName = workspaceName.trim();
 
                 if (workspaceName) {
-                    onCreate(workspaceName, $scope.creatorModel['switchWorkspace'], function () {
+                    onCreate(workspaceName, creatorModel.switchWorkspace, function () {
                         $modalInstance.close();
                     });
                 }
-            };
+            }
 
-            $scope.cancel = function () {
+            function cancel() {
                 $modalInstance.dismiss('cancel');
-            };
+            }
+
+            $scope.creatorModel = creatorModel;
+
+            $scope.createWorkspace = createWorkspace;
+            $scope.cancel = cancel;
         }
     ]
 );
