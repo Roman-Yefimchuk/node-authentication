@@ -553,7 +553,7 @@ module.exports = function (db, developmentMode) {
         });
     }
 
-    function saveItems(workspaceId, userId, todoModel, callback) {
+    function saveItem(workspaceId, userId, todoModel, callback) {
         db.query("" +
             "INSERT INTO Todo (workspaceId, creatorId, title, completed, creationDate) " +
             "VALUES (:workspaceId, :creatorId, :title, :completed, :creationDate)", {
@@ -1427,7 +1427,7 @@ module.exports = function (db, developmentMode) {
         createUser: createUser,
         findUser: findUser,
         getItems: getItems,
-        saveItem: saveItems,
+        saveItem: saveItem,
         updateItems: updateItems,
         removeItems: removeItems,
         setUserWorkspaceId: setUserWorkspaceId,
@@ -1448,6 +1448,8 @@ module.exports = function (db, developmentMode) {
         getAllUsers: getAllUsers,
         getAllUsersWithPermissions: getAllUsersWithPermissions,
         isAccessGrantedForWorkspace: isAccessGrantedForWorkspace,
-        setUsersPermissionsForWorkspace: setUsersPermissionsForWorkspace
+        setUsersPermissionsForWorkspace: setUsersPermissionsForWorkspace,
+        addUserToGroup: addUserToGroup,
+        removeUserFromGroup: removeUserFromGroup
     };
 };

@@ -1,0 +1,6 @@
+<ol breadcrumb class="panel breadcrumb" ng-show="breadcrumb.length">
+    <li ng-repeat="item in breadcrumb" ng-class="{'active' : $last}" available="{{item.isAvailable()}}"><a
+            ng-if="!$last && item.isAvailable()" href="javascript:void(0)"
+            ng-click="item.click()">{{item.getLabel()}}</a><span ng-if="$last || !item.isAvailable()">{{item.getLabel()}}</span>
+    </li>
+</ol>
