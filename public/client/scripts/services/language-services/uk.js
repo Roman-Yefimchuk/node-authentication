@@ -95,6 +95,10 @@ angular.module('application')
                         "user_joined": "Користувач @{userName} приєднався до робочої області",
                         "user_has_left": "Користувач @{userName} покинув робочий простір",
                         "you_lost_connection": "Ви втратили зв'язок"
+                    },
+                    "info_widget": {
+                        "review": "Залишити відгук",
+                        "copyright": "Роман Єфімчук, iKrok, 2014"
                     }
                 },
                 "dialogs": {

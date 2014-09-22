@@ -80,6 +80,17 @@ angular.module('application')
                             }
                         }
                     });
+                },
+                showReview: function (options) {
+                    return open({
+                        templateUrl: '/client/views/controllers/dialogs/review-view.html',
+                        controller: 'ReviewDialogController',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
                 }
             };
         }

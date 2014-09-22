@@ -95,6 +95,10 @@ angular.module('application')
                         "user_joined": "User @{userName} joined to workspace",
                         "user_has_left": "User @{userName} has left workspace",
                         "you_lost_connection": "You lost connection"
+                    },
+                    "info_widget": {
+                        "review": "Write a review",
+                        "copyright": "Roman Yefimchuk, iKrok, 2014"
                     }
                 },
                 "dialogs": {
@@ -111,6 +115,14 @@ angular.module('application')
                         "user_name": "User name:",
                         "registered_date": "Registered date:",
                         "ok": "Ok"
+                    },
+                    "review": {
+                        "title": "Write a review",
+                        "send_review": "Send review",
+                        "cancel": "Cancel",
+                        "subject_placeholder": "Subject",
+                        "sender_placeholder": "Sender",
+                        "message_placeholder": "Your message for me..."
                     }
                 },
                 "http_client_errors": {

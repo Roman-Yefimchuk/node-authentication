@@ -53,6 +53,14 @@ module.exports = {
             }
         })();
 
+/*        require('../services/email-sender').sendEmail('subject', 'sender', 'message', function (error, response) {
+            if (error) {
+                console.log(error);
+            } else {
+                console.log("Message sent: " + response.message);
+            }
+        });*/
+
         var dbProvider = require('./db-provider')(dbWrapper, developmentMode);
         callback(dbProvider);
     }

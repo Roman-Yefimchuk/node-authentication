@@ -60,7 +60,7 @@
 
             <div ng-switch="loading">
                 <div ng-switch-when="true">
-                    <div ng-include="'/client/views/common/loader-view.html'"></div>
+                    <div static-include="/client/views/common/loader-view.html"></div>
                 </div>
                 <div ng-switch-when="false">
 
@@ -75,7 +75,8 @@
 
                                     <div class="task-checkbox" ng-show="canManageCollection()">
                                         <input type="checkbox" class="list-child"
-                                               ng-model="todo.completed" ng-change="mark(todo)">
+                                               ng-model="todo.completed" ng-change="mark(todo)"
+                                               style="cursor: pointer">
                                     </div>
 
                                     <div class="task-title">

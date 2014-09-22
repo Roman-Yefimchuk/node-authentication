@@ -3,7 +3,7 @@
 angular.module('application')
 
     .constant("NAME_PATTERN", /^(\w+){6}$/)
-    .constant("EMAIL_PATTERN", /^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$/)
+    .constant("EMAIL_PATTERN", /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)
     .constant("PASSWORD_PATTERN", /^(\w+){6}$/)
 
     .constant("ROOT_ID", '@root')

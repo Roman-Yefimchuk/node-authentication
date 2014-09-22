@@ -18,7 +18,8 @@
 </head>
 <body ng-app="application" ng-cloak>
 
-<div language-switcher style="padding: 5px;position: absolute;right: 0;"></div>
+<div language-switcher style="padding: 5px;position: fixed;right: 0;"></div>
+<div info-widget style="padding: 5px;position: fixed;"></div>
 
 <div class="container">
     <div ng-view>
@@ -62,6 +63,7 @@
 <script type="text/javascript" src="/client/scripts/controllers/dialogs/present-users.js"></script>
 <script type="text/javascript" src="/client/scripts/controllers/dialogs/confirmation-dialog.js"></script>
 <script type="text/javascript" src="/client/scripts/controllers/dialogs/alert-dialog.js"></script>
+<script type="text/javascript" src="/client/scripts/controllers/dialogs/review-dialog.js"></script>
 
 <!--directives-->
 <script type="text/javascript" src="/client/scripts/directives/list-item.js"></script>
@@ -69,6 +71,7 @@
 <script type="text/javascript" src="/client/scripts/directives/language-switcher.js"></script>
 <script type="text/javascript" src="/client/scripts/directives/l10n.js"></script>
 <script type="text/javascript" src="/client/scripts/directives/static-include.js"></script>
+<script type="text/javascript" src="/client/scripts/directives/info-widget.js"></script>
 
 <!--filters-->
 <script type="text/javascript" src="/client/scripts/filters/format-date.js"></script>
