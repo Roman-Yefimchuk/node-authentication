@@ -55,7 +55,7 @@ angular.module('application', [
                     title: 'routes.sign_up'
                 }
             }).when('/home', {
-                templateUrl: '/client/views/controllers/home/index-view.html',
+                templateUrl: '/client/views/controllers/home/home-view.html',
                 controller: 'HomeController',
                 options: {
                     title: 'routes.home'

@@ -30,19 +30,19 @@ angular.module('application')
                     this.node = node;
                 }
 
-                BreadcrumbItem.prototype.click = function () {
-                    var node = this.node;
-                    updateActiveNode(node);
-                };
-
-                BreadcrumbItem.prototype.getLabel = function () {
-                    var node = this.node;
-                    return node.getLabel();
-                };
-
-                BreadcrumbItem.prototype.isAvailable = function () {
-                    var node = this.node;
-                    return node.isAvailable();
+                BreadcrumbItem.prototype = {
+                    click: function () {
+                        var node = this.node;
+                        updateActiveNode(node);
+                    },
+                    getLabel: function () {
+                        var node = this.node;
+                        return node.getLabel();
+                    },
+                    isAvailable: function () {
+                        var node = this.node;
+                        return node.isAvailable();
+                    }
                 };
 
                 return BreadcrumbItem;
@@ -736,9 +736,15 @@ angular.module('application')
                 });
 
                 $scope.$on('socketsService:disconnect', function (event, data) {
-
                     var message = notificationsTranslator.translate('you_lost_connection');
                     notificationsService.error(message);
+                });
+            }
+
+            function getRecords() {
+                var completed = $scope.statusFilter['completed'];
+                return _.filter($scope.todos, function (todo) {
+                    return todo.completed == completed;
                 });
             }
 
@@ -811,6 +817,8 @@ angular.module('application')
                     var workspaceId = getWorkspaceId();
                     var rootWorkspaceId = getRootWorkspaceId();
 
+                    $scope.loading = true;
+
                     apiService.setUserWorkspace(workspaceId, rootWorkspaceId, function (data) {
 
                         var socketConnection = $scope.socketConnection;
@@ -860,6 +868,7 @@ angular.module('application')
             $scope.showWorkspaceCreator = showWorkspaceCreator;
             $scope.showWorkspaceInfo = showWorkspaceInfo;
             $scope.logout = logout;
+            $scope.getRecords = getRecords;
 
             loaderService.showLoader();
 
