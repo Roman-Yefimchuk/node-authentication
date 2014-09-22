@@ -21,13 +21,17 @@ function asyncEach(obj, nextCallback, completedCallback) {
         if (obj instanceof Array) {
 
             var index = 0;
+            var interrupt = function () {
+                index = obj.length;
+                next();
+            };
             var next = function () {
 
                 if (index == obj.length) {
                     completedCallback();
                 } else {
                     var element = obj[index];
-                    nextCallback(element, index++, next);
+                    nextCallback(element, index++, next, interrupt);
                 }
             };
 
@@ -36,6 +40,10 @@ function asyncEach(obj, nextCallback, completedCallback) {
 
             var keys = _.keys(obj);
             var index = 0;
+            var interrupt = function () {
+                index = keys.length;
+                next();
+            };
             var next = function () {
 
                 if (index == keys.length) {
@@ -43,7 +51,7 @@ function asyncEach(obj, nextCallback, completedCallback) {
                 } else {
                     var key = keys[index++];
                     var element = obj[key];
-                    nextCallback(element, key, next);
+                    nextCallback(element, key, next, interrupt);
                 }
             };
 

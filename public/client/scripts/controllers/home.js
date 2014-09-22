@@ -113,29 +113,51 @@ angular.module('application')
                             }
                         });
                     } else {
-                        searchNode(workspaceId, function (node) {
 
-                            if (node) {
-                                var workspace = node.getWorkspace();
-                                workspace.permissions = permissions;
+                        var nextNode = null;
+                        var prevWorkspaceId = ROOT_ID;
 
-                                if (getWorkspaceId() == workspaceId) {
-                                    $scope.permissions = permissions;
-                                }
-                            } else {
+                        asyncEach(hierarchy, function (id, index, next, interrupt) {
 
-                                searchNode(parentWorkspaceId, function (node) {
+                            if (id != ROOT_ID) {
+
+                                searchNode(id, function (node) {
 
                                     if (node) {
-                                        apiService.getPermittedWorkspaces(parentWorkspaceId, function (workspaces) {
-                                            _.forEach(workspaces, function (workspace) {
+                                        nextNode = node;
+                                        prevWorkspaceId = id;
+                                        next();
+                                    } else {
+                                        apiService.getPermittedWorkspaces(prevWorkspaceId, function (workspaces) {
+
+                                            function updateNode(insert) {
+
+                                                var workspace = _.findWhere(workspaces, {
+                                                    id: id
+                                                });
+
                                                 var item = workspaceToItem(workspace);
-                                                node.insert(item);
-                                            });
+                                                insert(item, function () {
+                                                    interrupt();
+                                                });
+                                            }
+
+                                            if (nextNode) {
+                                                updateNode(function (item, callback) {
+                                                    nextNode.insert(item, callback);
+                                                });
+                                            } else {
+                                                updateNode(function (item, callback) {
+                                                    insertRootNode(item, callback);
+                                                });
+                                            }
                                         });
                                     }
                                 });
+                            } else {
+                                next();
                             }
+                        }, function () {
                         });
                     }
 
@@ -153,6 +175,7 @@ angular.module('application')
                         if (node) {
                             var workspace = node.getWorkspace();
                             workspace.permissions = permissions;
+                            workspace.isAvailable = true;
 
                             if (getWorkspaceId() == workspaceId) {
                                 $scope.permissions = permissions;

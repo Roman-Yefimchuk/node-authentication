@@ -4,6 +4,7 @@ module.exports = function (io, dbProvider, developmentMode) {
 
     var socketsSession = {};
     var _ = require('underscore');
+    var forEach = _.forEach;
 
     var SocketSession = (function () {
 
@@ -54,7 +55,7 @@ module.exports = function (io, dbProvider, developmentMode) {
                 workspaceId = currentSocketSession.workspaceId;
             }
 
-            _.forEach(socketsSession, function (socketSession, sessionId) {
+            forEach(socketsSession, function (socketSession, sessionId) {
                 if (socketSession && sessionId != socket.id) {
                     if (socketSession.workspaceId == workspaceId) {
                         socketSession.sendCommand(command, data);
@@ -63,17 +64,17 @@ module.exports = function (io, dbProvider, developmentMode) {
             });
         }
 
-        function sendCommand(command, data) {
+        function emit(command, data) {
             socket.emit(command, data);
         }
 
-        function onCommand(command, callback) {
+        function on(command, callback) {
             socket.on(command, function (data) {
                 callback(data);
             });
         }
 
-        onCommand('user_connection', function (data) {
+        on('user_connection', function (data) {
             var userId = data.userId;
             var workspaceId = data.workspaceId;
 
@@ -81,7 +82,7 @@ module.exports = function (io, dbProvider, developmentMode) {
 
             var presentUsers = [];
 
-            _.forEach(socketsSession, function (socketSession, sessionId) {
+            forEach(socketsSession, function (socketSession, sessionId) {
                 if (socketSession && sessionId != socket.id) {
                     if (socketSession.workspaceId == workspaceId) {
                         var userId = socketSession.userId;
@@ -90,12 +91,12 @@ module.exports = function (io, dbProvider, developmentMode) {
                 }
             });
 
-            sendCommand('user_connected', {
+            emit('user_connected', {
                 presentUsers: presentUsers
             });
         });
 
-        onCommand('changed_workspace', function (data) {
+        on('changed_workspace', function (data) {
             var session = getSession();
 
             if (session) {
@@ -119,7 +120,7 @@ module.exports = function (io, dbProvider, developmentMode) {
             }
         });
 
-        onCommand('updated_workspace', function (data) {
+        on('updated_workspace', function (data) {
             var userId = data.userId;
             var workspaceId = data.workspaceId;
             var data = data.data;
@@ -131,7 +132,7 @@ module.exports = function (io, dbProvider, developmentMode) {
             });
         });
 
-        onCommand('removed_workspace', function (data) {
+        on('removed_workspace', function (data) {
             var userId = data.userId;
             var workspaceId = data.workspaceId;
             var removedWorkspaces = data.removedWorkspaces;
@@ -143,7 +144,7 @@ module.exports = function (io, dbProvider, developmentMode) {
             });
         });
 
-        onCommand('added_item', function (data) {
+        on('added_item', function (data) {
             var userId = data.userId;
             var item = data.item;
 
@@ -153,7 +154,7 @@ module.exports = function (io, dbProvider, developmentMode) {
             });
         });
 
-        onCommand('updated_items', function (data) {
+        on('updated_items', function (data) {
             var userId = data.userId;
             var items = data.items;
 
@@ -163,7 +164,7 @@ module.exports = function (io, dbProvider, developmentMode) {
             });
         });
 
-        onCommand('removed_items', function (data) {
+        on('removed_items', function (data) {
             var userId = data.userId;
             var itemIds = data.itemIds;
 
@@ -173,13 +174,13 @@ module.exports = function (io, dbProvider, developmentMode) {
             });
         });
 
-        onCommand('permissions_changed', function (data) {
+        on('permissions_changed', function (data) {
             var userId = data.userId;
             var workspaceId = data.workspaceId;
             var parentWorkspaceId = data.parentWorkspaceId || '@root';
             var accessResultCollection = data.accessResultCollection;
 
-            _.forEach(socketsSession, function (socketSession, sessionId) {
+            forEach(socketsSession, function (socketSession, sessionId) {
                 if (socketSession && sessionId != socket.id) {
 
                     var accessData = _.findWhere(accessResultCollection, {
@@ -199,13 +200,13 @@ module.exports = function (io, dbProvider, developmentMode) {
             });
         });
 
-        onCommand('update_present_users', function (data) {
+        on('update_present_users', function (data) {
             var userId = data.userId;
             var workspaceId = data.workspaceId;
 
             var presentUsers = [];
 
-            _.forEach(socketsSession, function (socketSession, sessionId) {
+            forEach(socketsSession, function (socketSession, sessionId) {
                 if (socketSession && sessionId != socket.id) {
                     if (socketSession.workspaceId == workspaceId) {
                         var userId = socketSession.userId;
@@ -214,12 +215,12 @@ module.exports = function (io, dbProvider, developmentMode) {
                 }
             });
 
-            sendCommand('update_present_users', {
+            emit('update_present_users', {
                 presentUsers: presentUsers
             });
         });
 
-        onCommand('disconnect', function () {
+        on('disconnect', function () {
             var session = getSession();
             if (session) {
                 var userId = session.userId;
