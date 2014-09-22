@@ -177,38 +177,23 @@ module.exports = function (io, dbProvider, developmentMode) {
             var userId = data.userId;
             var workspaceId = data.workspaceId;
             var parentWorkspaceId = data.parentWorkspaceId || '@root';
-            var collection = data.collection;
-
-            function isAccessDenied(permissions) {
-                return !permissions.readOnly && !permissions.collectionManager && !permissions.accessManager;
-            }
+            var accessResultCollection = data.accessResultCollection;
 
             _.forEach(socketsSession, function (socketSession, sessionId) {
                 if (socketSession && sessionId != socket.id) {
 
-                    var collectionItem = _.findWhere(collection, {
-                        'userId': socketSession.userId
+                    var accessData = _.findWhere(accessResultCollection, {
+                        userId: socketSession.userId
                     });
 
-                    if (collectionItem) {
-                        var permissions = collectionItem.permissions;
+                    if (accessData) {
 
-                        if (isAccessDenied(permissions)) {
-                            socketSession.sendCommand('permissions_changed', {
-                                userId: userId,
-                                workspaceId: workspaceId,
-                                parentWorkspaceId: parentWorkspaceId,
-                                access: false
-                            });
-                        } else {
-                            socketSession.sendCommand('permissions_changed', {
-                                userId: userId,
-                                workspaceId: workspaceId,
-                                parentWorkspaceId: parentWorkspaceId,
-                                access: true,
-                                permissions: permissions
-                            });
-                        }
+                        socketSession.sendCommand('permissions_changed', {
+                            userId: userId,
+                            workspaceId: workspaceId,
+                            parentWorkspaceId: parentWorkspaceId,
+                            accessData: accessData
+                        });
                     }
                 }
             });

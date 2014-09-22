@@ -63,12 +63,12 @@ angular.module('application')
                             itemIds: itemIds
                         });
                     },
-                    permissionsChanged: function (collection, workspaceId, parentWorkspaceId) {
+                    permissionsChanged: function (accessResultCollection, workspaceId, parentWorkspaceId) {
                         emit('permissions_changed', {
                             userId: userId,
                             workspaceId: workspaceId,
                             parentWorkspaceId: parentWorkspaceId,
-                            collection: collection
+                            accessResultCollection: accessResultCollection
                         });
                     },
                     updatePresentUsers: function (workspaceId) {

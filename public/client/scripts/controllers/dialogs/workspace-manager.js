@@ -26,9 +26,13 @@ angular.module('application')
                 pageNumber: 1
             };
 
-            var onUpdate = options.onUpdate || angular.noop;
-            var onRemove = options.onRemove || angular.noop;
-            var onUpdatePermissions = options.onUpdatePermissions || angular.noop;
+            var defaultCloseCallback = function (closeCallback) {
+                closeCallback();
+            };
+
+            var onUpdateWorkspace = options.onUpdateWorkspace || defaultCloseCallback;
+            var onRemoveWorkspace = options.onRemoveWorkspace || defaultCloseCallback;
+            var onUpdateAccess = options.onUpdateAccess || defaultCloseCallback;
 
             var tabs = [
                 {
@@ -76,7 +80,7 @@ angular.module('application')
                         name = name.trim();
 
                         if (name.length > 0 && name != defaultGenericModel.workspaceName) {
-                            onUpdate(name, function () {
+                            onUpdateWorkspace(name, function () {
                                 $modalInstance.close();
                             });
                         }
@@ -97,7 +101,7 @@ angular.module('application')
                         });
 
                         if (collection.length > 0) {
-                            onUpdatePermissions(collection, function () {
+                            onUpdateAccess(collection, function () {
                                 $modalInstance.close();
                             });
                         }
@@ -151,7 +155,7 @@ angular.module('application')
                     title: 'Remove workspace',
                     message: 'Do you want remove workspace <b>{{ workspaceName }}</b>?',
                     onAccept: function (closeCallback) {
-                        onRemove(function () {
+                        onRemoveWorkspace(function () {
                             closeCallback();
                             $modalInstance.close();
                         });

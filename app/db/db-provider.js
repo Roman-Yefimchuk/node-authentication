@@ -295,7 +295,7 @@ module.exports = function (db, developmentMode) {
                 }
             }).then(function (results) {
                 var parentWorkspaceId = results[0].parentWorkspaceId;
-                callback(parentWorkspaceId);
+                callback(parentWorkspaceId, workspaceId);
             }).catch(function (error) {
                 throw error;
             });
@@ -1003,6 +1003,7 @@ module.exports = function (db, developmentMode) {
                             result.push({
                                 id: permittedWorkspace.workspaceId,
                                 name: workspace.name,
+                                creationDate: workspace.creationDate,
                                 childrenCount: childrenCount,
                                 isAvailable: false
                             });
@@ -1014,6 +1015,11 @@ module.exports = function (db, developmentMode) {
                     throw error;
                 });
             }, function () {
+
+                result = _.sortBy(result, function (item) {
+                    return item.creationDate;
+                });
+
                 callback(result);
             });
         }).catch(function (error) {
@@ -1159,7 +1165,7 @@ module.exports = function (db, developmentMode) {
 
     function setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, callback) {
 
-        var result = [];
+        var accessResultCollection = [];
 
         asyncEach(collection, function (collectionItem, index, next) {
 
@@ -1204,9 +1210,10 @@ module.exports = function (db, developmentMode) {
                             }
                         }).then(function (total) {
 
-                            result.push({
+                            accessResultCollection.push({
                                 userId: userId,
-                                status: 'updated'
+                                permissions: permissions,
+                                status: 'access_updated'
                             });
 
                             next();
@@ -1241,9 +1248,14 @@ module.exports = function (db, developmentMode) {
 
                             addPermittedWorkspace(ROOT_ID, function () {
 
-                                result.push({
+                                accessResultCollection.push({
                                     userId: userId,
-                                    status: 'created'
+                                    permissions: permissions,
+                                    hierarchy: [
+                                        ROOT_ID,
+                                        workspaceId
+                                    ],
+                                    status: 'access_provided'
                                 });
 
                                 next();
@@ -1267,7 +1279,6 @@ module.exports = function (db, developmentMode) {
                                             isPermittedWorkspaceExist(id, function (isExist) {
 
                                                 if (isExist) {
-
                                                     next();
                                                 } else {
 
@@ -1298,6 +1309,14 @@ module.exports = function (db, developmentMode) {
                                         }
                                     }
                                 }, function () {
+
+                                    accessResultCollection.push({
+                                        userId: userId,
+                                        permissions: permissions,
+                                        hierarchy: hierarchy,
+                                        status: 'access_provided'
+                                    });
+
                                     next();
                                 });
                             });
@@ -1318,15 +1337,15 @@ module.exports = function (db, developmentMode) {
 
                     var workspaceId = results[0].workspaceId;
 
-                    function removeDisabledParent(workspaceId, parentWorkspaceId, callback) {
-                        if (parentWorkspaceId != ROOT_ID) {
+                    function closeAccessForDisabledParent(workspaceId, nextWorkspaceId, callback) {
+                        if (nextWorkspaceId != ROOT_ID) {
                             db.query("" +
                                 "SELECT COUNT(*) AS count " +
                                 "FROM PermittedWorkspace " +
                                 "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
                                 params: {
                                     userId: userId,
-                                    parentWorkspaceId: parentWorkspaceId
+                                    parentWorkspaceId: nextWorkspaceId
                                 }
                             }).then(function (results) {
                                 if (results[0].count > 0) {
@@ -1338,11 +1357,11 @@ module.exports = function (db, developmentMode) {
                                         "WHERE userId = :userId AND workspaceId = :workspaceId", {
                                         params: {
                                             userId: userId,
-                                            workspaceId: parentWorkspaceId
+                                            workspaceId: nextWorkspaceId
                                         }
                                     }).then(function (results) {
                                         var parentWorkspaceId = results[0].parentWorkspaceId;
-                                        removeDisabledParent(workspaceId, parentWorkspaceId, callback);
+                                        closeAccessForDisabledParent(nextWorkspaceId, parentWorkspaceId, callback);
                                     }).catch(function (error) {
                                         throw error;
                                     });
@@ -1380,12 +1399,12 @@ module.exports = function (db, developmentMode) {
                             });
                         } else {
                             getParentWorkspaceId(workspaceId, function (parentWorkspaceId) {
-                                removeDisabledParent(workspaceId, parentWorkspaceId, function (workspaceId) {
+                                closeAccessForDisabledParent(workspaceId, parentWorkspaceId, function (topLevelWorkspaceId) {
 
-                                    result.push({
+                                    accessResultCollection.push({
                                         userId: userId,
-                                        status: 'removed',
-                                        workspaceId: workspaceId
+                                        status: 'access_closed',
+                                        topLevelWorkspaceId: topLevelWorkspaceId
                                     });
 
                                     next();
@@ -1400,7 +1419,7 @@ module.exports = function (db, developmentMode) {
                 });
             }
         }, function () {
-            callback(result);
+            callback(accessResultCollection);
         });
     }
 

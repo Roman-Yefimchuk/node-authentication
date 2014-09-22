@@ -85,7 +85,7 @@ angular.module('application')
                 $scope.currentViewMode = viewMode;
             }
 
-            function updatePermissions(userId, workspaceId, parentWorkspaceId, permissions) {
+            function provideAccessForWorkspace(userId, workspaceId, parentWorkspaceId, permissions, hierarchy) {
                 permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
 
                     if (parentWorkspaceId == ROOT_ID) {
@@ -146,10 +146,31 @@ angular.module('application')
                 });
             }
 
-            function closeAccess(userId, workspaceId, parentWorkspaceId) {
+            function updateAccessForWorkspace(userId, workspaceId, parentWorkspaceId, permissions) {
                 permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
 
                     searchNode(workspaceId, function (node) {
+                        if (node) {
+                            var workspace = node.getWorkspace();
+                            workspace.permissions = permissions;
+
+                            if (getWorkspaceId() == workspaceId) {
+                                $scope.permissions = permissions;
+                            }
+                        }
+                    });
+
+                    return notificationsTranslator.format('user_updated_permissions', {
+                        userName: userName,
+                        workspaceName: workspaceName
+                    });
+                });
+            }
+
+            function closeAccessForWorkspace(userId, workspaceId, parentWorkspaceId, topLevelWorkspaceId) {
+                permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
+
+                    searchNode(topLevelWorkspaceId, function (node) {
                         if (node) {
 
                             node.remove();
@@ -366,7 +387,7 @@ angular.module('application')
                     userId: $scope.user['userId'],
                     defaultWorkspaceId: $scope.user['defaultWorkspaceId'],
                     workspace: workspace,
-                    onUpdate: function (name, closeCallback) {
+                    onUpdateWorkspace: function (name, closeCallback) {
 
                         var workspaceId = getWorkspaceId();
                         var data = {
@@ -383,7 +404,7 @@ angular.module('application')
                             closeCallback();
                         });
                     },
-                    onRemove: function (closeCallback) {
+                    onRemoveWorkspace: function (closeCallback) {
 
                         var workspaceId = getWorkspaceId();
 
@@ -397,13 +418,13 @@ angular.module('application')
                             closeCallback();
                         });
                     },
-                    onUpdatePermissions: function (collection, closeCallback) {
+                    onUpdateAccess: function (collection, closeCallback) {
                         var workspaceId = getWorkspaceId();
                         var parentWorkspaceId = getParentWorkspaceId();
 
-                        apiService.setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function () {
+                        apiService.setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function (accessResultCollection) {
                             var socketConnection = $scope.socketConnection;
-                            socketConnection.permissionsChanged(collection, workspaceId, parentWorkspaceId);
+                            socketConnection.permissionsChanged(accessResultCollection, workspaceId, parentWorkspaceId);
 
                             closeCallback();
                         });
@@ -662,12 +683,28 @@ angular.module('application')
                     var userId = data['userId'];
                     var workspaceId = data['workspaceId'];
                     var parentWorkspaceId = data['parentWorkspaceId'];
+                    var accessData = data['accessData'];
 
-                    if (data['access']) {
-                        var permissions = data['permissions'];
-                        updatePermissions(userId, workspaceId, parentWorkspaceId, permissions);
-                    } else {
-                        closeAccess(userId, workspaceId, parentWorkspaceId);
+                    switch (accessData['status']) {
+                        case 'access_provided':
+                        {
+                            var permissions = accessData['permissions'];
+                            var hierarchy = accessData['hierarchy'];
+                            provideAccessForWorkspace(userId, workspaceId, parentWorkspaceId, permissions, hierarchy);
+                            break;
+                        }
+                        case 'access_updated':
+                        {
+                            var permissions = accessData['permissions'];
+                            updateAccessForWorkspace(userId, workspaceId, parentWorkspaceId, permissions);
+                            break
+                        }
+                        case 'access_closed':
+                        {
+                            var topLevelWorkspaceId = accessData['topLevelWorkspaceId'];
+                            closeAccessForWorkspace(userId, workspaceId, parentWorkspaceId, topLevelWorkspaceId);
+                            break;
+                        }
                     }
                 });
 
@@ -783,10 +820,6 @@ angular.module('application')
             $scope.onWorkspaceChanged = onWorkspaceChanged;
             $scope.onWorkspaceLoading = onWorkspaceLoading;
             $scope.setViewMode = setViewMode;
-            $scope.updatePermissions = updatePermissions;
-            $scope.closeAccess = closeAccess;
-            $scope.userJoined = userJoined;
-            $scope.userHasLeft = userHasLeft;
             $scope.canReadOnly = canReadOnly;
             $scope.canManageCollection = canManageCollection;
             $scope.canManageAccess = canManageAccess;

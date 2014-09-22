@@ -68,10 +68,10 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var parentWorkspaceId = request.body['parentWorkspaceId'];
         var collection = request.body['collection'];
 
-        dbProvider.setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function (result) {
+        dbProvider.setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function (accessResultCollection) {
             resultCallback({
                 message: 'Updated ' + collection.length + ' permission(s)',
-                data: result
+                data: accessResultCollection
             });
         });
     });

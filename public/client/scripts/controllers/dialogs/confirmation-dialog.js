@@ -16,27 +16,23 @@ angular.module('application')
             $scope.title = $interpolate(options.title)(context);
             $scope.message = $interpolate(options.message)(context);
 
-            var onAccept = options.onAccept || angular.noop;
-            var onReject = options.onReject || angular.noop;
+            var defaultCloseCallback = function (closeCallback) {
+                closeCallback();
+            };
+
+            var onAccept = options.onAccept || defaultCloseCallback;
+            var onReject = options.onReject || defaultCloseCallback;
 
             function yes() {
-                if (onAccept) {
-                    onAccept(function () {
-                        $modalInstance.close();
-                    });
-                } else {
+                onAccept(function () {
                     $modalInstance.close();
-                }
+                });
             }
 
             function no() {
-                if (onReject) {
-                    onReject(function () {
-                        $modalInstance.close();
-                    });
-                } else {
+                onReject(function () {
                     $modalInstance.close();
-                }
+                });
             }
 
             $scope.yes = yes;

@@ -88,7 +88,7 @@ angular.module('application')
                         "user_updated_workspace": "Пользователь @{userName} обновил рабочее пространство",
                         "user_updated_permissions": "Пользователь @{userName} обновил ваши полномочия для рабочего пространства @{workspaceName}",
                         "user_closed_access": "Пользователь @{userName} закрыл доступ для вас к рабочей области @{workspaceName}",
-                        "user_added_item": "Пользователь @{userName} добачил запись",
+                        "user_added_item": "Пользователь @{userName} добавил запись",
                         "user_updated_items": "Пользователь @{userName} обновил @{count} запись(ей)",
                         "user_removed_items": "Пользователь @{userName} удалил @{count} запись(ей)",
                         "user_disconnected": "Пользователь @{userName} отключился",
