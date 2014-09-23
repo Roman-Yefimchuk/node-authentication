@@ -64,7 +64,7 @@
                 </div>
                 <div ng-switch-when="false">
 
-                    <div ng-switch="todos.length > 0">
+                    <div ng-switch="todos.length > 0 && (todos | filter:statusFilter).length > 0">
                         <div ng-switch-when="true">
 
                             <ul class="task-list">
@@ -116,9 +116,7 @@
                             <div class="text-center">
                                 <div class="row clearfix">
                                     <div class="col-md-12 column">
-                                        <b>
-                                            <span l10n key="home.no_records"></span>
-                                        </b>
+                                        <span l10n key="home.no_records"></span>
                                     </div>
                                 </div>
                             </div>

@@ -106,3 +106,28 @@
     padding-left: 15px;
     padding-right: 15px;
 }
+
+.tasks-widget .task-list li span[priority] {
+    padding: 5px;
+}
+
+.item-priority-low {
+    color: #ffffff;
+    background-color: #5cb85c;
+    border-color: #4cae4c;
+    border-radius: 3px;
+}
+
+.item-priority-medium {
+    color: #ffffff;
+    background-color: #f0ad4e;
+    border-color: #eea236;
+    border-radius: 3px;
+}
+
+.item-priority-high {
+    color: #ffffff;
+    background-color: #d9534f;
+    border-color: #d43f3a;
+    border-radius: 3px;
+}
