@@ -97,7 +97,7 @@ angular.module('application')
                         "you_lost_connection": "Вы потеряли связь"
                     },
                     "info_widget": {
-                        "review": "Оставить отзыв",
+                        "feedback": "Обратная связь",
                         "copyright": "Роман Ефимчук, iKrok, 2014"
                     }
                 },
@@ -115,6 +115,17 @@ angular.module('application')
                         "user_name": "Имя пользователя:",
                         "registered_date": "Дата регистрации:",
                         "ok": "Хорошо"
+                    },
+                    "feedback": {
+                        "title": "Обратная связь",
+                        "send": "Отправить",
+                        "cancel": "Отменить",
+                        "subject": "Тема",
+                        "sender_address": "Адрес отправителя",
+                        "message": "Сообщение",
+                        "subject_placeholder": "Введите тему",
+                        "sender_address_placeholder": "Введите адрес отправителя",
+                        "message_placeholder": "Введите сообщение"
                     }
                 },
                 "http_client_errors": {

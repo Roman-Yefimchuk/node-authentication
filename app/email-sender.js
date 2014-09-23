@@ -7,7 +7,7 @@ var nodeMailer = require("nodemailer");
 var smtpTransport = require('nodemailer-smtp-transport');
 
 module.exports = {
-    sendEmail: function (subject, sender, message, callback) {
+    sendEmail: function (subject, senderAddress, message, callback) {
 
         var transporter = nodeMailer.createTransport(smtpTransport({
             service: "Yandex",
@@ -20,8 +20,8 @@ module.exports = {
         transporter.sendMail({
             from: "animland@yandex.ru",
             to: "romane@ikrok.net",
-            subject: "Subject",
-            text: "Text"
+            subject: subject,
+            html: "<b>From: </b>" + senderAddress + "<p>" + message
         }, callback);
     }
 };

@@ -1,0 +1,68 @@
+<div>
+    <div class="modal-header">
+        <span class="close" ng-click="cancel()">×</span>
+        <h4 style="margin-bottom: 0;margin-top: 0;">
+            <i class="fa fa-comment"></i>
+            &nbsp;
+            <span l10n key="dialogs.feedback.title"></span>
+        </h4>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row clearfix">
+            <div class="form-group col-md-12 column">
+                <label>
+                    <span l10n key="dialogs.feedback.subject"></span>
+                </label>
+                <div class="input-group" ng-class="{ 'has-error' : !isSubjectValid() }">
+                    <div class="input-group-addon">
+                        <i class="fa fa-book"></i>
+                    </div>
+                    <input maxlength="50" class="form-control" type="text" required
+                           l10n="placeholder" placeholder-key="dialogs.feedback.subject_placeholder"
+                           ng-model="model.subject">
+                </div>
+            </div>
+            <div class="form-group col-md-12 column">
+                <label>
+                    <span l10n key="dialogs.feedback.sender_address"></span>
+                </label>
+                <div class="input-group" ng-class="{ 'has-error' : !isSenderAddressValid() }">
+                    <div class="input-group-addon">
+                        <i class="fa fa-at"></i>
+                    </div>
+                    <input maxlength="50" class="form-control" type="text" required
+                           l10n="placeholder" placeholder-key="dialogs.feedback.sender_address_placeholder"
+                           ng-model="model.senderAddress">
+                </div>
+            </div>
+            <div class="form-group col-md-12 column" style="margin-bottom: 0">
+                <label>
+                    <span l10n key="dialogs.feedback.message"></span>
+                </label>
+                <div ng-class="{ 'has-error' : !isMessageValid() }">
+                    <textarea rows="10" noresize class="form-control" required style="resize: none"
+                              l10n="placeholder" placeholder-key="dialogs.feedback.message_placeholder"
+                              ng-model="model.message">
+                    </textarea>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-footer ng-scope" style="margin-top: 0">
+        <span class="btn btn-warning btn-sm" ng-click="cancel()">
+            <i class="fa fa-share"></i>
+            &nbsp;
+            <span l10n key="dialogs.feedback.cancel"></span>
+        </span>
+        <span class="btn btn-success btn-sm" ng-click="send()"
+              ng-disabled="!isFormEnabled()">
+            <i class="fa fa-paper-plane"></i>
+            &nbsp;
+            <span l10n key="dialogs.feedback.send"></span>
+        </span>
+    </div>
+</div>

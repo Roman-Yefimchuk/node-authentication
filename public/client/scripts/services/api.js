@@ -9,6 +9,15 @@ angular.module('application')
         function (httpClientService) {
 
             return {
+                feedback: function (feedbackModel, handler) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        data: {
+                            feedbackModel: feedbackModel
+                        },
+                        url: '/api/feedback'
+                    }, handler);
+                },
                 login: function (data, handler) {
                     httpClientService.sendRequest({
                         method: 'POST',

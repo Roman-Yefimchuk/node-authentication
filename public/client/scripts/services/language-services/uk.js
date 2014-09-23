@@ -97,7 +97,7 @@ angular.module('application')
                         "you_lost_connection": "Ви втратили зв'язок"
                     },
                     "info_widget": {
-                        "review": "Залишити відгук",
+                        "feedback": "Зворотній зв'язок",
                         "copyright": "Роман Єфімчук, iKrok, 2014"
                     }
                 },
@@ -115,6 +115,17 @@ angular.module('application')
                         "user_name": "Ім'я користувача:",
                         "registered_date": "Дата реєстрації:",
                         "ok": "Добре"
+                    },
+                    "feedback": {
+                        "title": "Зворотній зв'язок",
+                        "send": "Відправити",
+                        "cancel": "Скасувати",
+                        "subject": "Тема",
+                        "sender_address": "Адреса відправника",
+                        "message": "Повідомлення",
+                        "subject_placeholder": "Введіть тема",
+                        "sender_address_placeholder": "Введіть адресу відправника",
+                        "message_placeholder": "Введіть повідомлення"
                     }
                 },
                 "http_client_errors": {

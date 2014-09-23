@@ -2,7 +2,7 @@
 
 angular.module('application')
 
-    .controller('ReviewDialogController', [
+    .controller('FeedbackDialogController', [
 
         '$scope',
         '$modalInstance',
@@ -11,13 +11,13 @@ angular.module('application')
 
         function ($scope, $modalInstance, options, EMAIL_PATTERN) {
 
-            var onReviewSent = options.onReviewSent || function (closeCallback) {
+            var onFeedbackSent = options.onFeedbackSent || function (closeCallback) {
                 closeCallback();
             };
 
             var model = {
                 subject: "",
-                sender: "",
+                senderAddress: "",
                 message: ""
             };
 
@@ -25,8 +25,8 @@ angular.module('application')
                 return (model.subject || '').length > 0;
             }
 
-            function isSenderValid() {
-                var sender = (model['sender'] || '').toLowerCase();
+            function isSenderAddressValid() {
+                var sender = (model.senderAddress || '').toLowerCase();
                 return EMAIL_PATTERN.test(sender);
             }
 
@@ -35,11 +35,11 @@ angular.module('application')
             }
 
             function isFormEnabled() {
-                return isSubjectValid() && isSenderValid() && isMessageValid();
+                return isSubjectValid() && isSenderAddressValid() && isMessageValid();
             }
 
             function send() {
-                onReviewSent(model, function () {
+                onFeedbackSent(model, function () {
                     $modalInstance.close();
                 });
             }
@@ -51,7 +51,7 @@ angular.module('application')
             $scope.model = model;
 
             $scope.isSubjectValid = isSubjectValid;
-            $scope.isSenderValid = isSenderValid;
+            $scope.isSenderAddressValid = isSenderAddressValid;
             $scope.isMessageValid = isMessageValid;
             $scope.isFormEnabled = isFormEnabled;
             $scope.send = send;

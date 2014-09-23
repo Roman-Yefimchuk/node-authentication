@@ -3,6 +3,7 @@
 module.exports = function (app, dbProvider, serviceProvider) {
 
     var Exception = require('../app/exception');
+    var emailSender = require('../app/email-sender');
 
     function getParam(paramName, request) {
         var params = request.params;
@@ -255,6 +256,18 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var todoIds = request.body['todoIds'];
         dbProvider.removeItems(workspaceId, userId, todoIds, function () {
             resultCallback('Removed ' + todoIds.length + ' item(s)');
+        });
+    });
+
+    serviceProvider.post('/api/feedback', function (request, response, resultCallback) {
+        var feedbackModel = request.body['feedbackModel'];
+
+        var subject = feedbackModel.subject;
+        var senderAddress = feedbackModel.senderAddress;
+        var message = feedbackModel.message;
+
+        emailSender.sendEmail(subject, senderAddress, message, function (error, response) {
+            resultCallback('OK');
         });
     });
 };

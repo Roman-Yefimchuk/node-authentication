@@ -97,7 +97,7 @@ angular.module('application')
                         "you_lost_connection": "You lost connection"
                     },
                     "info_widget": {
-                        "review": "Write a review",
+                        "feedback": "Feedback",
                         "copyright": "Roman Yefimchuk, iKrok, 2014"
                     }
                 },
@@ -116,13 +116,16 @@ angular.module('application')
                         "registered_date": "Registered date:",
                         "ok": "Ok"
                     },
-                    "review": {
-                        "title": "Write a review",
-                        "send_review": "Send review",
+                    "feedback": {
+                        "title": "Feedback",
+                        "send": "Send",
                         "cancel": "Cancel",
-                        "subject_placeholder": "Subject",
-                        "sender_placeholder": "Sender",
-                        "message_placeholder": "Your message for me..."
+                        "subject": "Subject",
+                        "sender_address": "Sender address",
+                        "message": "Message",
+                        "subject_placeholder": "Enter subject",
+                        "sender_address_placeholder": "Enter sender address",
+                        "message_placeholder": "Enter message"
                     }
                 },
                 "http_client_errors": {

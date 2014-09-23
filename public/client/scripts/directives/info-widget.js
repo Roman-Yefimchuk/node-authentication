@@ -5,21 +5,29 @@ angular.module('application')
     .directive('infoWidget', [
 
         'dialogsService',
+        'apiService',
 
-        function (dialogsService) {
+        function (dialogsService, apiService) {
             return {
                 templateUrl: '/client/views/directives/info-widget-view.html',
                 controller: ['$scope', function ($scope) {
 
-                    function openReviewDialog() {
-                        dialogsService.showReview({
-                            onReviewSent: function (model, closeCallback) {
-                                closeCallback();
+                    function openFeedbackDialog() {
+                        dialogsService.showFeedback({
+                            onFeedbackSent: function (feedbackModel, closeCallback) {
+                                apiService.feedback(feedbackModel, {
+                                    success: function () {
+                                        closeCallback();
+                                    },
+                                    failure: function () {
+                                        closeCallback();
+                                    }
+                                });
                             }
                         });
                     }
 
-                    $scope.openReviewDialog = openReviewDialog;
+                    $scope.openFeedbackDialog = openFeedbackDialog;
                 }]
             };
         }

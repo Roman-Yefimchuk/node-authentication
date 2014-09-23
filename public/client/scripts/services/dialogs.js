@@ -81,10 +81,10 @@ angular.module('application')
                         }
                     });
                 },
-                showReview: function (options) {
+                showFeedback: function (options) {
                     return open({
-                        templateUrl: '/client/views/controllers/dialogs/review-view.html',
-                        controller: 'ReviewDialogController',
+                        templateUrl: '/client/views/controllers/dialogs/feedback-view.html',
+                        controller: 'FeedbackDialogController',
                         resolve: {
                             options: function () {
                                 return options;
