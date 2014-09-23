@@ -55,9 +55,9 @@ CREATE PROPERTY PermittedWorkspace.workspaceId STRING
 CREATE PROPERTY PermittedWorkspace.parentWorkspaceId STRING
 CREATE PROPERTY PermittedWorkspace.isOwn BOOLEAN
 CREATE PROPERTY PermittedWorkspace.isDefault BOOLEAN
-CREATE PROPERTY PermittedWorkspace.readOnly BOOLEAN
-CREATE PROPERTY PermittedWorkspace.collectionManager BOOLEAN
-CREATE PROPERTY PermittedWorkspace.accessManager BOOLEAN
+CREATE PROPERTY PermittedWorkspace.reader BOOLEAN
+CREATE PROPERTY PermittedWorkspace.writer BOOLEAN
+CREATE PROPERTY PermittedWorkspace.admin BOOLEAN
 CREATE PROPERTY PermittedWorkspace.isAvailable BOOLEAN
 
 INSERT INTO Organization (name, creatorId, creationDate) VALUES ('system', '@system', date());

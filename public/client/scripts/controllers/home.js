@@ -235,20 +235,20 @@ angular.module('application')
 
             function canReadOnly() {
                 var permissions = $scope.permissions;
-                if (permissions.readOnly && !permissions.collectionManager) {
+                if (permissions.reader && !permissions.writer) {
                     return true;
                 }
-                return !permissions.collectionManager;
+                return !permissions.writer;
             }
 
             function canManageCollection() {
                 var permissions = $scope.permissions;
-                return permissions.collectionManager;
+                return permissions.writer;
             }
 
             function canManageAccess() {
                 var permissions = $scope.permissions;
-                return permissions.accessManager;
+                return permissions.admin;
             }
 
             function addedItem(userId, item) {
@@ -762,9 +762,9 @@ angular.module('application')
                 isOpen: false
             };
             $scope.permissions = {
-                readOnly: false,
-                collectionManager: false,
-                accessManager: false
+                reader: false,
+                writer: false,
+                admin: false
             };
             $scope.viewModes = [
                 {

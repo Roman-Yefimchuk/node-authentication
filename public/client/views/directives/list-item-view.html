@@ -28,32 +28,32 @@
 
         <div class="col-md-4 column">
             <div>
-                <span class="pull-left" btn-checkbox ng-model="permissions.readOnly">
+                <span class="pull-left" btn-checkbox ng-model="permissions.reader">
                     <i class="fa"
-                       ng-class="{ 'fa-square-o' : !permissions.readOnly, 'fa-check-square-o' : permissions.readOnly }">
+                       ng-class="{ 'fa-square-o' : !permissions.reader, 'fa-check-square-o' : permissions.reader }">
                     </i>
                     &nbsp;
-                    Read only
+                    Reader
                 </span>
 
                 <br>
 
-                <span class="pull-left" btn-checkbox ng-model="permissions.collectionManager">
+                <span class="pull-left" btn-checkbox ng-model="permissions.writer">
                     <i class="fa"
-                       ng-class="{ 'fa-square-o' : !permissions.collectionManager, 'fa-check-square-o' : permissions.collectionManager }">
+                       ng-class="{ 'fa-square-o' : !permissions.writer, 'fa-check-square-o' : permissions.writer }">
                     </i>
                     &nbsp;
-                    Collection manager
+                    Writer
                 </span>
 
                 <br>
 
-                <span class="pull-left" btn-checkbox ng-model="permissions.accessManager">
+                <span class="pull-left" btn-checkbox ng-model="permissions.admin">
                     <i class="fa"
-                       ng-class="{ 'fa-square-o' : !permissions.accessManager, 'fa-check-square-o' : permissions.accessManager }">
+                       ng-class="{ 'fa-square-o' : !permissions.admin, 'fa-check-square-o' : permissions.admin }">
                     </i>
                     &nbsp;
-                    Access manager
+                    Admin
                 </span>
             </div>
         </div>

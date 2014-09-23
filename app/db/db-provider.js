@@ -39,7 +39,7 @@ module.exports = function (db, developmentMode) {
 
     function getUserPermissionsForWorkspace(userId, workspaceId, callback) {
         db.query("" +
-            "SELECT readOnly, collectionManager, accessManager " +
+            "SELECT reader, writer, admin " +
             "FROM PermittedWorkspace " +
             "WHERE userId = :userId AND workspaceId = :workspaceId", {
             params: {
@@ -50,15 +50,15 @@ module.exports = function (db, developmentMode) {
             if (results.length > 0) {
                 var permittedWorkspace = results[0];
                 callback({
-                    readOnly: permittedWorkspace.readOnly || false,
-                    collectionManager: permittedWorkspace.collectionManager || false,
-                    accessManager: permittedWorkspace.accessManager || false
+                    reader: permittedWorkspace.reader || false,
+                    writer: permittedWorkspace.writer || false,
+                    admin: permittedWorkspace.admin || false
                 });
             } else {
                 callback({
-                    readOnly: false,
-                    collectionManager: false,
-                    accessManager: false
+                    reader: false,
+                    writer: false,
+                    admin: false
                 });
             }
         }).catch(function (error) {
@@ -251,16 +251,16 @@ module.exports = function (db, developmentMode) {
 
                 addOwnWorkspace(creatorId, workspaceId, function () {
                     db.query("" +
-                        "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, readOnly, collectionManager, accessManager, parentWorkspaceId, isAvailable) " +
-                        "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :readOnly, :collectionManager, :accessManager, :parentWorkspaceId, :isAvailable)", {
+                        "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, reader, writer, admin, parentWorkspaceId, isAvailable) " +
+                        "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :reader, :writer, :admin, :parentWorkspaceId, :isAvailable)", {
                         params: {
                             userId: creatorId,
                             workspaceId: workspaceId,
                             isOwn: true,
                             isDefault: isDefault,
-                            readOnly: true,
-                            collectionManager: true,
-                            accessManager: true,
+                            reader: true,
+                            writer: true,
+                            admin: true,
                             parentWorkspaceId: parentWorkspaceId || ROOT_ID,
                             isAvailable: true
                         }
@@ -990,9 +990,9 @@ module.exports = function (db, developmentMode) {
                                 creationDate: workspace.creationDate,
                                 childrenCount: childrenCount,
                                 permissions: {
-                                    readOnly: permittedWorkspace.readOnly,
-                                    collectionManager: permittedWorkspace.collectionManager,
-                                    accessManager: permittedWorkspace.accessManager
+                                    reader: permittedWorkspace.reader,
+                                    writer: permittedWorkspace.writer,
+                                    admin: permittedWorkspace.admin
                                 },
                                 isAvailable: true
                             });
@@ -1155,7 +1155,7 @@ module.exports = function (db, developmentMode) {
 
     function isAccessGrantedForWorkspace(userId, workspaceId, callback) {
         getUserPermissionsForWorkspace(userId, workspaceId, function (permissions) {
-            if (permissions.readOnly || permissions.collectionManager || permissions.accessManager) {
+            if (permissions.reader || permissions.writer || permissions.admin) {
                 callback(true);
             } else {
                 callback(false);
@@ -1171,7 +1171,7 @@ module.exports = function (db, developmentMode) {
 
             var userId = collectionItem.userId;
             var permissions = collectionItem.permissions;
-            var isAccessGranted = permissions.readOnly || permissions.collectionManager || permissions.accessManager;
+            var isAccessGranted = permissions.reader || permissions.writer || permissions.admin;
 
             if (isAccessGranted) {
 
@@ -1198,12 +1198,12 @@ module.exports = function (db, developmentMode) {
 
                         db.query("" +
                             "UPDATE PermittedWorkspace " +
-                            "SET readOnly = :readOnly, collectionManager = :collectionManager, accessManager = :accessManager, isAvailable = :isAvailable " +
+                            "SET reader = :reader, writer = :writer, admin = :admin, isAvailable = :isAvailable " +
                             "WHERE userId = :userId AND workspaceId = :workspaceId", {
                             params: {
-                                readOnly: permissions.readOnly,
-                                collectionManager: permissions.collectionManager,
-                                accessManager: permissions.accessManager,
+                                reader: permissions.reader,
+                                writer: permissions.writer,
+                                admin: permissions.admin,
                                 isAvailable: true,
                                 userId: userId,
                                 workspaceId: workspaceId
@@ -1224,16 +1224,16 @@ module.exports = function (db, developmentMode) {
 
                         var addPermittedWorkspace = function (parentWorkspaceId, callback) {
                             db.query("" +
-                                "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, readOnly, collectionManager, accessManager, parentWorkspaceId, isAvailable) " +
-                                "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :readOnly, :collectionManager, :accessManager, :parentWorkspaceId, :isAvailable)", {
+                                "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, reader, writer, admin, parentWorkspaceId, isAvailable) " +
+                                "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :reader, :writer, :admin, :parentWorkspaceId, :isAvailable)", {
                                 params: {
                                     userId: userId,
                                     workspaceId: workspaceId,
                                     isOwn: false,
                                     isDefault: false,
-                                    readOnly: permissions.readOnly,
-                                    collectionManager: permissions.collectionManager,
-                                    accessManager: permissions.accessManager,
+                                    reader: permissions.reader,
+                                    writer: permissions.writer,
+                                    admin: permissions.admin,
                                     parentWorkspaceId: parentWorkspaceId,
                                     isAvailable: true
                                 }
