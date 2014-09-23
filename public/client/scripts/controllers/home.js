@@ -741,13 +741,6 @@ angular.module('application')
                 });
             }
 
-            function getRecords() {
-                var completed = $scope.statusFilter['completed'];
-                return _.filter($scope.todos, function (todo) {
-                    return todo.completed == completed;
-                });
-            }
-
             $scope.treeModel = [];
             $scope.breadcrumb = [];
             $scope.errorMessage = null;
@@ -868,7 +861,6 @@ angular.module('application')
             $scope.showWorkspaceCreator = showWorkspaceCreator;
             $scope.showWorkspaceInfo = showWorkspaceInfo;
             $scope.logout = logout;
-            $scope.getRecords = getRecords;
 
             loaderService.showLoader();
 
