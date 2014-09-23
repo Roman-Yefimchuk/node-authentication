@@ -38,11 +38,11 @@ angular.module('application')
                             data: data
                         });
                     },
-                    removedWorkspace: function (workspaceId, removedWorkspaces) {
+                    removedWorkspace: function (workspaceId, result) {
                         emit('removed_workspace', {
                             userId: userId,
                             workspaceId: workspaceId,
-                            removedWorkspaces: removedWorkspaces
+                            result: result
                         });
                     },
                     addedItem: function (item) {

@@ -335,7 +335,8 @@ angular.module('application')
 
             function removeTodo(todo) {
                 apiService.remove(getWorkspaceId(), [todo.id], function () {
-                    $scope.todos.splice($scope.todos.indexOf(todo), 1);
+
+                    $scope.todos = _.without($scope.todos, todo);
 
                     var socketConnection = $scope.socketConnection;
                     socketConnection.removedItems([todo.id]);
@@ -431,12 +432,12 @@ angular.module('application')
 
                         var workspaceId = getWorkspaceId();
 
-                        apiService.removeWorkspace(workspaceId, function (removedWorkspaces) {
+                        apiService.removeWorkspace(workspaceId, function (result) {
                             var activeNode = $scope.activeNode;
                             activeNode.remove();
 
                             var socketConnection = $scope.socketConnection;
-                            socketConnection.removedWorkspace(workspaceId, removedWorkspaces);
+                            socketConnection.removedWorkspace(workspaceId, result);
 
                             closeCallback();
                         });
@@ -683,9 +684,23 @@ angular.module('application')
                 });
 
                 $scope.$on('socketsService:removedWorkspace', function (event, data) {
-                    searchNode(data['workspaceId'], function (node) {
+                    var topLevelWorkspaceId = data['topLevelWorkspaceId'];
+                    searchNode(topLevelWorkspaceId, function (node) {
+
                         if (node) {
-                            node.remove();
+
+                            var userId = data['userId'];
+                            var workspaceName = data['workspaceName'];
+
+                            changeNotification(userId, function (userName) {
+
+                                node.remove();
+
+                                return notificationsTranslator.format('user_removed_workspace', {
+                                    userName: userName,
+                                    workspaceName: workspaceName
+                                });
+                            });
                         }
                     });
                 });

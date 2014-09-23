@@ -85,7 +85,8 @@ angular.module('application')
                     "notifications": {
                         "greeting": "Hello, @{userName}!",
                         "workspace_was_changed": "Workspace was changed",
-                        "user_updated_workspace": "User @{userName} updated workspace",
+                        "user_updated_workspace": "User @{userName} updated workspace @{workspaceName}",
+                        "user_removed_workspace": "User @{userName} removed workspace @{workspaceName}",
                         "user_updated_permissions": "User @{userName} updated your permissions for workspace @{workspaceName}",
                         "user_closed_access": "User @{userName} closed access for you to workspace @{workspaceName}",
                         "user_added_item": "User @{userName} added item",

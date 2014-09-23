@@ -3,6 +3,11 @@
 module.exports = function (db, developmentMode) {
 
     var ROOT_ID = '@root';
+    var DEFAULT_PERMISSIONS = {
+        reader: false,
+        writer: false,
+        admin: false
+    };
 
     var _ = require('underscore');
 
@@ -11,6 +16,7 @@ module.exports = function (db, developmentMode) {
 
     var encodeBase64 = security.encodeBase64;
     var decodeBase64 = security.decodeBase64;
+    var forEach = _.forEach;
 
     function extractPropertyId(property) {
         if (property) {
@@ -55,11 +61,7 @@ module.exports = function (db, developmentMode) {
                     admin: permittedWorkspace.admin || false
                 });
             } else {
-                callback({
-                    reader: false,
-                    writer: false,
-                    admin: false
-                });
+                callback(DEFAULT_PERMISSIONS);
             }
         }).catch(function (error) {
             throw error;
@@ -121,6 +123,27 @@ module.exports = function (db, developmentMode) {
             if (results.length > 0) {
                 var permittedWorkspace = results[0];
                 callback(permittedWorkspace.isOwn);
+            } else {
+                callback(false);
+            }
+        }).catch(function (error) {
+            throw error;
+        });
+    }
+
+    function isWorkspaceAvailable(userId, workspaceId, callback) {
+        db.query("" +
+            "SELECT isAvailable " +
+            "FROM PermittedWorkspace " +
+            "WHERE userId = :userId AND workspaceId = :workspaceId", {
+            params: {
+                userId: userId,
+                workspaceId: workspaceId
+            }
+        }).then(function (results) {
+            if (results.length > 0) {
+                var permittedWorkspace = results[0];
+                callback(permittedWorkspace.isAvailable);
             } else {
                 callback(false);
             }
@@ -340,7 +363,7 @@ module.exports = function (db, developmentMode) {
         var mode = options && options.mode;
         var excludedKeys = options && options.excludedKeys;
 
-        _.forEach(data, function (value, key) {
+        forEach(data, function (value, key) {
             if (!_.contains(excludedKeys, key)) {
                 if (result.length > 0) {
                     result += ', ';
@@ -387,7 +410,7 @@ module.exports = function (db, developmentMode) {
                     var successCallback = callback.success;
                     var failureCallback = callback.failure;
 
-                    _.forEach([
+                    forEach([
                         'genericId',
                         'displayName',
                         'password',
@@ -421,7 +444,7 @@ module.exports = function (db, developmentMode) {
         var failureCallback = callback.failure;
 
         try {
-            _.forEach([
+            forEach([
                 'genericId',
                 'displayName',
                 'password',
@@ -536,7 +559,7 @@ module.exports = function (db, developmentMode) {
 
             var result = [];
 
-            _.forEach(items, function (item) {
+            forEach(items, function (item) {
                 result.push({
                     id: encodePropertyId(item),
                     creatorId: item.creatorId,
@@ -690,15 +713,6 @@ module.exports = function (db, developmentMode) {
 
     function removeWorkspace(userId, workspaceId, callback) {
 
-        var removedWorkspaces = [];
-
-        function pushWorkspace(workspace) {
-            removedWorkspaces.push({
-                id: encodePropertyId(workspace),
-                name: workspace.name
-            });
-        }
-
         function removeRecords(workspaceId, callback) {
             db.query("" +
                 "DELETE FROM Todo " +
@@ -713,7 +727,7 @@ module.exports = function (db, developmentMode) {
             });
         }
 
-        function removeChildren(stack) {
+        function removeChildren(stack, callback) {
             if (stack.length > 0) {
                 var parentWorkspaceId = stack.pop();
 
@@ -727,7 +741,6 @@ module.exports = function (db, developmentMode) {
                 }).then(function (results) {
 
                     asyncEach(results, function (workspace, index, next) {
-                        pushWorkspace(workspace);
 
                         var workspaceId = encodePropertyId(workspace);
                         stack.push(workspaceId);
@@ -744,7 +757,7 @@ module.exports = function (db, developmentMode) {
                             }
                         }).then(function (results) {
                             removeRecords(workspaceId, function () {
-                                removeChildren(stack);
+                                removeChildren(stack, callback);
                             });
                         }).catch(function (error) {
                             throw error;
@@ -754,37 +767,76 @@ module.exports = function (db, developmentMode) {
                     throw error;
                 });
             } else {
-                callback(removedWorkspaces);
+                callback();
             }
         }
 
+        function removeWorkspace(topLevelWorkspaceIdCollection) {
+            db.query("" +
+                "DELETE FROM Workspace " +
+                "RETURN BEFORE " +
+                "WHERE @rid = :id", {
+                params: {
+                    id: decodeId(workspaceId)
+                }
+            }).then(function (results) {
+
+                var workspace = results[0];
+                var workspaceId = encodePropertyId(workspace);
+
+                removeOwnWorkspace(workspace.creatorId, workspaceId, function () {
+                    db.query("" +
+                        "DELETE FROM PermittedWorkspace " +
+                        "WHERE workspaceId = :workspaceId", {
+                        params: {
+                            workspaceId: workspaceId
+                        }
+                    }).then(function (results) {
+                        removeRecords(workspaceId, function () {
+                            removeChildren([workspaceId], function () {
+
+                                callback({
+                                    workspaceName: workspace.name,
+                                    topLevelWorkspaceIdCollection: topLevelWorkspaceIdCollection
+                                });
+                            });
+                        });
+                    }).catch(function (error) {
+                        throw error;
+                    });
+                });
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
         db.query("" +
-            "DELETE FROM Workspace " +
-            "RETURN BEFORE " +
-            "WHERE @rid = :id", {
+            "SELECT userId " +
+            "FROM PermittedWorkspace " +
+            "WHERE workspaceId = :workspaceId AND userId <> :userId", {
             params: {
-                id: decodeId(workspaceId)
+                workspaceId: workspaceId,
+                userId: userId
             }
         }).then(function (results) {
 
-            var workspace = results[0];
-            var workspaceId = encodePropertyId(workspace);
+            getParentWorkspaceId(workspaceId, function (parentWorkspaceId) {
+                var collection = [];
 
-            pushWorkspace(workspace);
-
-            removeOwnWorkspace(workspace.creatorId, workspaceId, function () {
-                db.query("" +
-                    "DELETE FROM PermittedWorkspace " +
-                    "WHERE workspaceId = :workspaceId", {
-                    params: {
-                        workspaceId: workspaceId
-                    }
-                }).then(function (results) {
-                    removeRecords(workspaceId, function () {
-                        removeChildren([workspaceId]);
+                forEach(results, function (item) {
+                    collection.push({
+                        userId: item.userId,
+                        permissions: DEFAULT_PERMISSIONS
                     });
-                }).catch(function (error) {
-                    throw error;
+                });
+
+                setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function (accessResultCollection) {
+
+                    forEach(accessResultCollection, function (item) {
+                        item.status = null;
+                    });
+
+                    removeWorkspace(accessResultCollection);
                 });
             });
         }).catch(function (error) {
@@ -804,7 +856,7 @@ module.exports = function (db, developmentMode) {
 
             var result = [];
 
-            _.forEach(results, function (item) {
+            forEach(results, function (item) {
                 var value = item.value;
                 var workspaceId = encodeBase64(value);
                 result.push(workspaceId);
@@ -1338,36 +1390,45 @@ module.exports = function (db, developmentMode) {
                     var workspaceId = results[0].workspaceId;
 
                     function closeAccessForDisabledParent(workspaceId, nextWorkspaceId, callback) {
+
                         if (nextWorkspaceId != ROOT_ID) {
-                            db.query("" +
-                                "SELECT COUNT(*) AS count " +
-                                "FROM PermittedWorkspace " +
-                                "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
-                                params: {
-                                    userId: userId,
-                                    parentWorkspaceId: nextWorkspaceId
-                                }
-                            }).then(function (results) {
-                                if (results[0].count > 0) {
+                            isWorkspaceAvailable(userId, nextWorkspaceId, function (isAvailable) {
+
+                                if (isAvailable) {
                                     callback(workspaceId);
                                 } else {
                                     db.query("" +
-                                        "DELETE FROM PermittedWorkspace " +
-                                        "RETURN BEFORE " +
-                                        "WHERE userId = :userId AND workspaceId = :workspaceId", {
+                                        "SELECT COUNT(*) AS count " +
+                                        "FROM PermittedWorkspace " +
+                                        "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
                                         params: {
                                             userId: userId,
-                                            workspaceId: nextWorkspaceId
+                                            parentWorkspaceId: nextWorkspaceId
                                         }
                                     }).then(function (results) {
-                                        var parentWorkspaceId = results[0].parentWorkspaceId;
-                                        closeAccessForDisabledParent(nextWorkspaceId, parentWorkspaceId, callback);
+
+                                        if (results[0].count > 0) {
+                                            callback(workspaceId);
+                                        } else {
+                                            db.query("" +
+                                                "DELETE FROM PermittedWorkspace " +
+                                                "RETURN BEFORE " +
+                                                "WHERE userId = :userId AND workspaceId = :workspaceId", {
+                                                params: {
+                                                    userId: userId,
+                                                    workspaceId: nextWorkspaceId
+                                                }
+                                            }).then(function (results) {
+                                                var parentWorkspaceId = results[0].parentWorkspaceId;
+                                                closeAccessForDisabledParent(nextWorkspaceId, parentWorkspaceId, callback);
+                                            }).catch(function (error) {
+                                                throw error;
+                                            });
+                                        }
                                     }).catch(function (error) {
                                         throw error;
                                     });
                                 }
-                            }).catch(function (error) {
-                                throw error;
                             });
                         } else {
                             callback(workspaceId);
@@ -1388,7 +1449,7 @@ module.exports = function (db, developmentMode) {
                                 }
                             }).then(function (results) {
 
-                                _.forEach(results, function (permittedWorkspace) {
+                                forEach(results, function (permittedWorkspace) {
                                     var workspaceId = permittedWorkspace.workspaceId;
                                     stack.push(workspaceId);
                                 });

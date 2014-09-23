@@ -36,6 +36,12 @@ module.exports = function (io, dbProvider, developmentMode) {
         return SocketSession;
     })();
 
+    function findSocketSessionByUserId(userId) {
+        return _.findWhere(socketsSession, {
+            userId: userId
+        });
+    }
+
     io.on('connection', function (socket) {
 
         function getSession() {
@@ -133,14 +139,26 @@ module.exports = function (io, dbProvider, developmentMode) {
         });
 
         on('removed_workspace', function (data) {
+
             var userId = data.userId;
             var workspaceId = data.workspaceId;
-            var removedWorkspaces = data.removedWorkspaces;
+            var result = data.result;
 
-            sendBroadcast('removed_workspace', {
-                userId: userId,
-                workspaceId: workspaceId,
-                removedWorkspaces: removedWorkspaces
+            var workspaceName = result.workspaceName;
+            var topLevelWorkspaceIdCollection = result.topLevelWorkspaceIdCollection;
+
+            forEach(topLevelWorkspaceIdCollection, function (item) {
+                var topLevelWorkspaceId = item.topLevelWorkspaceId;
+                var socketSession = findSocketSessionByUserId(item.userId);
+
+                if (socketSession) {
+                    socketSession.sendCommand('removed_workspace', {
+                        userId: userId,
+                        workspaceId: workspaceId,
+                        workspaceName: workspaceName,
+                        topLevelWorkspaceId: topLevelWorkspaceId
+                    });
+                }
             });
         });
 
