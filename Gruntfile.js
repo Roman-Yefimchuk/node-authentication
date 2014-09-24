@@ -3,10 +3,14 @@ module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         bower_concat: {
-            libs: {
-                dest: 'production/temp/js/build/libs.js',
+            vendor: {
+                dest: 'production/temp/js/build/vendor.js',
+                mainFiles: {
+                    'notifyjs': ['dist/notify-combined.js']
+                },
                 exclude: [
-                    'font-awesome'
+                    'font-awesome',
+                    'bootstrap'
                 ]
             }
         },
@@ -15,33 +19,33 @@ module.exports = function (grunt) {
                 src: [
                     'public/client/scripts/**/*.js'
                 ],
-                dest: 'production/temp/js/build/scripts.js'
+                dest: 'production/temp/js/build/main.js'
             },
             styles: {
                 src: [
                     'public/client/styles/**/*.css'
                 ],
-                dest: 'production/temp/styles/build/styles.css'
+                dest: 'production/temp/styles/build/main.css'
             }
         },
         wrap: {
-            scripts: {
+            main: {
                 src: '<%= concat.scripts.dest %>',
-                dest: 'production/temp/js/build/scripts_wrapped.js',
+                dest: 'production/temp/js/build/main_wrapped.js',
                 options: {
                     wrapper: [
-                            '(function (undefined, angular, _, String, Array, RegExp) {' +
+                            '(function (undefined, angular, _, String, Array, RegExp) {\n' +
                             '"use strict";\n',
                         '\n})(undefined, angular, _, String, Array, RegExp);'
                     ]
                 }
             },
-            libs: {
-                src: '<%= bower_concat.libs.dest %>',
-                dest: 'production/temp/js/build/libs_wrapped.js',
+            vendor: {
+                src: '<%= bower_concat.vendor.dest %>',
+                dest: 'production/temp/js/build/vendor_wrapped.js',
                 options: {
                     wrapper: [
-                            '(function (undefined, Object, String, Number, Array, RegExp) {' +
+                            '(function (undefined, Object, String, Number, Array, RegExp) {\n' +
                             '"use strict";\n',
                         '\n})(undefined, Object, String, Number, Array, RegExp);'
                     ]
@@ -54,14 +58,14 @@ module.exports = function (grunt) {
                     drop_console: true
                 }
             },
-            libs: {
+            vendor: {
                 files: {
-                    'production/build/public/libs/libs.min.js': '<%= wrap.libs.dest %>'
+                    'production/build/public/client/scripts/vendor.js': '<%= wrap.vendor.dest %>'
                 }
             },
             scripts: {
                 files: {
-                    'production/build/public/client/scripts/scripts.min.js': '<%= wrap.scripts.dest %>'
+                    'production/build/public/client/scripts/main.js': '<%= wrap.main.dest %>'
                 }
             },
             server: {
@@ -108,7 +112,7 @@ module.exports = function (grunt) {
                         cwd: 'production/temp/styles/build/',
                         src: ['*.css', '!*.min.css'],
                         dest: 'production/build/public/client/styles/',
-                        ext: '.min.css'
+                        ext: '.css'
                     }
                 ]
             }
@@ -116,6 +120,7 @@ module.exports = function (grunt) {
         clean: ["production/temp"]
     });
 
+    grunt.loadNpmTasks('grunt-usemin');
     grunt.loadNpmTasks('grunt-bower-concat');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-wrap');
@@ -123,7 +128,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-clean');
-    //https://github.com/yeoman/grunt-usemin
 
     grunt.registerTask('default', [
         'bower_concat',

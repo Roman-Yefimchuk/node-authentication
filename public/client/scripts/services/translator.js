@@ -51,10 +51,15 @@ angular.module('application')
                         }
 
                         if (typeof value == 'object') {
-                            stack.push({
-                                $key: key,
-                                $value: value
-                            });
+
+                            if (value instanceof Array) {
+                                dictionary[key] = value;
+                            } else {
+                                stack.push({
+                                    $key: key,
+                                    $value: value
+                                });
+                            }
                         } else {
                             dictionary[key] = value;
                         }

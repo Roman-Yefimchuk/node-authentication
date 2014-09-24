@@ -7,13 +7,18 @@
     <link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon">
     <link rel="icon" href="/favicon.ico" type="image/vnd.microsoft.icon">
 
-    <link rel="stylesheet" href="/libs/bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.css">
+    <!-- build:css(../../production/build/public/client/) /styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/bower_components/font-awesome/css/font-awesome.css">
+    <!-- endbower -->
+    <!-- endbuild -->
 
+    <!-- build:css(../../production/build/public/client/styles) /styles/main.css -->
     <link rel="stylesheet" href="/client/styles/styles.css">
     <link rel="stylesheet" href="/client/styles/ajax-loader.css">
-
     <link rel="stylesheet" href="/client/styles/tasks.css">
+    <!-- endbuild -->
 
 </head>
 <body ng-app="application" ng-cloak>
@@ -28,26 +33,36 @@
 
 <div id="ajax_loader" class="ajax-loader"></div>
 
-<!--libraries-->
-<script type="text/javascript" src="/libs/js/jquery.js"></script>
-<script type="text/javascript" src="/libs/js/angular.js"></script>
-<script type="text/javascript" src="/libs/js/angular-route.js"></script>
-<script type="text/javascript" src="/libs/js/angular-sanitize.js"></script>
-<script type="text/javascript" src="/libs/js/angular-cookies.js"></script>
-<script type="text/javascript" src="/libs/bootstrap/js/ui-bootstrap-tpls.js"></script>
-<script type="text/javascript" src="/libs/js/date-format.js"></script>
-<script type="text/javascript" src="/libs/js/notify.js"></script>
-<script type="text/javascript" src="/libs/js/underscore.js"></script>
+<!--begin_libraries-->
+
+<!-- build:js(../../production/build/public/scripts) /scripts/vendor.js -->
+<!-- bower:js -->
+<script type="text/javascript" src="/bower_components/json3/lib/json3.js"></script>
+<script type="text/javascript" src="/bower_components/jquery/dist/jquery.js"></script>
+<script type="text/javascript" src="/bower_components/angular/angular.js"></script>
+<script type="text/javascript" src="/bower_components/angular-route/angular-route.js"></script>
+<script type="text/javascript" src="/bower_components/angular-sanitize/angular-sanitize.js"></script>
+<script type="text/javascript" src="/bower_components/angular-cookies/angular-cookies.js"></script>
+<script type="text/javascript" src="/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+<script type="text/javascript" src="/bower_components/notifyjs/dist/notify-combined.js"></script>
+<script type="text/javascript" src="/bower_components/underscore/underscore.js"></script>
+<!-- endbower -->
+<!-- endbuild -->
 
 <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<!--end_libraries-->
 
-<!--application-->
+<!-- build:js(../../production/build/public/client/scripts) /scripts/main.js -->
+
+<!--begin_application-->
 <script type="text/javascript" src="/client/scripts/application.js"></script>
+<!--end_application-->
 
-<!--config-->
+<!--begin_config-->
 <script type="text/javascript" src="/client/scripts/config.js"></script>
+<!--end_config-->
 
-<!--controllers-->
+<!--begin_controllers-->
 <script type="text/javascript" src="/client/scripts/controllers/index.js"></script>
 <script type="text/javascript" src="/client/scripts/controllers/home.js"></script>
 <script type="text/javascript" src="/client/scripts/controllers/login.js"></script>
@@ -64,20 +79,23 @@
 <script type="text/javascript" src="/client/scripts/controllers/dialogs/confirmation-dialog.js"></script>
 <script type="text/javascript" src="/client/scripts/controllers/dialogs/alert-dialog.js"></script>
 <script type="text/javascript" src="/client/scripts/controllers/dialogs/feedback-dialog.js"></script>
+<!--end_controllers-->
 
-<!--directives-->
+<!--begin_directives-->
 <script type="text/javascript" src="/client/scripts/directives/list-item.js"></script>
 <script type="text/javascript" src="/client/scripts/directives/workspace-tree.js"></script>
 <script type="text/javascript" src="/client/scripts/directives/language-switcher.js"></script>
 <script type="text/javascript" src="/client/scripts/directives/l10n.js"></script>
 <script type="text/javascript" src="/client/scripts/directives/static-include.js"></script>
 <script type="text/javascript" src="/client/scripts/directives/info-widget.js"></script>
+<!--end_directives-->
 
-<!--filters-->
+<!--begin_filters-->
 <script type="text/javascript" src="/client/scripts/filters/format-date.js"></script>
 <script type="text/javascript" src="/client/scripts/filters/translate.js"></script>
+<!--end_filters-->
 
-<!--services-->
+<!--begin_services-->
 <script type="text/javascript" src="/client/scripts/services/http-client.js"></script>
 <script type="text/javascript" src="/client/scripts/services/api.js"></script>
 <script type="text/javascript" src="/client/scripts/services/notifications.js"></script>
@@ -91,9 +109,13 @@
 <script type="text/javascript" src="/client/scripts/services/language-services/en.js"></script>
 <script type="text/javascript" src="/client/scripts/services/language-services/ru.js"></script>
 <script type="text/javascript" src="/client/scripts/services/language-services/uk.js"></script>
+<!--end_services-->
 
-<!--common-->
+<!--begin_common-->
 <script type="text/javascript" src="/client/scripts/utils/common.js"></script>
+<!--end_common-->
+
+<!-- endbuild -->
 
 </body>
 </html>
