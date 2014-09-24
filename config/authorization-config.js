@@ -1,4 +1,6 @@
-{
+"use strict";
+
+module.exports = {
     "facebookAuth": {
         "clientID": "825915494093970",
         "clientSecret": "b1bef1cb2cfa573b9752f0c94bb2b6c8",

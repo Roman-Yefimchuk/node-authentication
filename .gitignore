@@ -1,6 +1,7 @@
 .idea/
 local_db/
 node_modules/
+bower_components/
 temp/
 command_line/
 production/

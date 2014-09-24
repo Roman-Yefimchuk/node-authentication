@@ -1,4 +1,6 @@
-{
+"use strict";
+
+module.exports = {
     "host": "localhost",
     "port": 2424,
     "server_username": "root",

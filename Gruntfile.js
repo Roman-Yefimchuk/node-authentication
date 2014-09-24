@@ -2,13 +2,15 @@ module.exports = function (grunt) {
 
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
-        concat: {
+        bower_concat: {
             libs: {
-                src: [
-                    'public/libs/**/*.js'
-                ],
-                dest: 'production/temp/js/build/libs.js'
-            },
+                dest: 'production/temp/js/build/libs.js',
+                exclude: [
+                    'font-awesome'
+                ]
+            }
+        },
+        concat: {
             scripts: {
                 src: [
                     'public/client/scripts/**/*.js'
@@ -22,6 +24,30 @@ module.exports = function (grunt) {
                 dest: 'production/temp/styles/build/styles.css'
             }
         },
+        wrap: {
+            scripts: {
+                src: '<%= concat.scripts.dest %>',
+                dest: 'production/temp/js/build/scripts_wrapped.js',
+                options: {
+                    wrapper: [
+                            '(function (undefined, angular, _, String, Array, RegExp) {' +
+                            '"use strict";\n',
+                        '\n})(undefined, angular, _, String, Array, RegExp);'
+                    ]
+                }
+            },
+            libs: {
+                src: '<%= bower_concat.libs.dest %>',
+                dest: 'production/temp/js/build/libs_wrapped.js',
+                options: {
+                    wrapper: [
+                            '(function (undefined, Object, String, Number, Array, RegExp) {' +
+                            '"use strict";\n',
+                        '\n})(undefined, Object, String, Number, Array, RegExp);'
+                    ]
+                }
+            }
+        },
         uglify: {
             options: {
                 compress: {
@@ -30,12 +56,12 @@ module.exports = function (grunt) {
             },
             libs: {
                 files: {
-                    'production/build/public/libs/libs.js': '<%= concat.libs.dest %>'
+                    'production/build/public/libs/libs.min.js': '<%= wrap.libs.dest %>'
                 }
             },
             scripts: {
                 files: {
-                    'production/build/public/client/scripts/scripts.js': '<%= concat.scripts.dest %>'
+                    'production/build/public/client/scripts/scripts.min.js': '<%= wrap.scripts.dest %>'
                 }
             },
             server: {
@@ -82,23 +108,30 @@ module.exports = function (grunt) {
                         cwd: 'production/temp/styles/build/',
                         src: ['*.css', '!*.min.css'],
                         dest: 'production/build/public/client/styles/',
-                        ext: '.css'
+                        ext: '.min.css'
                     }
                 ]
             }
-        }
+        },
+        clean: ["production/temp"]
     });
 
+    grunt.loadNpmTasks('grunt-bower-concat');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-wrap');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-htmlmin');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-clean');
     //https://github.com/yeoman/grunt-usemin
 
     grunt.registerTask('default', [
+        'bower_concat',
         'concat',
+        'wrap',
         'uglify',
         'htmlmin',
-        'cssmin'
+        'cssmin',
+        'clean'
     ]);
 };
