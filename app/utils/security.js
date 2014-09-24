@@ -1,6 +1,6 @@
 "use strict";
 
-(function () {
+(function (require) {
 
     var bCrypt = require('bcrypt-nodejs');
 
@@ -35,4 +35,4 @@
             }
         })())
     };
-})();
+})(require);

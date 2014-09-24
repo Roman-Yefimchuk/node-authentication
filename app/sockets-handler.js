@@ -2,8 +2,8 @@
 
 module.exports = function (io, dbProvider, developmentMode) {
 
-    var socketsSession = {};
     var _ = require('underscore');
+    var socketsSession = {};
     var forEach = _.forEach;
 
     var SocketSession = (function () {

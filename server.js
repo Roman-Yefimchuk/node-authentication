@@ -1,6 +1,7 @@
 "use strict";
 
-(function () {
+(function (require) {
+
     var express = require('express');
     var app = express();
     var server = require('http').Server(app);
@@ -105,4 +106,5 @@
         console.log('The magic happens on port ' + port);
 
     }, developmentMode);
-})();
+
+})(require);

@@ -1,6 +1,6 @@
 "use strict";
 
-(function () {
+(function (require) {
 
     var fs = require("fs");
 
@@ -61,4 +61,4 @@
             }
         });
     };
-})();
+})(require);

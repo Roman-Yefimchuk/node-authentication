@@ -1,6 +1,6 @@
 "use strict";
 
-(function () {
+(function (require) {
 
     var LocalStrategy = require('passport-local').Strategy;
     var FacebookStrategy = require('passport-facebook').Strategy;
@@ -254,4 +254,4 @@
             }, done);
         }));
     };
-})();
+})(require);
