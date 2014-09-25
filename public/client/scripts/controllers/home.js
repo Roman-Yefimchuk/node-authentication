@@ -411,7 +411,8 @@ angular.module('application')
                     {
                         id: todo.id,
                         title: todo.title,
-                        completed: todo.completed
+                        completed: todo.completed,
+                        priority: todo.priority
                     }
                 ], function () {
                     var socketConnection = $scope.socketConnection;
