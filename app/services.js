@@ -210,10 +210,10 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var userId = getUserId(request);
 
         var workspaceId = getParam('workspaceId', request);
-        dbProvider.removeWorkspace(userId, workspaceId, function (removedWorkspaces) {
+        dbProvider.removeWorkspace(userId, workspaceId, function (result) {
             resultCallback({
-                message: 'Removed ' + removedWorkspaces.length + ' workspace(s)',
-                data: removedWorkspaces
+                message: 'Workspace ' + result.workspaceName + ' removed',
+                data: result
             });
         });
     });

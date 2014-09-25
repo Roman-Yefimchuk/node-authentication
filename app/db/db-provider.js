@@ -1,8 +1,11 @@
 "use strict";
 
 (function (require) {
+
     module.exports = function (db, developmentMode) {
 
+        var RECORD_ID_PATTERN = /^\#\-?\d+\:\d+$/;
+        var SYSTEM_ID_PATTERN = /^\@.+/;
         var ROOT_ID = '@root';
         var DEFAULT_PERMISSIONS = {
             reader: false,
@@ -22,25 +25,6 @@
         function extractPropertyId(property) {
             if (property) {
                 return (property['rid'] || property['@rid']).toString();
-            }
-        }
-
-        function encodePropertyId(property) {
-            if (property) {
-                var id = extractPropertyId(property);
-                return encodeBase64(id);
-            }
-        }
-
-        function encodeId(id) {
-            if (id) {
-                return decodeBase64(id);
-            }
-        }
-
-        function decodeId(id) {
-            if (id) {
-                return decodeBase64(id);
             }
         }
 
@@ -159,8 +143,8 @@
                 "ADD ownWorkspaces = :workspaceId " +
                 "WHERE @rid = :id", {
                 params: {
-                    id: decodeId(userId),
-                    workspaceId: decodeId(workspaceId)
+                    id: userId,
+                    workspaceId: workspaceId
                 }
             }).then(function (results) {
                 callback();
@@ -175,8 +159,8 @@
                 "REMOVE ownWorkspaces = :workspaceId " +
                 "WHERE @rid = :id", {
                 params: {
-                    id: decodeId(userId),
-                    workspaceId: decodeId(workspaceId)
+                    id: userId,
+                    workspaceId: workspaceId
                 }
             }).then(function (results) {
                 callback();
@@ -191,7 +175,7 @@
                 "ADD users = :userId " +
                 "WHERE name = :name", {
                 params: {
-                    userId: decodeId(userId),
+                    userId: userId,
                     name: groupName
                 }
             }).then(function (results) {
@@ -207,7 +191,7 @@
                 "REMOVE users = :userId " +
                 "WHERE name = :name", {
                 params: {
-                    userId: decodeId(userId),
+                    userId: userId,
                     name: groupName
                 }
             }).then(function (results) {
@@ -226,7 +210,7 @@
                     "FROM Workspace " +
                     "WHERE @rid = :id", {
                     params: {
-                        id: decodeId(workspaceId)
+                        id: workspaceId
                     }
                 }).then(function (results) {
                     var hierarchyLevel = results[0].hierarchyLevel;
@@ -246,7 +230,7 @@
                     "FROM Workspace " +
                     "WHERE @rid = :id", {
                     params: {
-                        id: decodeId(workspaceId)
+                        id: workspaceId
                     }
                 }).then(function (results) {
                     var name = results[0].name;
@@ -271,7 +255,7 @@
                     }
                 }).then(function (results) {
                     var workspace = results[0];
-                    var workspaceId = encodePropertyId(workspace);
+                    var workspaceId = extractPropertyId(workspace);
 
                     addOwnWorkspace(creatorId, workspaceId, function () {
                         db.query("" +
@@ -315,7 +299,7 @@
                     "FROM Workspace " +
                     "WHERE @rid = :id", {
                     params: {
-                        id: decodeId(workspaceId)
+                        id: workspaceId
                     }
                 }).then(function (results) {
                     var parentWorkspaceId = results[0].parentWorkspaceId;
@@ -342,7 +326,7 @@
                         "FROM Workspace " +
                         "WHERE @rid = :id", {
                         params: {
-                            id: decodeId(workspaceId)
+                            id: workspaceId
                         }
                     }).then(function (results) {
 
@@ -481,11 +465,11 @@
                     "INSERT INTO User (accountId) " +
                     "VALUES (:accountId)", {
                     params: {
-                        accountId: encodePropertyId(userAccount)
+                        accountId: extractPropertyId(userAccount)
                     }
                 }).then(function (results) {
                     var user = results[0];
-                    var userId = encodePropertyId(user);
+                    var userId = extractPropertyId(user);
 
                     addUserToGroup(userId, 'users', function () {
 
@@ -562,7 +546,7 @@
 
                 forEach(items, function (item) {
                     result.push({
-                        id: encodePropertyId(item),
+                        id: extractPropertyId(item),
                         creatorId: item.creatorId,
                         title: item.title,
                         completed: item.completed,
@@ -591,7 +575,7 @@
             }).then(function (results) {
                 var item = results[0];
                 callback({
-                    itemId: encodePropertyId(item),
+                    itemId: extractPropertyId(item),
                     creationDate: item.creationDate
                 });
             }).catch(function (error) {
@@ -606,7 +590,7 @@
                     "SET title = :title, completed = :completed " +
                     "WHERE @rid = :id", {
                     params: {
-                        id: decodeId(todoModel.id),
+                        id: todoModel.id,
                         title: todoModel.title,
                         completed: todoModel.completed
                     }
@@ -626,7 +610,7 @@
                     "DELETE FROM Todo " +
                     "WHERE @rid = :id", {
                     params: {
-                        id: decodeId(todoId)
+                        id: todoId
                     }
                 }).then(function (total) {
                     next();
@@ -646,7 +630,7 @@
                 params: {
                     currentWorkspaceId: workspaceId,
                     currentRootWorkspaceId: rootWorkspaceId,
-                    id: decodeId(userId)
+                    id: userId
                 }
             }).then(function (total) {
                 if (total.length > 0) {
@@ -670,7 +654,7 @@
                 "FROM User " +
                 "WHERE @rid = :id", {
                 params: {
-                    id: decodeId(userId)
+                    id: userId
                 }
             }).then(function (results) {
                 if (results.length > 0) {
@@ -702,7 +686,7 @@
                 "SET name = :name " +
                 "WHERE @rid = :id", {
                 params: {
-                    id: decodeId(workspaceId),
+                    id: workspaceId,
                     name: data.name
                 }
             }).then(function (total) {
@@ -743,7 +727,7 @@
 
                         asyncEach(results, function (workspace, index, next) {
 
-                            var workspaceId = encodePropertyId(workspace);
+                            var workspaceId = extractPropertyId(workspace);
                             stack.push(workspaceId);
 
                             removeOwnWorkspace(workspace.creatorId, workspaceId, function () {
@@ -778,12 +762,12 @@
                     "RETURN BEFORE " +
                     "WHERE @rid = :id", {
                     params: {
-                        id: decodeId(workspaceId)
+                        id: workspaceId
                     }
                 }).then(function (results) {
 
                     var workspace = results[0];
-                    var workspaceId = encodePropertyId(workspace);
+                    var workspaceId = extractPropertyId(workspace);
 
                     removeOwnWorkspace(workspace.creatorId, workspaceId, function () {
                         db.query("" +
@@ -851,15 +835,14 @@
                 "FROM User " +
                 "WHERE @rid = :id", {
                 params: {
-                    id: decodeId(userId)
+                    id: userId
                 }
             }).then(function (results) {
 
                 var result = [];
 
                 forEach(results, function (item) {
-                    var value = item.value;
-                    var workspaceId = encodeBase64(value);
+                    var workspaceId = item.value;
                     result.push(workspaceId);
                 });
 
@@ -875,7 +858,7 @@
                 "FROM Workspace " +
                 "WHERE @rid = :id", {
                 params: {
-                    id: decodeId(workspaceId)
+                    id: workspaceId
                 }
             }).then(function (results) {
                 if (results.length > 0) {
@@ -1026,7 +1009,7 @@
                         "FROM Workspace " +
                         "WHERE @rid = :id", {
                         params: {
-                            id: decodeId(permittedWorkspace.workspaceId)
+                            id: permittedWorkspace.workspaceId
                         }
                     }).then(function (results) {
                         var workspace = results[0];
@@ -1095,7 +1078,7 @@
 
                 asyncEach(workspaces, function (workspace, index, next) {
 
-                    var workspaceId = encodePropertyId(workspace);
+                    var workspaceId = extractPropertyId(workspace);
 
                     getChildrenCount(workspaceId, function (childrenCount) {
                         result.push({
@@ -1485,34 +1468,417 @@
             });
         }
 
+        function isSystemId(id) {
+            if (id) {
+                return SYSTEM_ID_PATTERN.test(id);
+            }
+            return false;
+        }
+
+        function decodeId(id) {
+            if (isSystemId(id)) {
+                return id;
+            } else {
+                if (id) {
+                    return decodeBase64(id);
+                }
+            }
+        }
+
+        function encodeId(id) {
+            if (isSystemId(id)) {
+                return id;
+            } else {
+                if (id) {
+                    return encodeBase64(id);
+                }
+            }
+        }
+
+        function decodeObject(object, properties) {
+            if (object) {
+                forEach(properties, function (property) {
+                    object[property] = decodeId(object[property]);
+                });
+            }
+        }
+
+        function encodeObject(object, properties) {
+            if (object) {
+                forEach(properties, function (property) {
+                    object[property] = encodeId(object[property]);
+                });
+            }
+        }
+
+        function getAccountEncoder(callback) {
+            return {
+                success: function (userAccount) {
+
+                    encodeObject(userAccount, [
+                        'userId'
+                    ]);
+
+                    callback.success(userAccount);
+                },
+                failure: function (error) {
+                    callback.failure(error);
+                }
+            };
+        }
+
         return {
-            createUser: createUser,
-            findUser: findUser,
-            getItems: getItems,
-            saveItem: saveItem,
-            updateItems: updateItems,
-            removeItems: removeItems,
-            setUserWorkspaceId: setUserWorkspaceId,
-            getUserWorkspaceId: getUserWorkspaceId,
-            createDefaultWorkspace: createDefaultWorkspace,
-            createWorkspace: createWorkspace,
-            updateWorkspace: updateWorkspace,
-            removeWorkspace: removeWorkspace,
-            getWorkspaces: getWorkspaces,
-            getWorkspace: getWorkspace,
-            getDefaultWorkspaceId: getDefaultWorkspaceId,
-            getUser: getUser,
-            getUsers: getUsers,
-            loadHierarchy: loadHierarchy,
-            getPermittedWorkspaces: getPermittedWorkspaces,
-            getAllWorkspaces: getAllWorkspaces,
-            getUsersCount: getUsersCount,
-            getAllUsers: getAllUsers,
-            getAllUsersWithPermissions: getAllUsersWithPermissions,
-            isAccessGrantedForWorkspace: isAccessGrantedForWorkspace,
-            setUsersPermissionsForWorkspace: setUsersPermissionsForWorkspace,
-            addUserToGroup: addUserToGroup,
-            removeUserFromGroup: removeUserFromGroup
+            createUser: function (data, callback) {
+                createUser(data, getAccountEncoder(callback));
+            },
+            findUser: function (genericId, callback) {
+                findUser(genericId, getAccountEncoder(callback));
+            },
+            getItems: function (workspaceId, userId, callback) {
+
+                workspaceId = decodeId(workspaceId);
+                userId = decodeId(userId);
+
+                getItems(workspaceId, userId, function (items) {
+
+                    forEach(items, function (item) {
+                        encodeObject(item, [
+                            'id',
+                            'creatorId',
+                            'workspaceId'
+                        ]);
+                    });
+
+                    callback(items);
+                });
+            },
+            saveItem: function (workspaceId, userId, todoModel, callback) {
+
+                workspaceId = decodeId(workspaceId);
+                userId = decodeId(userId);
+
+                saveItem(workspaceId, userId, todoModel, function (item) {
+
+                    encodeObject(item, [
+                        'itemId'
+                    ]);
+
+                    callback(item);
+                });
+            },
+            updateItems: function (workspaceId, userId, todoModels, callback) {
+
+                workspaceId = decodeId(workspaceId);
+                userId = decodeId(userId);
+
+                forEach(todoModels, function (todoModel) {
+                    decodeObject(todoModel, [
+                        'id'
+                    ]);
+                });
+
+                updateItems(workspaceId, userId, todoModels, callback);
+            },
+            removeItems: function (workspaceId, userId, todoIds, callback) {
+
+                workspaceId = decodeId(workspaceId);
+                userId = decodeId(userId);
+
+                forEach(todoIds, function (todoId, index) {
+                    todoIds[index] = decodeId(todoId);
+                });
+
+                removeItems(workspaceId, userId, todoIds, callback);
+            },
+            setUserWorkspaceId: function (userId, workspaceId, rootWorkspaceId, callback) {
+
+                userId = decodeId(userId);
+                workspaceId = decodeId(workspaceId);
+                rootWorkspaceId = decodeId(rootWorkspaceId);
+
+                setUserWorkspaceId(userId, workspaceId, rootWorkspaceId, callback);
+            },
+            getUserWorkspaceId: function (userId, callback) {
+
+                userId = decodeId(userId);
+
+                getUserWorkspaceId(userId, function (workspaceId, rootWorkspaceId) {
+
+                    workspaceId = encodeId(workspaceId);
+                    rootWorkspaceId = encodeId(rootWorkspaceId);
+
+                    callback(workspaceId, rootWorkspaceId);
+                });
+            },
+            createDefaultWorkspace: function (name, creatorId, callback) {
+
+                creatorId = decodeId(creatorId);
+
+                createDefaultWorkspace(name, creatorId, function (workspace) {
+
+                    encodeObject(workspace, [
+                        'id',
+                        'creatorId'
+                    ]);
+
+                    callback(workspace);
+                });
+            },
+            createWorkspace: function (name, creatorId, parentWorkspaceId, callback) {
+
+                creatorId = decodeId(creatorId);
+                parentWorkspaceId = decodeId(parentWorkspaceId);
+
+                createWorkspace(name, creatorId, parentWorkspaceId, function (workspace) {
+
+                    encodeObject(workspace, [
+                        'id',
+                        'creatorId'
+                    ]);
+
+                    callback(workspace);
+                });
+            },
+            updateWorkspace: function (workspaceId, data, callback) {
+
+                workspaceId = decodeId(workspaceId);
+
+                updateWorkspace(workspaceId, data, callback);
+            },
+            removeWorkspace: function (userId, workspaceId, callback) {
+
+                userId = decodeId(userId);
+                workspaceId = decodeId(workspaceId);
+
+                removeWorkspace(userId, workspaceId, function (result) {
+
+                    forEach(result.topLevelWorkspaceIdCollection, function (item) {
+                        encodeObject(item, [
+                            'userId',
+                            'topLevelWorkspaceId'
+                        ]);
+                    });
+
+                    callback(result);
+                });
+            },
+            getWorkspaces: function (userId, callback) {
+
+                userId = decodeId(userId);
+
+                getWorkspaces(userId, function (result) {
+
+                    forEach(result, function (workspaceId, index) {
+                        result[index] = encodeId(workspaceId);
+                    });
+
+                    callback(result);
+                });
+            },
+            getWorkspace: function (workspaceId, callback) {
+
+                workspaceId = decodeId(workspaceId);
+
+                getWorkspace(workspaceId, function (workspace) {
+
+                    encodeObject(workspace, [
+                        'id',
+                        'creatorId'
+                    ]);
+
+                    callback(workspace);
+                });
+            },
+            getDefaultWorkspaceId: function (userId, callback) {
+
+                userId = decodeId(userId);
+
+                getDefaultWorkspaceId(userId, function (workspaceId) {
+                    workspaceId = encodeId(workspaceId);
+                    callback(workspaceId);
+                });
+            },
+            getUser: function (userId, callback) {
+
+                userId = decodeId(userId);
+
+                getUser(userId, function (user) {
+
+                    encodeObject(user, [
+                        'id'
+                    ]);
+
+                    callback(user);
+                });
+            },
+            getUsers: function (ids, callback) {
+
+                forEach(ids, function (id, index) {
+                    ids[index] = decodeId(id);
+                });
+
+                getUsers(ids, function (users) {
+
+                    forEach(users, function (user) {
+                        encodeObject(user, [
+                            'id'
+                        ]);
+                    });
+
+                    callback(users);
+                });
+            },
+            loadHierarchy: function (userId, workspaceId, rootWorkspaceId, callback) {
+
+                userId = decodeId(userId);
+                workspaceId = decodeId(workspaceId);
+                rootWorkspaceId = decodeId(rootWorkspaceId);
+
+                loadHierarchy(userId, workspaceId, rootWorkspaceId, function (status, hierarchy) {
+
+                    if (hierarchy) {
+                        forEach(hierarchy, function (id, index) {
+                            hierarchy[index] = encodeId(id);
+                        });
+                    }
+
+                    callback(status, hierarchy);
+                });
+            },
+            getPermittedWorkspaces: function (userId, parentWorkspaceId, callback) {
+
+                userId = decodeId(userId);
+                parentWorkspaceId = decodeId(parentWorkspaceId);
+
+                getPermittedWorkspaces(userId, parentWorkspaceId, function (workspaces) {
+
+                    forEach(workspaces, function (workspace) {
+
+                        if (workspace.isAvailable) {
+                            encodeObject(workspace, [
+                                'id',
+                                'creatorId'
+                            ]);
+                        } else {
+                            encodeObject(workspace, [
+                                'id'
+                            ]);
+                        }
+                    });
+
+                    callback(workspaces);
+                });
+            },
+            getAllWorkspaces: function (parentWorkspaceId, callback) {
+
+                parentWorkspaceId = decodeId(parentWorkspaceId);
+
+                getAllWorkspaces(parentWorkspaceId, function (workspaces) {
+
+                    forEach(workspaces, function (workspace) {
+                        encodeObject(workspace, [
+                            'id'
+                        ]);
+                    });
+
+                    callback(workspaces);
+                });
+            },
+            getUsersCount: function (callback) {
+                getUsersCount(callback);
+            },
+            getAllUsers: function (skip, limit, callback) {
+                getAllUsers(skip, limit, function (result) {
+
+                    forEach(result.users, function (user) {
+                        encodeObject(user, [
+                            'id'
+                        ]);
+                    });
+
+                    callback(result);
+                });
+            },
+            getAllUsersWithPermissions: function (workspaceId, skip, limit, callback) {
+
+                workspaceId = decodeId(workspaceId);
+
+                getAllUsersWithPermissions(workspaceId, skip, limit, function (result) {
+
+                    forEach(result.users, function (user) {
+                        encodeObject(user, [
+                            'id'
+                        ]);
+                    });
+
+                    callback(result);
+                });
+            },
+            isAccessGrantedForWorkspace: function (userId, workspaceId, callback) {
+
+                userId = decodeId(userId);
+                workspaceId = decodeId(workspaceId);
+
+                isAccessGrantedForWorkspace(userId, workspaceId, callback);
+            },
+            setUsersPermissionsForWorkspace: function (workspaceId, parentWorkspaceId, collection, callback) {
+
+                workspaceId = decodeId(workspaceId);
+                parentWorkspaceId = decodeId(parentWorkspaceId);
+
+                forEach(collection, function (item) {
+                    decodeObject(item, [
+                        'userId'
+                    ]);
+                });
+
+                setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function (accessResultCollection) {
+
+                    forEach(accessResultCollection, function (item) {
+                        switch (item.status) {
+                            case 'access_provided':
+                            {
+                                encodeObject(item, [
+                                    'userId'
+                                ]);
+
+                                var hierarchy = item.hierarchy;
+                                forEach(hierarchy, function (id, index) {
+                                    hierarchy[index] = encodeId(id);
+                                });
+
+                                break;
+                            }
+                            case 'access_updated':
+                            {
+                                encodeObject(item, [
+                                    'userId'
+                                ]);
+                                break;
+                            }
+                            case 'access_closed':
+                            {
+                                encodeObject(item, [
+                                    'userId',
+                                    'topLevelWorkspaceId'
+                                ]);
+                                break;
+                            }
+                        }
+                    });
+
+                    callback(accessResultCollection);
+                });
+            },
+            addUserToGroup: function (userId, groupName, callback) {
+                userId = decodeId(userId);
+                addUserToGroup(userId, groupName, callback);
+            },
+            removeUserFromGroup: function (userId, groupName, callback) {
+                userId = decodeId(userId);
+                removeUserFromGroup(userId, groupName, callback);
+            }
         };
     };
+
 })(require);
