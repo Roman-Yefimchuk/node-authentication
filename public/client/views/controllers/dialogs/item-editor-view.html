@@ -4,23 +4,81 @@
         <h4 style="margin-bottom: 0;margin-top: 0;">
             <i class="fa fa-pencil"></i>
             &nbsp;
-            Edit todo
+            Edit item
         </h4>
     </div>
 
     <div class="modal-body">
 
-        <form ng-submit="save(itemModel)">
+        <form ng-submit="save()">
 
             <div class="input-group task-add">
-                <input class="form-control input-sm" type="text"
-                       ng-model="itemModel" autofocus autocomplete="off">
 
-                    <span class="btn btn-danger btn-sm input-group-addon" href
-                          ng-click="itemModel = ''"
-                          ng-class="{ 'disabled' : !itemModel }">
+            <span class="input-group-btn dropdown" is-open="itemPriorityDropdown.isOpen">
+
+                <span class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
+                      tooltip="{{ 'home.priority' | translate }}">
+                    <i class="fa fa-star"
+                       ng-class="{ 'star-priority-none' : itemModel.priority == 'none',
+                                   'star-priority-low' : itemModel.priority == 'low',
+                                   'star-priority-medium' : itemModel.priority == 'medium',
+                                   'star-priority-high' : itemModel.priority == 'high'
+                                 }">
+                    </i>
+                </span>
+
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <a href ng-click="setItemPriority('high')">
+                            <i class="fa fa-star star-priority-high"></i>
+                            &nbsp;
+                            <span l10n key="home.high_priority"
+                                  ng-class="{ 'bold-fond' : itemModel.priority == 'high' }">
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href ng-click="setItemPriority('medium')">
+                            <i class="fa fa-star star-priority-medium"></i>
+                            &nbsp;
+                            <span l10n key="home.medium_priority"
+                                  ng-class="{ 'bold-fond' : itemModel.priority == 'medium' }">
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href ng-click="setItemPriority('low')">
+                            <i class="fa fa-star star-priority-low"></i>
+                            &nbsp;
+                            <span l10n key="home.low_priority"
+                                  ng-class="{ 'bold-fond' : itemModel.priority == 'low' }">
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href ng-click="setItemPriority('none')">
+                            <i class="fa fa-star star-priority-none"></i>
+                            &nbsp;
+                            <span l10n key="home.without_priority"
+                                  ng-class="{ 'bold-fond' : itemModel.priority == 'none' }">
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </span>
+
+                <input id="editor-input" class="form-control input-sm" type="text"
+                       ng-model="itemModel.title" autofocus autocomplete="off">
+
+                <span class="input-group-btn">
+
+                    <span class="btn btn-danger btn-sm"
+                          ng-click="itemModel.title = ''"
+                          ng-class="{ 'disabled' : !itemModel.title }">
                         <i class="fa fa-eraser"></i>
                         Clear
+                    </span>
+
                     </span>
 
             </div>
@@ -34,8 +92,8 @@
             &nbsp;
             Cancel
         </span>
-        <span class="btn btn-primary btn-sm" ng-click="save(itemModel)"
-              ng-class="{ 'disabled' : !itemModel || itemModel == originItemModel }">
+        <span class="btn btn-primary btn-sm" ng-click="save()"
+              ng-class="{ 'disabled' : !canSaveItem() }">
             <i class="fa fa-floppy-o"></i>
             &nbsp;
             Save

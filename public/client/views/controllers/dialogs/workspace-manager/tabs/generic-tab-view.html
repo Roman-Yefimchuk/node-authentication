@@ -2,7 +2,24 @@
 
     <div class="col-md-12 column">
         <label>Workspace name</label>
-        <input type="text" class="form-control input-sm" ng-model="genericModel.workspaceName">
+
+        <div class="input-group">
+
+            <input type="text" class="form-control input-sm" ng-model="genericModel.workspaceName">
+
+              <span class="input-group-btn">
+
+                  <span class="btn btn-danger btn-sm"
+                        ng-click="genericModel.workspaceName = ''"
+                        ng-class="{ 'disabled' : !genericModel.workspaceName }">
+                      <i class="fa fa-eraser"></i>
+                      Clear
+                  </span>
+
+              </span>
+
+        </div>
+
     </div>
 
     <div class="col-md-12 column text-center" ng-show="canRemove()">

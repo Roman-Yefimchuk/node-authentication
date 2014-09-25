@@ -100,7 +100,12 @@ angular.module('application')
                     "info_widget": {
                         "feedback": "Обратная связь",
                         "copyright": "Роман Ефимчук, iKrok, 2014"
-                    }
+                    },
+                    "priority": "Приоритет",
+                    "low_priority": "Низкий приоритет",
+                    "medium_priority": "Средний приоритет",
+                    "high_priority": "Высокий приоритет",
+                    "without_priority": "Без приоритета"
                 },
                 "dialogs": {
                     "alert": {

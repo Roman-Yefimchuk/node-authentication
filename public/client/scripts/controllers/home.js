@@ -24,6 +24,23 @@ angular.module('application')
             var errorsTranslator = translatorService.getSector('home.errors');
             var notificationsTranslator = translatorService.getSector('home.notifications');
 
+            var forEach = _.forEach;
+            var findWhere = _.findWhere;
+            var filter = _.filter;
+            var without = _.without;
+            var contains = _.contains;
+
+            var itemPriorityDropdown = {
+                isOpen: false
+            };
+            var workspaceDropdown = {
+                isOpen: false
+            };
+            var newTodo = {
+                title: '',
+                priority: 'none'
+            };
+
             var BreadcrumbItem = (function () {
 
                 function BreadcrumbItem(node) {
@@ -48,6 +65,17 @@ angular.module('application')
                 return BreadcrumbItem;
             })();
 
+            function setFocus() {
+                var input = angular.element('#main-input');
+                input.focus();
+            }
+
+            function setItemPriority(priority) {
+                newTodo.priority = priority;
+                itemPriorityDropdown.isOpen = false;
+                setFocus();
+            }
+
             function showWorkspaceId() {
                 if (DEBUG_MODE) {
                     dialogsService.showAlert({
@@ -69,7 +97,7 @@ angular.module('application')
 
             function onWorkspaceChanged(node) {
                 updateActiveNode(node);
-                $scope.workspaceDropdown['isOpen'] = false;
+                workspaceDropdown.isOpen = false;
             }
 
             function onWorkspaceLoading(item, callback) {
@@ -103,8 +131,8 @@ angular.module('application')
 
                                 apiService.getPermittedWorkspaces(parentWorkspaceId, function (workspaces) {
 
-                                    var workspace = _.find(workspaces, function (workspace) {
-                                        return workspace.id == workspaceId;
+                                    var workspace = findWhere(workspaces, {
+                                        id: workspaceId
                                     });
 
                                     var item = workspaceToItem(workspace);
@@ -132,7 +160,7 @@ angular.module('application')
 
                                             function updateNode(insert) {
 
-                                                var workspace = _.findWhere(workspaces, {
+                                                var workspace = findWhere(workspaces, {
                                                     id: id
                                                 });
 
@@ -226,7 +254,7 @@ angular.module('application')
 
             function userHasLeft(userId, callback) {
                 apiService.getUser(userId, function (user) {
-                    $scope.presentUsers = _.filter($scope.presentUsers, function (value) {
+                    $scope.presentUsers = filter($scope.presentUsers, function (value) {
                         return value != userId;
                     });
                     callback(user);
@@ -265,14 +293,15 @@ angular.module('application')
             function updatedItems(userId, items) {
                 changeNotification(userId, function (userName) {
 
-                    _.forEach(items, function (item) {
+                    forEach(items, function (item) {
 
-                        var todo = _.findWhere($scope.todos, {
+                        var todo = findWhere($scope.todos, {
                             id: item.id
                         });
 
                         todo.title = item.title;
                         todo.completed = item.completed;
+                        todo.priority = item.priority;
                     });
 
                     return notificationsTranslator.format('user_updated_items', {
@@ -285,8 +314,8 @@ angular.module('application')
             function removedItems(userId, itemIds) {
                 changeNotification(userId, function (userName) {
 
-                    $scope.todos = _.filter($scope.todos, function (todo) {
-                        return !_.contains(itemIds, todo.id);
+                    $scope.todos = filter($scope.todos, function (todo) {
+                        return !contains(itemIds, todo.id);
                     });
 
                     return notificationsTranslator.format('user_removed_items', {
@@ -297,14 +326,15 @@ angular.module('application')
             }
 
             function addTodo() {
-                var newTodo = $scope.newTodo.trim();
-                if (!newTodo.length) {
+                var title = newTodo['title'].trim();
+                if (!title.length) {
                     return;
                 }
 
                 var item = {
-                    title: newTodo,
-                    completed: false
+                    title: title,
+                    completed: false,
+                    priority: newTodo.priority
                 };
 
                 apiService.save(getWorkspaceId(), item, function (response) {
@@ -312,10 +342,13 @@ angular.module('application')
                     item.creationDate = response.creationDate;
 
                     $scope.todos.push(item);
-                    $scope.newTodo = '';
+                    newTodo.title = '';
+                    newTodo.priority = 'none';
 
                     var socketConnection = $scope.socketConnection;
                     socketConnection.addedItem(item);
+
+                    setFocus();
                 });
             }
 
@@ -336,7 +369,7 @@ angular.module('application')
             function removeTodo(todo) {
                 apiService.remove(getWorkspaceId(), [todo.id], function () {
 
-                    $scope.todos = _.without($scope.todos, todo);
+                    $scope.todos = without($scope.todos, todo);
 
                     var socketConnection = $scope.socketConnection;
                     socketConnection.removedItems([todo.id]);
@@ -346,7 +379,7 @@ angular.module('application')
             function clearDoneTodos() {
 
                 var ids = [];
-                _.forEach($scope.todos, function (todo) {
+                forEach($scope.todos, function (todo) {
                     if (todo.completed) {
                         ids.push(todo.id);
                     }
@@ -360,7 +393,7 @@ angular.module('application')
                     message: 'Remove <b>{{ count }}</b> completed item(s)?',
                     onAccept: function (closeCallback) {
                         apiService.remove(getWorkspaceId(), ids, function () {
-                            $scope.todos = _.filter($scope.todos, function (item) {
+                            $scope.todos = filter($scope.todos, function (item) {
                                 return !item.completed;
                             });
 
@@ -374,7 +407,13 @@ angular.module('application')
             }
 
             function mark(todo) {
-                apiService.update(getWorkspaceId(), [todo], function () {
+                apiService.update(getWorkspaceId(), [
+                    {
+                        id: todo.id,
+                        title: todo.title,
+                        completed: todo.completed
+                    }
+                ], function () {
                     var socketConnection = $scope.socketConnection;
                     socketConnection.updatedItems([todo]);
                 });
@@ -383,19 +422,20 @@ angular.module('application')
             function markAll(done) {
                 var todos = [];
 
-                _.forEach($scope.todos, function (todo) {
+                forEach($scope.todos, function (todo) {
                     if (todo.completed != done) {
                         todos.push({
                             id: todo.id,
-                            completed: done,
                             title: todo.title,
-                            userId: todo.userId
+                            completed: done,
+                            priority: todo.priority
                         });
                     }
                 });
 
                 apiService.update(getWorkspaceId(), todos, function () {
-                    _.forEach($scope.todos, function (todo) {
+
+                    forEach($scope.todos, function (todo) {
                         todo.completed = done;
                     });
 
@@ -481,7 +521,7 @@ angular.module('application')
                     }
                 });
 
-                $scope.workspaceDropdown['isOpen'] = false;
+                workspaceDropdown.isOpen = false;
             }
 
             function showWorkspaceInfo() {
@@ -506,7 +546,7 @@ angular.module('application')
                             "<br>" +
                             "Creation date" +
                             "<br>" +
-                            "<span><b>{{ creationDate | formatDate:'mmmm d, yyyy, h:MM TT' }}</b></span>" +
+                            "<span><b>{{ creationDate | formatDate:'mmm d, yyyy, h:MM TT' }}</b></span>" +
                             ""
                     });
                 });
@@ -762,13 +802,12 @@ angular.module('application')
             $scope.currentWorkspace = undefined;
             $scope.loading = true;
             $scope.todos = [];
-            $scope.newTodo = '';
+            $scope.newTodo = newTodo;
             $scope.presentUsers = [];
             $scope.workspaces = [];
             $scope.user = {};
-            $scope.workspaceDropdown = {
-                isOpen: false
-            };
+            $scope.itemPriorityDropdown = itemPriorityDropdown;
+            $scope.workspaceDropdown = workspaceDropdown;
             $scope.permissions = {
                 reader: false,
                 writer: false,
@@ -791,8 +830,8 @@ angular.module('application')
                     icon: 'fa-flag'
                 }
             ];
-            $scope.currentViewMode = _.find($scope.viewModes, function (viewMode) {
-                return viewMode.name == 'all';
+            $scope.currentViewMode = findWhere($scope.viewModes, {
+                name: 'all'
             });
 
             $scope.$watch('currentViewMode', function (viewMode) {
@@ -855,6 +894,7 @@ angular.module('application')
                 $scope.allChecked = !$scope.remainingCount;
             }, true);
 
+            $scope.setItemPriority = setItemPriority;
             $scope.showWorkspaceId = showWorkspaceId;
             $scope.onWorkspaceChanged = onWorkspaceChanged;
             $scope.onWorkspaceLoading = onWorkspaceLoading;
@@ -900,7 +940,7 @@ angular.module('application')
 
                             var treeModel = [];
 
-                            _.forEach(workspaces, function (workspace) {
+                            forEach(workspaces, function (workspace) {
                                 var item = workspaceToItem(workspace);
                                 treeModel.push(item);
                             });

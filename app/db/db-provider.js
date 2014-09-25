@@ -551,7 +551,8 @@
                         title: item.title,
                         completed: item.completed,
                         workspaceId: item.workspaceId,
-                        creationDate: item.creationDate
+                        creationDate: item.creationDate,
+                        priority: item.priority
                     });
                 });
 
@@ -563,14 +564,15 @@
 
         function saveItem(workspaceId, userId, todoModel, callback) {
             db.query("" +
-                "INSERT INTO Todo (workspaceId, creatorId, title, completed, creationDate) " +
-                "VALUES (:workspaceId, :creatorId, :title, :completed, :creationDate)", {
+                "INSERT INTO Todo (workspaceId, creatorId, title, completed, creationDate, priority) " +
+                "VALUES (:workspaceId, :creatorId, :title, :completed, :creationDate, :priority)", {
                 params: {
                     workspaceId: workspaceId,
                     creatorId: userId,
                     title: todoModel.title,
                     completed: todoModel.completed,
-                    creationDate: _.now()
+                    creationDate: _.now(),
+                    priority: todoModel.priority
                 }
             }).then(function (results) {
                 var item = results[0];
@@ -587,12 +589,13 @@
             asyncEach(todoModels, function (todoModel, index, next) {
                 db.query("" +
                     "UPDATE Todo " +
-                    "SET title = :title, completed = :completed " +
+                    "SET title = :title, completed = :completed, priority = :priority " +
                     "WHERE @rid = :id", {
                     params: {
                         id: todoModel.id,
                         title: todoModel.title,
-                        completed: todoModel.completed
+                        completed: todoModel.completed,
+                        priority: todoModel.priority
                     }
                 }).then(function (total) {
                     next();

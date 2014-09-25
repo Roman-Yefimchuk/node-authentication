@@ -100,7 +100,12 @@ angular.module('application')
                     "info_widget": {
                         "feedback": "Feedback",
                         "copyright": "Roman Yefimchuk, iKrok, 2014"
-                    }
+                    },
+                    "priority": "Priority",
+                    "low_priority": "Low priority",
+                    "medium_priority": "Medium priority",
+                    "high_priority": "High priority",
+                    "without_priority": "Without priority"
                 },
                 "dialogs": {
                     "alert": {

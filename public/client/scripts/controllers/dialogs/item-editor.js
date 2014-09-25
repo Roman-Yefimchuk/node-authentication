@@ -10,20 +10,48 @@ angular.module('application')
 
         function ($scope, $modalInstance, options) {
 
-            var item = options.item;
             var onUpdate = options.onUpdate;
 
-            $scope.originItemModel = item.title;
-            $scope.itemModel = item.title;
+            var readableItemModel = options.item;
+            var editableItemModel = {
+                title: readableItemModel.title,
+                priority: readableItemModel.priority
+            };
 
-            function save(itemModel) {
-                var title = itemModel.trim();
+            var itemPriorityDropdown = {
+                isOpen: false
+            };
 
-                if (title.length && title != item.title) {
-                    item.title = title;
-                    onUpdate(item, function () {
-                        $modalInstance.close();
-                    });
+            function canSaveItem() {
+                return readableItemModel.title != editableItemModel.title ||
+                    readableItemModel.priority != editableItemModel.priority;
+            }
+
+            function setFocus() {
+                var input = angular.element('#editor-input');
+                input.focus();
+            }
+
+            function setItemPriority(priority) {
+                editableItemModel.priority = priority;
+                itemPriorityDropdown.isOpen = false;
+                setFocus();
+            }
+
+            function save() {
+
+                if (canSaveItem()) {
+                    var title = editableItemModel['title'].trim();
+
+                    if (title.length > 0) {
+
+                        readableItemModel.title = editableItemModel.title;
+                        readableItemModel.priority = editableItemModel.priority;
+
+                        onUpdate(readableItemModel, function () {
+                            $modalInstance.close();
+                        });
+                    }
                 }
             }
 
@@ -31,6 +59,11 @@ angular.module('application')
                 $modalInstance.dismiss('cancel');
             }
 
+            $scope.itemModel = editableItemModel;
+            $scope.itemPriorityDropdown = itemPriorityDropdown;
+
+            $scope.canSaveItem = canSaveItem;
+            $scope.setItemPriority = setItemPriority;
             $scope.save = save;
             $scope.cancel = cancel;
         }

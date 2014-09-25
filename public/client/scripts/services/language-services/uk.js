@@ -71,7 +71,7 @@ angular.module('application')
                     "manage_workspace": "Управління робочим простором",
                     "add_task": "Додати задачу",
                     "no_records": "Немає записів",
-                    "select_all": "Вибрати все",
+                    "select_all": "Вибрати всі",
                     "clear_completed": "Очистити виконані",
                     "all": "Всі",
                     "active": "Активні",
@@ -100,7 +100,12 @@ angular.module('application')
                     "info_widget": {
                         "feedback": "Зворотній зв'язок",
                         "copyright": "Роман Єфімчук, iKrok, 2014"
-                    }
+                    },
+                    "priority": "Приорітет",
+                    "low_priority": "Низький приорітет",
+                    "medium_priority": "Середній приорітет",
+                    "high_priority": "Високий приорітет",
+                    "without_priority": "Без приорітету"
                 },
                 "dialogs": {
                     "alert": {

@@ -111,23 +111,43 @@
     padding: 5px;
 }
 
+.star-priority-none {
+    color: #adadad;
+/*    text-shadow: -1px 0 #e6e6e6, 0 1px #e6e6e6, 1px 0 #e6e6e6, 0 -1px #e6e6e6;*/
+}
+
+.star-priority-low {
+    color: #4cae4c;
+}
+
+.star-priority-medium {
+    color: #eea236;
+}
+
+.star-priority-high {
+    color: #d43f3a;
+}
+
+.item-priority-none {
+    color: #ffffff;
+    background-color: #e6e6e6;
+    border-color: #adadad;
+}
+
 .item-priority-low {
     color: #ffffff;
     background-color: #5cb85c;
     border-color: #4cae4c;
-    border-radius: 3px;
 }
 
 .item-priority-medium {
     color: #ffffff;
     background-color: #f0ad4e;
     border-color: #eea236;
-    border-radius: 3px;
 }
 
 .item-priority-high {
     color: #ffffff;
     background-color: #d9534f;
     border-color: #d43f3a;
-    border-radius: 3px;
 }
