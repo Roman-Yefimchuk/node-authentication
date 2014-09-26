@@ -18,15 +18,15 @@ angular.module('application')
 
             return {
                 link: function (scope, element, attrs) {
-                    var templatePath = attrs['staticInclude'];
-                    var template = $templateCache.get(templatePath);
+                    var templateUrl = attrs['staticInclude'];
+                    var template = $templateCache.get(templateUrl);
 
                     if (template) {
                         compileTemplate(scope, element, template);
                     } else {
-                        var request = $http.get(templatePath);
+                        var request = $http.get(templateUrl);
                         request.success(function (template) {
-                            $templateCache.put(templatePath, template);
+                            $templateCache.put(templateUrl, template);
                             compileTemplate(scope, element, template);
                         });
                     }
