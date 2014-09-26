@@ -1,0 +1,114 @@
+<section style="margin-bottom: 15px">
+
+    <div class="input-group task-add">
+
+       <span class="input-group-btn dropdown" is-open="queryHistoryDropdown.isOpen">
+
+            <span class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
+                  ng-disabled="searchModel.searchHistory['length'] == 0"
+                  tooltip="{{ 'home.search_history' | translate }}">
+                <i class="fa fa-history"></i>
+                &nbsp;
+                <span class="caret"></span>
+            </span>
+
+            <ul class="dropdown-menu" role="menu">
+                <li ng-repeat="searchQuery in searchModel.searchHistory">
+                    <a href ng-click="(searchModel.searchQuery = searchQuery) && (queryHistoryDropdown.isOpen = false)">
+                        {{ searchQuery }}
+                    </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                    <a href ng-click="(searchModel.searchHistory = []) && (queryHistoryDropdown.isOpen = false)">
+                        <i class="fa fa-trash"></i>
+                        &nbsp;
+                        <span l10n key="home.clear_search_history"></span>
+                    </a>
+                </li>
+            </ul>
+
+        </span>
+
+        <input id="editor-input" class="form-control input-sm" type="text"
+               ng-model="searchModel.searchQuery" autofocus autocomplete="off">
+
+        <span class="input-group-btn">
+            <span class="btn btn-danger btn-sm"
+                  ng-click="clearSearchQuery()"
+                  ng-class="{ 'disabled' : !searchModel.searchQuery }">
+                <i class="fa fa-eraser"></i>
+                Clear
+            </span>
+        </span>
+
+    </div>
+
+    <div ng-switch="searchModel.result['length'] > 0"
+         style="margin-top: 15px;margin-right: 15px;margin-left: 15px">
+        <div ng-switch-when="true">
+            <ul class="task-list">
+                <li ng-repeat="todo in searchModel.result"
+                    ng-class="{ 'task-done' : todo.completed }"
+                    is-lats-item="{{ $last }}">
+                    <div class="task-checkbox" ng-show="canManageCollection()">
+                        <i class="fa" style="cursor: pointer;vertical-align: sub;margin-left: 8px;"
+                           btn-checkbox ng-model="todo.completed" ng-change="mark(todo)"
+                           ng-class="{ 'fa-square-o' : !todo.completed, 'fa-check-square-o' : todo.completed }">
+                        </i>
+                    </div>
+                    <div class="task-title">
+                <span class="task-title-sp"
+                      style="vertical-align: sub;">
+                    {{ todo.title }}
+                </span>
+
+                        <div class="pull-right hidden-phone">
+
+                            <i class="fa fa-star" ng-show="todo.priority != 'none'"
+                               ng-class="{ 'star-priority-low' : todo.priority == 'low',
+                                           'star-priority-medium' : todo.priority == 'medium',
+                                           'star-priority-high' : todo.priority == 'high' }"
+                               tooltip="{{ 'home.' + todo.priority + '_priority' | translate }}"
+                               style="vertical-align: sub;">
+                            </i>
+
+                            &nbsp;
+
+                            <span style="padding-right: 8px;vertical-align: sub;">
+                                {{ todo.creationDate | formatDate:'mmm d, yyyy, h:MM TT' }}
+                            </span>
+
+                            <span class="btn btn-primary btn-xs"
+                                  tooltip="{{ 'home.edit' | translate }}"
+                                  ng-click="showItemEditor(todo)"
+                                  ng-show="canManageCollection()">
+                                <i class="fa fa-pencil"></i>
+                            </span>
+
+                            <span class="btn btn-danger btn-xs"
+                                  tooltip="{{ 'home.remove' | translate }}"
+                                  ng-click="removeTodo(todo)"
+                                  ng-show="canManageCollection()">
+                                <i class="fa fa-trash-o"></i>
+                            </span>
+
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <div ng-switch-when="false">
+            <div class="text-center">
+                <div class="row clearfix">
+                    <div class="col-md-12 column">
+                        <span l10n key="home.nothing_found"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</section>

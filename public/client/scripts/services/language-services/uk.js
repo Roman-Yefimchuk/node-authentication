@@ -79,6 +79,11 @@ angular.module('application')
                     "what_needs_to_be_done": "Що потрібно зробити?",
                     "edit": "Редагувати",
                     "remove": "Видалити",
+                    "tasks": "Задачі",
+                    "search_in_workspace": "Пошук по робочому просторі",
+                    "nothing_found": "Нічого не знайдено",
+                    "search_history": "Історія пошуку",
+                    "clear_search_history": "Очистити історію пошуку",
                     "errors": {
                         "connection_problem_with_socket": "Проблема з'єднання з сокетом"
                     },

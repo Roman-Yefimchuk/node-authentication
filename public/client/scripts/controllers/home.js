@@ -24,6 +24,7 @@ angular.module('application')
             var errorsTranslator = translatorService.getSector('home.errors');
             var notificationsTranslator = translatorService.getSector('home.notifications');
 
+            var indexOf = _.indexOf;
             var forEach = _.forEach;
             var findWhere = _.findWhere;
             var filter = _.filter;
@@ -36,9 +37,18 @@ angular.module('application')
             var workspaceDropdown = {
                 isOpen: false
             };
+            var queryHistoryDropdown = {
+                isOpen: false
+            };
             var newTodo = {
                 title: '',
                 priority: 'none'
+            };
+            var searchModel = {
+                searchQuery: '',
+                result: [],
+                searchHistory: [],
+                caseSensitive: false
             };
 
             var BreadcrumbItem = (function () {
@@ -64,6 +74,23 @@ angular.module('application')
 
                 return BreadcrumbItem;
             })();
+
+            function clearSearchQuery() {
+                var searchHistory = searchModel.searchHistory;
+                var searchQuery = searchModel.searchQuery;
+                if (indexOf(searchHistory, searchQuery) == -1) {
+                    searchHistory.push(searchQuery);
+                }
+                searchModel.searchQuery = '';
+            }
+
+            function toggleFormMode() {
+                if ($scope.formMode == 'view') {
+                    $scope.formMode = 'search';
+                } else {
+                    $scope.formMode = 'view';
+                }
+            }
 
             function setFocus() {
                 var input = angular.element('#main-input');
@@ -797,6 +824,8 @@ angular.module('application')
                 });
             }
 
+            $scope.formMode = 'view';
+            $scope.searchModel = searchModel;
             $scope.treeModel = [];
             $scope.breadcrumb = [];
             $scope.errorMessage = null;
@@ -809,6 +838,7 @@ angular.module('application')
             $scope.user = {};
             $scope.itemPriorityDropdown = itemPriorityDropdown;
             $scope.workspaceDropdown = workspaceDropdown;
+            $scope.queryHistoryDropdown = queryHistoryDropdown;
             $scope.permissions = {
                 reader: false,
                 writer: false,
@@ -833,6 +863,49 @@ angular.module('application')
             ];
             $scope.currentViewMode = findWhere($scope.viewModes, {
                 name: 'all'
+            });
+
+            $scope.$watch('searchModel.searchQuery', function (searchQuery) {
+
+                if (searchQuery) {
+
+                    var startWith = function (str, prefix) {
+                        if (str.length >= prefix.length) {
+                            return str.substr(0, prefix.length) == prefix;
+                        }
+                        return false;
+                    };
+
+                    var result = [];
+                    var statusFilter = $scope.statusFilter;
+                    var caseSensitive = searchModel.caseSensitive;
+
+                    if (!caseSensitive) {
+                        searchQuery = searchQuery.toLowerCase();
+                    }
+
+                    forEach($scope.todos, function (todo) {
+                        var title = todo.title;
+
+                        if (!caseSensitive) {
+                            title = title.toLowerCase();
+                        }
+
+                        if (statusFilter) {
+                            if (statusFilter.completed == todo.completed && startWith(title, searchQuery)) {
+                                result.push(todo);
+                            }
+                        } else {
+                            if (startWith(title, searchQuery)) {
+                                result.push(todo);
+                            }
+                        }
+                    });
+
+                    searchModel.result = result;
+                } else {
+                    searchModel.result = [];
+                }
             });
 
             $scope.$watch('currentViewMode', function (viewMode) {
@@ -895,6 +968,8 @@ angular.module('application')
                 $scope.allChecked = !$scope.remainingCount;
             }, true);
 
+            $scope.clearSearchQuery = clearSearchQuery;
+            $scope.toggleFormMode = toggleFormMode;
             $scope.setItemPriority = setItemPriority;
             $scope.showWorkspaceId = showWorkspaceId;
             $scope.onWorkspaceChanged = onWorkspaceChanged;

@@ -1,0 +1,45 @@
+<header class="panel-heading text-center"
+        ng-class="{'header' : canManageCollection(), 'header-min' : !canManageCollection()}">
+
+        <span class="pull-left"
+              style="cursor: pointer"
+              ng-click="showPresentUsers()">
+            <i class="fa fa-users" tooltip="{{ 'home.third_party_users' | translate }}"></i>
+            &nbsp;
+            {{ presentUsers.length }}
+        </span>
+
+        <span ng-show="isOwnWorkspace">
+            <i class="fa fa-user" tooltip="{{ 'home.own_workspace' | translate }}"></i>
+            &nbsp;
+        </span>
+
+        <span>
+            <b>{{ currentWorkspace.name }}</b>
+        </span>
+
+        <span class="pull-right"
+              style="cursor: pointer"
+              ng-click="showWorkspaceInfo()">
+            <i class="fa fa-info" tooltip="{{ 'home.workspace_info' | translate }}"></i>
+        </span>
+
+        <span class="pull-right"
+              style="cursor: pointer;margin-right: 15px"
+              ng-click="toggleFormMode()">
+
+            <i ng-if="formMode == 'view'" class="fa fa-search"
+               tooltip="{{ 'home.search_in_workspace' | translate }}"></i>
+            <i ng-if="formMode == 'search'" class="fa fa-tasks"
+               tooltip="{{ 'home.tasks' | translate }}"></i>
+
+        </span>
+
+        <span class="pull-right"
+              style="cursor: pointer;margin-right: 15px"
+              ng-click="showWorkspaceManager()"
+              ng-show="canManageAccess()">
+            <i class="fa fa-cogs" tooltip="{{ 'home.manage_workspace' | translate }}"></i>
+        </span>
+
+</header>
