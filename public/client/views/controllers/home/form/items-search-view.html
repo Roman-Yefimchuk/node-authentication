@@ -1,51 +1,93 @@
 <section style="margin-bottom: 15px">
 
-    <div class="input-group task-add">
+    <form>
 
-       <span class="input-group-btn dropdown" is-open="queryHistoryDropdown.isOpen">
+        <div class="input-group task-add">
 
-            <span class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
-                  ng-disabled="searchModel.searchHistory['length'] == 0"
-                  tooltip="{{ 'home.search_history' | translate }}">
-                <i class="fa fa-history"></i>
-                &nbsp;
-                <span class="caret"></span>
+           <span class="input-group-btn dropdown" is-open="queryHistoryDropdown.isOpen">
+
+                <span class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
+                      ng-disabled="searchModel.searchHistory['length'] == 0"
+                      tooltip="{{ 'home.search_history' | translate }}">
+                    <i class="fa fa-history"></i>
+                    &nbsp;
+                    <span class="caret"></span>
+                </span>
+
+                <ul class="dropdown-menu" role="menu">
+                    <li ng-repeat="searchQuery in searchModel.searchHistory">
+                        <a href
+                           ng-click="(searchModel.searchQuery = searchQuery) && (queryHistoryDropdown.isOpen = false)">
+                            {{ searchQuery }}
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href ng-click="(searchModel.searchHistory = []) && (queryHistoryDropdown.isOpen = false)">
+                            <i class="fa fa-trash"></i>
+                            &nbsp;
+                            <span l10n key="home.clear_search_history"></span>
+                        </a>
+                    </li>
+                </ul>
+
+           </span>
+
+            <div class="form-group-sm" ng-class="{ 'has-feedback' : !!searchModel.searchQuery }">
+                <label class="control-label" ng-show="false"></label>
+                <input type="text" class="form-control input-sm" id="editor-input"
+                       autofocus autocomplete="off" ng-model="searchModel.searchQuery"
+                       placeholder="Enter search query">
+                <span class="form-control-feedback" style="top: 0"
+                      ng-show="!!searchModel.searchQuery">
+                    <i class="fa fa-times" style="cursor: pointer"
+                       tooltip="{{ 'home.clear' | translate }}"
+                       ng-click="clearSearchQuery()"></i>
+                </span>
+            </div>
+
+            <span class="input-group-btn dropdown" is-open="searchOptionsDropdown.isOpen">
+
+                <span class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
+                      tooltip="{{ 'home.search_options' | translate }}">
+                    <i class="fa fa-cog"></i>
+                    &nbsp;
+                    <span class="caret"></span>
+                </span>
+
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    <li>
+                        <a href ng-click="searchOptionsDropdown.isOpen = false"
+                           btn-checkbox ng-model="searchModel.caseSensitive"
+                           ng-change="search(searchModel.searchQuery)">
+                            <i class="fa" style="cursor: pointer"
+                               ng-class="{ 'fa-square-o' : !searchModel.caseSensitive, 'fa-check-square-o' : searchModel.caseSensitive }">
+                            </i>
+                            &nbsp;
+                            Case sensitive
+                        </a>
+                    </li>
+                    <li>
+                        <a href ng-click="searchOptionsDropdown.isOpen = false"
+                           btn-checkbox ng-model="searchModel.showHighlight">
+                            <i class="fa" style="cursor: pointer"
+                               ng-class="{ 'fa-square-o' : !searchModel.showHighlight, 'fa-check-square-o' : searchModel.showHighlight }">
+                            </i>
+                            &nbsp;
+                            Show Highlight
+                        </a>
+                    </li>
+                </ul>
+
             </span>
 
-            <ul class="dropdown-menu" role="menu">
-                <li ng-repeat="searchQuery in searchModel.searchHistory">
-                    <a href ng-click="(searchModel.searchQuery = searchQuery) && (queryHistoryDropdown.isOpen = false)">
-                        {{ searchQuery }}
-                    </a>
-                </li>
-                <li class="divider"></li>
-                <li>
-                    <a href ng-click="(searchModel.searchHistory = []) && (queryHistoryDropdown.isOpen = false)">
-                        <i class="fa fa-trash"></i>
-                        &nbsp;
-                        <span l10n key="home.clear_search_history"></span>
-                    </a>
-                </li>
-            </ul>
+        </div>
 
-        </span>
-
-        <input id="editor-input" class="form-control input-sm" type="text"
-               ng-model="searchModel.searchQuery" autofocus autocomplete="off">
-
-        <span class="input-group-btn">
-            <span class="btn btn-danger btn-sm"
-                  ng-click="clearSearchQuery()"
-                  ng-class="{ 'disabled' : !searchModel.searchQuery }">
-                <i class="fa fa-eraser"></i>
-                Clear
-            </span>
-        </span>
-
-    </div>
+    </form>
 
     <div ng-switch="searchModel.result['length'] > 0"
          style="margin-top: 15px;margin-right: 15px;margin-left: 15px">
+
         <div ng-switch-when="true">
             <ul class="task-list">
                 <li ng-repeat="todo in searchModel.result"
@@ -57,11 +99,21 @@
                            ng-class="{ 'fa-square-o' : !todo.completed, 'fa-check-square-o' : todo.completed }">
                         </i>
                     </div>
+
                     <div class="task-title">
-                <span class="task-title-sp"
-                      style="vertical-align: sub;">
-                    {{ todo.title }}
-                </span>
+
+                        <span class="task-title-sp"
+                              style="vertical-align: sub;">
+                            <span ng-switch="searchModel.showHighlight">
+                                <span ng-switch-when="true">
+                                    <span ng-bind-html="todo.title | searchHighlight:searchModel">
+                                    </span>
+                                </span>
+                                <span ng-switch-when="false">
+                                    {{ todo.title }}
+                                </span>
+                            </span>
+                        </span>
 
                         <div class="pull-right hidden-phone">
 

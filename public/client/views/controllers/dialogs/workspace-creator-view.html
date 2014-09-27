@@ -15,8 +15,19 @@
             <div class="row clearfix">
                 <div class="col-md-12 column">
 
-                    <input class="form-control input-sm" type="text"
-                           ng-model="creatorModel.workspaceName" autofocus autocomplete="off">
+                    <div class="form-group-sm" ng-class="{ 'has-feedback' : !!creatorModel.workspaceName }"
+                         style="margin-bottom: 0">
+                        <label class="control-label" ng-show="false"></label>
+                        <input type="text" class="form-control input-sm"
+                               placeholder="Enter workspace name"
+                               autofocus autocomplete="off" ng-model="creatorModel.workspaceName">
+                        <span class="form-control-feedback" style="top: 0"
+                              ng-show="!!creatorModel.workspaceName">
+                            <i class="fa fa-times" style="cursor: pointer"
+                               tooltip="{{ 'home.clear' | translate }}"
+                               ng-click="creatorModel.workspaceName = ''"></i>
+                        </span>
+                    </div>
 
                 <span class="pull-left" btn-checkbox ng-model="creatorModel.switchWorkspace"
                       style="margin-top: 15px;cursor: pointer">

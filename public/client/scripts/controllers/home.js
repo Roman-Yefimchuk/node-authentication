@@ -40,6 +40,9 @@ angular.module('application')
             var queryHistoryDropdown = {
                 isOpen: false
             };
+            var searchOptionsDropdown = {
+                isOpen: false
+            };
             var newTodo = {
                 title: '',
                 priority: 'none'
@@ -48,7 +51,8 @@ angular.module('application')
                 searchQuery: '',
                 result: [],
                 searchHistory: [],
-                caseSensitive: false
+                caseSensitive: false,
+                showHighlight: true
             };
 
             var BreadcrumbItem = (function () {
@@ -75,12 +79,51 @@ angular.module('application')
                 return BreadcrumbItem;
             })();
 
-            function clearSearchQuery() {
+            function search(searchQuery) {
+                if (searchQuery) {
+
+                    var startWith = function (str, prefix) {
+                        if (str.length >= prefix.length) {
+                            return str.substr(0, prefix.length) == prefix;
+                        }
+                        return false;
+                    };
+
+                    var result = [];
+                    var caseSensitive = searchModel.caseSensitive;
+
+                    if (!caseSensitive) {
+                        searchQuery = searchQuery.toLowerCase();
+                    }
+
+                    forEach($scope.todos, function (todo) {
+                        var title = todo.title;
+
+                        if (!caseSensitive) {
+                            title = title.toLowerCase();
+                        }
+
+                        if (title.indexOf(searchQuery) != -1) {
+                            result.push(todo);
+                        }
+                    });
+
+                    searchModel.result = result;
+                } else {
+                    searchModel.result = [];
+                }
+            }
+
+            function updateSearchHistory() {
                 var searchHistory = searchModel.searchHistory;
                 var searchQuery = searchModel.searchQuery;
                 if (indexOf(searchHistory, searchQuery) == -1) {
                     searchHistory.push(searchQuery);
                 }
+            }
+
+            function clearSearchQuery() {
+                updateSearchHistory();
                 searchModel.searchQuery = '';
             }
 
@@ -839,6 +882,7 @@ angular.module('application')
             $scope.itemPriorityDropdown = itemPriorityDropdown;
             $scope.workspaceDropdown = workspaceDropdown;
             $scope.queryHistoryDropdown = queryHistoryDropdown;
+            $scope.searchOptionsDropdown = searchOptionsDropdown;
             $scope.permissions = {
                 reader: false,
                 writer: false,
@@ -866,46 +910,7 @@ angular.module('application')
             });
 
             $scope.$watch('searchModel.searchQuery', function (searchQuery) {
-
-                if (searchQuery) {
-
-                    var startWith = function (str, prefix) {
-                        if (str.length >= prefix.length) {
-                            return str.substr(0, prefix.length) == prefix;
-                        }
-                        return false;
-                    };
-
-                    var result = [];
-                    var statusFilter = $scope.statusFilter;
-                    var caseSensitive = searchModel.caseSensitive;
-
-                    if (!caseSensitive) {
-                        searchQuery = searchQuery.toLowerCase();
-                    }
-
-                    forEach($scope.todos, function (todo) {
-                        var title = todo.title;
-
-                        if (!caseSensitive) {
-                            title = title.toLowerCase();
-                        }
-
-                        if (statusFilter) {
-                            if (statusFilter.completed == todo.completed && startWith(title, searchQuery)) {
-                                result.push(todo);
-                            }
-                        } else {
-                            if (startWith(title, searchQuery)) {
-                                result.push(todo);
-                            }
-                        }
-                    });
-
-                    searchModel.result = result;
-                } else {
-                    searchModel.result = [];
-                }
+                search(searchQuery);
             });
 
             $scope.$watch('currentViewMode', function (viewMode) {
@@ -968,6 +973,8 @@ angular.module('application')
                 $scope.allChecked = !$scope.remainingCount;
             }, true);
 
+            $scope.updateSearchHistory = updateSearchHistory;
+            $scope.search = search;
             $scope.clearSearchQuery = clearSearchQuery;
             $scope.toggleFormMode = toggleFormMode;
             $scope.setItemPriority = setItemPriority;

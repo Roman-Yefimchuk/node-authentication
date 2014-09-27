@@ -55,9 +55,18 @@
             </ul>
         </span>
 
-        <input id="main-input" class="form-control input-sm" type="text"
-               l10n="placeholder" placeholder-key="home.what_needs_to_be_done"
-               ng-model="newTodo.title" autofocus autocomplete="off">
+        <div class="form-group-sm" ng-class="{ 'has-feedback' : !!newTodo.title }">
+            <label class="control-label" ng-show="false"></label>
+            <input type="text" class="form-control input-sm" id="main-input"
+                   l10n="placeholder" placeholder-key="home.what_needs_to_be_done"
+                   autofocus autocomplete="off" ng-model="newTodo.title">
+                <span class="form-control-feedback" style="top: 0"
+                      ng-show="!!newTodo.title">
+                    <i class="fa fa-times" style="cursor: pointer"
+                       tooltip="{{ 'home.clear' | translate }}"
+                       ng-click="newTodo.title = ''"></i>
+                </span>
+        </div>
 
          <span class="input-group-btn">
 

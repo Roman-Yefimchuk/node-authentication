@@ -9,4 +9,4 @@ angular.module('application')
     .constant("ROOT_ID", '@root')
 
     .constant("DEBUG_MODE", true)
-    .constant("SOCKET_URL", 'http://127.0.0.1:8080/');
+    .constant("SOCKET_URL", "http://" + window.location['host']);

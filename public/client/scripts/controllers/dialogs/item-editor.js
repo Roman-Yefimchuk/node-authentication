@@ -23,8 +23,8 @@ angular.module('application')
             };
 
             function canSaveItem() {
-                return readableItemModel.title != editableItemModel.title ||
-                    readableItemModel.priority != editableItemModel.priority;
+                return (readableItemModel.title != editableItemModel.title && editableItemModel.title) ||
+                    (readableItemModel.priority != editableItemModel.priority && editableItemModel.priority);
             }
 
             function setFocus() {

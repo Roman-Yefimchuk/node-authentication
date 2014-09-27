@@ -84,6 +84,8 @@ angular.module('application')
                     "nothing_found": "Ничего не найдено",
                     "search_history": "История поиска",
                     "clear_search_history": "Очистить историю поиска",
+                    "search_options": "Опции поиска",
+                    "clear": "Очистить",
                     "errors": {
                         "connection_problem_with_socket": "Проблема соединения с сокетом"
                     },
