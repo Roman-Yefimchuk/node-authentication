@@ -25,7 +25,7 @@ CREATE PROPERTY UserAccount.email STRING
 CREATE PROPERTY UserAccount.token STRING
 CREATE PROPERTY UserAccount.authorizationProvider STRING
 CREATE PROPERTY UserAccount.avatarUrl STRING
-CREATE PROPERTY UserAccount.sex STRING
+CREATE PROPERTY UserAccount.gender STRING
 CREATE PROPERTY UserAccount.birthday LONG
 CREATE PROPERTY UserAccount.registeredDate LONG
 

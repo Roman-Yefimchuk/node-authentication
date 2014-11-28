@@ -1,15 +1,15 @@
 <section class="panel tasks-widget">
 
-    <div static-include="/client/views/controllers/home/form/form-header-view.html"></div>
+    <div static-include="/public/client/views/controllers/home/form/form-header-view.html"></div>
 
     <div ng-switch="formMode">
 
         <div ng-switch-when="view">
-            <div static-include="/client/views/controllers/home/form/items-view.html"></div>
+            <div static-include="/public/client/views/controllers/home/form/items-view.html"></div>
         </div>
 
         <div ng-switch-when="search">
-            <div static-include="/client/views/controllers/home/form/items-search-view.html"></div>
+            <div static-include="/public/client/views/controllers/home/form/items-search-view.html"></div>
         </div>
 
     </div>

@@ -9,7 +9,7 @@ angular.module('application')
 
         function (dialogsService, apiService) {
             return {
-                templateUrl: '/client/views/directives/info-widget-view.html',
+                templateUrl: '/public/client/views/directives/info-widget-view.html',
                 controller: ['$scope', function ($scope) {
 
                     function openFeedbackDialog() {

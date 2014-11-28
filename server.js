@@ -53,21 +53,38 @@
                 app.use(app.router);
 
                 var path = require('path');
-                var name = path.join(__dirname, 'public');
-                var staticPath = express.static(name);
-                app.use(staticPath);
+                var staticPath = express.static(__dirname + '/public');
+                app.use('/public', staticPath);
+
+                var acceptTypeDetector = function (request, handler) {
+                    var accepted = request.accepted;
+                    if (accepted.some(function (type) {
+                        return type.value == 'text/html';
+                    })) {
+                        handler.html();
+                    } else {
+                        if (accepted.some(function (type) {
+                            return type.value == 'application/json';
+                        })) {
+                            handler.json();
+                        } else {
+                            handler.unknown();
+                        }
+                    }
+                };
 
                 app.use(function (request, response, next) {
                     response.status(404);
 
                     var url = decodeURIComponent(request.url);
 
-                    if (request.accepts('html')) {
-                        response.render('page-not-found.ejs', {
-                            requestUrl: url
-                        });
-                    } else {
-                        if (request.accepts('json')) {
+                    acceptTypeDetector(request, {
+                        html: function () {
+                            response.render('page-not-found.ejs', {
+                                requestUrl: url
+                            });
+                        },
+                        json: function () {
                             response.send({
                                 status: false,
                                 error: {
@@ -75,16 +92,41 @@
                                     message: 'Page ' + url + ' not found'
                                 }
                             });
-                        } else {
-                            response.type('txt').send('Page ' + url + ' not found');
+                        },
+                        unknown: function () {
+                            response = response.type('txt');
+                            response.send('Page ' + url + ' not found');
                         }
-                    }
+                    });
                 });
 
                 app.use(function (error, request, response, next) {
                     response.status(error.status || 500);
-                    response.render('internal-server-error.ejs', {
-                        error: error
+
+                    function extractErrorMessage(error) {
+                        return error.message || error;
+                    }
+
+                    acceptTypeDetector(request, {
+                        html: function () {
+                            response.render('internal-server-error.ejs', {
+                                error: extractErrorMessage(error)
+                            });
+                        },
+                        json: function () {
+                            response.send({
+                                status: false,
+                                error: {
+                                    status: Exception.INTERNAL_SERVER_ERROR,
+                                    message: extractErrorMessage(error)
+                                }
+                            });
+                        },
+                        unknown: function () {
+                            var message = extractErrorMessage(error);
+                            response = response.type('txt');
+                            response.send(message);
+                        }
                     });
                 });
             }

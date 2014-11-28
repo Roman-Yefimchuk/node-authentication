@@ -9,7 +9,7 @@ angular.module('application')
 
         function ($rootScope, translatorService) {
             return {
-                templateUrl: '/client/views/directives/language-switcher-view.html',
+                templateUrl: '/public/client/views/directives/language-switcher-view.html',
                 controller: ['$scope', function ($scope) {
 
                     function setLocale(localeCode) {
@@ -21,16 +21,16 @@ angular.module('application')
                     $scope.currentLocaleCode = translatorService.getCurrentLocaleCode();
                     $scope.locales = {
                         'en-us': {
-                            enabledIcon: '/client/images/flags/us-enabled.png',
-                            disabledIcon: '/client/images/flags/us-disabled.png'
+                            enabledIcon: '/public/client/images/flags/us-enabled.png',
+                            disabledIcon: '/public/client/images/flags/us-disabled.png'
                         },
                         'ru': {
-                            enabledIcon: '/client/images/flags/ru-enabled.png',
-                            disabledIcon: '/client/images/flags/ru-disabled.png'
+                            enabledIcon: '/public/client/images/flags/ru-enabled.png',
+                            disabledIcon: '/public/client/images/flags/ru-disabled.png'
                         },
                         'uk': {
-                            enabledIcon: '/client/images/flags/ua-enabled.png',
-                            disabledIcon: '/client/images/flags/ua-disabled.png'
+                            enabledIcon: '/public/client/images/flags/ua-enabled.png',
+                            disabledIcon: '/public/client/images/flags/ua-disabled.png'
                         }
                     };
 

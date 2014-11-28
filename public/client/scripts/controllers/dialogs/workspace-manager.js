@@ -39,14 +39,14 @@ angular.module('application')
                     id: 'generic',
                     title: 'Generic',
                     icon: 'fa-folder',
-                    template: '/client/views/controllers/dialogs/workspace-manager/tabs/generic-tab-view.html',
+                    template: '/public/client/views/controllers/dialogs/workspace-manager/tabs/generic-tab-view.html',
                     isActive: true
                 },
                 {
                     id: 'permissions',
                     title: 'Permissions',
                     icon: 'fa-users',
-                    template: '/client/views/controllers/dialogs/workspace-manager/tabs/permissions-tab-view.html',
+                    template: '/public/client/views/controllers/dialogs/workspace-manager/tabs/permissions-tab-view.html',
                     isActive: false
                 }
             ];

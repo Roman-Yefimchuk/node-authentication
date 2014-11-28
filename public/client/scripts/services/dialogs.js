@@ -15,7 +15,7 @@ angular.module('application')
             return {
                 showWorkspaceManager: function (options) {
                     return open({
-                        templateUrl: '/client/views/controllers/dialogs/workspace-manager/workspace-manager-view.html',
+                        templateUrl: '/public/client/views/controllers/dialogs/workspace-manager/workspace-manager-view.html',
                         controller: 'WorkspaceManagerController',
                         resolve: {
                             options: function () {
@@ -26,7 +26,7 @@ angular.module('application')
                 },
                 showItemEditor: function (options) {
                     return open({
-                        templateUrl: '/client/views/controllers/dialogs/item-editor-view.html',
+                        templateUrl: '/public/client/views/controllers/dialogs/item-editor-view.html',
                         controller: 'ItemEditorController',
                         resolve: {
                             options: function () {
@@ -37,7 +37,7 @@ angular.module('application')
                 },
                 showWorkspaceCreator: function (options) {
                     return open({
-                        templateUrl: '/client/views/controllers/dialogs/workspace-creator-view.html',
+                        templateUrl: '/public/client/views/controllers/dialogs/workspace-creator-view.html',
                         controller: 'WorkspaceCreatorController',
                         resolve: {
                             options: function () {
@@ -48,7 +48,7 @@ angular.module('application')
                 },
                 showPresentUsers: function (options) {
                     return open({
-                        templateUrl: '/client/views/controllers/dialogs/present-users-view.html',
+                        templateUrl: '/public/client/views/controllers/dialogs/present-users-view.html',
                         controller: 'PresentUsersController',
                         resolve: {
                             options: function () {
@@ -59,7 +59,7 @@ angular.module('application')
                 },
                 showConfirmation: function (options) {
                     return open({
-                        templateUrl: '/client/views/controllers/dialogs/confirmation-dialog-view.html',
+                        templateUrl: '/public/client/views/controllers/dialogs/confirmation-dialog-view.html',
                         controller: 'ConfirmationDialogController',
                         size: 'sm',
                         resolve: {
@@ -71,7 +71,7 @@ angular.module('application')
                 },
                 showAlert: function (options) {
                     return open({
-                        templateUrl: '/client/views/controllers/dialogs/alert-dialog-view.html',
+                        templateUrl: '/public/client/views/controllers/dialogs/alert-dialog-view.html',
                         controller: 'AlertDialogController',
                         size: 'sm',
                         resolve: {
@@ -83,7 +83,7 @@ angular.module('application')
                 },
                 showFeedback: function (options) {
                     return open({
-                        templateUrl: '/client/views/controllers/dialogs/feedback-view.html',
+                        templateUrl: '/public/client/views/controllers/dialogs/feedback-view.html',
                         controller: 'FeedbackDialogController',
                         resolve: {
                             options: function () {

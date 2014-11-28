@@ -69,9 +69,7 @@ angular.module('application')
                     $scope.email = 'roman@gmail.com';
                     $scope.password = 'qwerty';
 
-                    $scope.$watch('email', function () {
-                        $scope.login();
-                    });
+                    login();
                 }
             }
 

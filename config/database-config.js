@@ -8,4 +8,4 @@ module.exports = {
     "db_name": "local_db",
     "db_username": "admin",
     "db_password": "admin"
-}
+};

@@ -17,7 +17,7 @@ angular.module('application')
                 if (NODE_TEMPLATE) {
                     callback();
                 } else {
-                    var request = $http.get('/client/views/directives/workspace-tree/workspace-tree-node-view.html');
+                    var request = $http.get('/public/client/views/directives/workspace-tree/workspace-tree-node-view.html');
                     request.success(function (data) {
                         NODE_TEMPLATE = data;
                         callback();
@@ -27,7 +27,7 @@ angular.module('application')
 
             return {
                 transclude: true,
-                templateUrl: '/client/views/directives/workspace-tree/workspace-tree-view.html',
+                templateUrl: '/public/client/views/directives/workspace-tree/workspace-tree-view.html',
                 scope: {
                     treeModel: '=',
                     onSelection: '&',

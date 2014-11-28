@@ -38,7 +38,7 @@
             usernameField: 'email',
             passwordField: 'password',
             passReqToCallback: true
-        }, function (req, email, password, done) {
+        }, function (request, email, password, done) {
 
             process.nextTick(function () {
 
@@ -72,7 +72,7 @@
             usernameField: 'email',
             passwordField: 'password',
             passReqToCallback: true
-        }, function (req, email, password, done) {
+        }, function (request, email, password, done) {
 
             process.nextTick(function () {
 
@@ -88,10 +88,10 @@
                             return done(null, null, error);
                         }
 
-                        if (req.user) {
-                            userAccount = req.user;
+                        if (request.user) {
+                            userAccount = request.user;
                             userAccount.update({
-                                displayName: req.body['name'],
+                                displayName: request.body['name'],
                                 email: email,
                                 password: security.generateHash(password),
                                 token: generateToken()
@@ -107,7 +107,7 @@
                         } else {
                             dbProvider.createUser({
                                 genericId: email,
-                                displayName: req.body['name'],
+                                displayName: request.body['name'],
                                 password: security.generateHash(password),
                                 email: email,
                                 token: generateToken(),
@@ -204,11 +204,11 @@
             clientSecret: authorizationConfig.facebookAuth.clientSecret,
             callbackURL: authorizationConfig.facebookAuth.callbackURL,
             passReqToCallback: true
-        }, function (req, token, refreshToken, profile, done) {
+        }, function (request, token, refreshToken, profile, done) {
 
             var name = profile.name;
 
-            externalAuthorization(req.user, {
+            externalAuthorization(request.user, {
                 genericId: profile.id,
                 displayName: name.givenName + ' ' + name.familyName,
                 email: profile.emails[0].value,
@@ -226,8 +226,8 @@
             consumerSecret: authorizationConfig.twitterAuth.consumerSecret,
             callbackURL: authorizationConfig.twitterAuth.callbackURL,
             passReqToCallback: true
-        }, function (req, token, tokenSecret, profile, done) {
-            externalAuthorization(req.user, {
+        }, function (request, token, tokenSecret, profile, done) {
+            externalAuthorization(request.user, {
                 genericId: profile.id,
                 displayName: profile.displayName,
                 token: token,
@@ -244,13 +244,15 @@
             clientSecret: authorizationConfig.googleAuth.clientSecret,
             callbackURL: authorizationConfig.googleAuth.callbackURL,
             passReqToCallback: true
-        }, function (req, token, refreshToken, profile, done) {
-            externalAuthorization(req.user, {
+        }, function (request, token, refreshToken, profile, done) {
+            externalAuthorization(request.user, {
                 genericId: profile.id,
                 displayName: profile.displayName,
                 token: token,
-                email: profile.emails[0].value,
-                name: 'google'
+                email: profile._json['email'],
+                name: 'google',
+                gender: profile._json['gender'] || null,
+                avatarUrl: profile._json['picture'] || null
             }, done);
         }));
     };

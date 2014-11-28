@@ -11,7 +11,7 @@ angular.module('application')
                     if (data) {
                         message = message.format(data);
                     }
-                    $.notify(message, {
+                    var notification = $.notify(message, {
                         position: "right bottom",
                         className: type,
                         autoHideDelay: 3000

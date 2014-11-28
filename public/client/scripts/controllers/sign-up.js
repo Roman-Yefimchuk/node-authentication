@@ -35,9 +35,7 @@ angular.module('application')
                 $scope.password = 'qwerty';
                 $scope.retypedPassword = 'qwerty';
 
-                $scope.$watch('email', function () {
-                    $scope.signUp();
-                });
+                signUp();
             }
 
             function signUp() {

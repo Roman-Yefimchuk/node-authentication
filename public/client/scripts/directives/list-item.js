@@ -6,7 +6,7 @@ angular.module('application')
 
         function () {
             return {
-                templateUrl: '/client/views/directives/list-item-view.html',
+                templateUrl: '/public/client/views/directives/list-item-view.html',
                 scope: {
                     user: '='
                 },

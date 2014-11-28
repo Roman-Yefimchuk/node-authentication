@@ -37,37 +37,37 @@ angular.module('application', [
             }
 
             $routeProvider.when('/', {
-                templateUrl: '/client/views/controllers/index-view.html',
+                templateUrl: '/public/client/views/controllers/index-view.html',
                 controller: 'IndexController',
                 options: {
                     title: 'routes.index'
                 }
             }).when('/login', {
-                templateUrl: '/client/views/controllers/login-view.html',
+                templateUrl: '/public/client/views/controllers/login-view.html',
                 controller: 'LoginController',
                 options: {
                     title: 'routes.login'
                 }
             }).when('/sign-up', {
-                templateUrl: '/client/views/controllers/sign-up-view.html',
+                templateUrl: '/public/client/views/controllers/sign-up-view.html',
                 controller: 'SignUpController',
                 options: {
                     title: 'routes.sign_up'
                 }
             }).when('/home', {
-                templateUrl: '/client/views/controllers/home/home-view.html',
+                templateUrl: '/public/client/views/controllers/home/home-view.html',
                 controller: 'HomeController',
                 options: {
                     title: 'routes.home'
                 }
             }).when('/profile', {
-                templateUrl: '/client/views/controllers/profile-view.html',
+                templateUrl: '/public/client/views/controllers/profile-view.html',
                 controller: 'ProfileController',
                 options: {
                     title: 'routes.profile'
                 }
             }).when('/settings', {
-                templateUrl: '/client/views/controllers/settings-view.html',
+                templateUrl: '/public/client/views/controllers/settings-view.html',
                 controller: 'SettingsController',
                 options: {
                     title: 'routes.settings'
@@ -76,7 +76,7 @@ angular.module('application', [
                 template: '',
                 controller: 'LogoutController'
             }).otherwise({
-                templateUrl: '/client/views/controllers/page-not-found-view.html',
+                templateUrl: '/public/client/views/controllers/page-not-found-view.html',
                 controller: 'NotFoundController',
                 options: {
                     title: function (currentPath, translatorService) {
