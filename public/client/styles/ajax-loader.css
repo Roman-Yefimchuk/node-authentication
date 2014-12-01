@@ -1,5 +1,5 @@
 .ajax-loader {
-    background: white url(/client/images/ajax-loader.gif) 50% 50% no-repeat;
+    background: white url(/public/client/images/ajax-loader.gif) 50% 50% no-repeat;
     position: fixed;
     width: 100%;
     height: 100%;
