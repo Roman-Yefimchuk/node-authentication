@@ -132,12 +132,12 @@
             }
         });
 
-        require('./app/sockets-handler')(io, dbProvider, developmentMode);
+        require('./app/sockets-handler')(io, dbProvider);
 
-        require('./app/authenticate/local-authenticate')(app, passport, dbProvider, developmentMode);
-        require('./app/authenticate/external-authenticate')(app, passport, developmentMode);
+        require('./app/authenticate/local-authenticate')(app, passport, dbProvider);
+        require('./app/authenticate/external-authenticate')(app, passport);
 
-        var serviceProvider = require('./app/providers/services-provider')(app, developmentMode);
+        var serviceProvider = require('./app/providers/services-provider')(app);
         require('./app/services')(app, dbProvider, serviceProvider);
         require('./app/session-manager')(app, dbProvider, serviceProvider);
 

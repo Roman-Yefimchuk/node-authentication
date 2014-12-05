@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = function (io, dbProvider, developmentMode) {
+module.exports = function (io) {
 
     var _ = require('underscore');
     var socketsSession = {};
@@ -16,20 +16,21 @@ module.exports = function (io, dbProvider, developmentMode) {
             this.workspaceId = workspaceId;
         }
 
-        SocketSession.prototype.sendCommand = function (command, data) {
-            var socket = this.socket;
-            socket.emit(command, data);
-        };
+        SocketSession.prototype = {
+            sendCommand: function (command, data) {
+                var socket = this.socket;
+                socket.emit(command, data);
+            },
+            close: function () {
+                var socket = this.socket;
 
-        SocketSession.prototype.close = function () {
-            var socket = this.socket;
+                delete socketsSession[socket.id];
+                socket.disconnect();
 
-            delete socketsSession[socket.id];
-            socket.disconnect();
-
-            if (++closedCounter > 100) {
-                socketsSession = _.compact(socketsSession);
-                closedCounter = 0;
+                if (++closedCounter > 100) {
+                    socketsSession = _.compact(socketsSession);
+                    closedCounter = 0;
+                }
             }
         };
 

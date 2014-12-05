@@ -2,7 +2,7 @@
 
 (function (require) {
 
-    module.exports = function (db, developmentMode) {
+    module.exports = function (dbWrapper) {
 
         var RECORD_ID_PATTERN = /^\#\-?\d+\:\d+$/;
         var SYSTEM_ID_PATTERN = /^\@.+/;
@@ -29,7 +29,7 @@
         }
 
         function getUserPermissionsForWorkspace(userId, workspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT reader, writer, admin " +
                 "FROM PermittedWorkspace " +
                 "WHERE userId = :userId AND workspaceId = :workspaceId", {
@@ -54,7 +54,7 @@
         }
 
         function getUsersCount(callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT COUNT(*) AS count " +
                 "FROM UserAccount", {
             }).then(function (results) {
@@ -65,7 +65,7 @@
         }
 
         function getChildrenCount(parentWorkspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT COUNT(*) AS count " +
                 "FROM Workspace " +
                 "WHERE parentWorkspaceId = :parentWorkspaceId", {
@@ -80,7 +80,7 @@
         }
 
         function getPermittedChildrenCount(userId, parentWorkspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT COUNT(*) AS count " +
                 "FROM PermittedWorkspace " +
                 "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
@@ -96,7 +96,7 @@
         }
 
         function isCreator(userId, workspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT isOwn " +
                 "FROM PermittedWorkspace " +
                 "WHERE userId = :userId AND workspaceId = :workspaceId", {
@@ -117,7 +117,7 @@
         }
 
         function isWorkspaceAvailable(userId, workspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT isAvailable " +
                 "FROM PermittedWorkspace " +
                 "WHERE userId = :userId AND workspaceId = :workspaceId", {
@@ -138,7 +138,7 @@
         }
 
         function addOwnWorkspace(userId, workspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "UPDATE User " +
                 "ADD ownWorkspaces = :workspaceId " +
                 "WHERE @rid = :id", {
@@ -154,7 +154,7 @@
         }
 
         function removeOwnWorkspace(userId, workspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "UPDATE User " +
                 "REMOVE ownWorkspaces = :workspaceId " +
                 "WHERE @rid = :id", {
@@ -170,7 +170,7 @@
         }
 
         function addUserToGroup(userId, groupName, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "UPDATE Group " +
                 "ADD users = :userId " +
                 "WHERE name = :name", {
@@ -186,7 +186,7 @@
         }
 
         function removeUserFromGroup(userId, groupName, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "UPDATE Group " +
                 "REMOVE users = :userId " +
                 "WHERE name = :name", {
@@ -205,7 +205,7 @@
             if (workspaceId == ROOT_ID) {
                 callback(0);
             } else {
-                db.query("" +
+                dbWrapper.query("" +
                     "SELECT hierarchyLevel " +
                     "FROM Workspace " +
                     "WHERE @rid = :id", {
@@ -225,7 +225,7 @@
             if (workspaceId == ROOT_ID) {
                 callback(ROOT_ID);
             } else {
-                db.query("" +
+                dbWrapper.query("" +
                     "SELECT name " +
                     "FROM Workspace " +
                     "WHERE @rid = :id", {
@@ -243,7 +243,7 @@
 
         function createWorkspaceImpl(name, creatorId, parentWorkspaceId, isDefault, callback) {
             getHierarchyLevel(parentWorkspaceId, function (hierarchyLevel) {
-                db.query("" +
+                dbWrapper.query("" +
                     "INSERT INTO Workspace (name, creatorId, parentWorkspaceId, creationDate, hierarchyLevel) " +
                     "VALUES (:name, :creatorId, :parentWorkspaceId, :creationDate, :hierarchyLevel)", {
                     params: {
@@ -258,7 +258,7 @@
                     var workspaceId = extractPropertyId(workspace);
 
                     addOwnWorkspace(creatorId, workspaceId, function () {
-                        db.query("" +
+                        dbWrapper.query("" +
                             "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, reader, writer, admin, parentWorkspaceId, isAvailable) " +
                             "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :reader, :writer, :admin, :parentWorkspaceId, :isAvailable)", {
                             params: {
@@ -294,7 +294,7 @@
             if (workspaceId == ROOT_ID) {
                 callback();
             } else {
-                db.query("" +
+                dbWrapper.query("" +
                     "SELECT parentWorkspaceId " +
                     "FROM Workspace " +
                     "WHERE @rid = :id", {
@@ -321,7 +321,7 @@
 
                     callback(hierarchy);
                 } else {
-                    db.query("" +
+                    dbWrapper.query("" +
                         "SELECT parentWorkspaceId " +
                         "FROM Workspace " +
                         "WHERE @rid = :id", {
@@ -408,7 +408,7 @@
                             }
                         });
 
-                        db.query("" +
+                        dbWrapper.query("" +
                             "UPDATE UserAccount " +
                             "SET " + formatParams(accountData) + " " +
                             "WHERE @rid = " + extractPropertyId(userAccount), {
@@ -446,7 +446,7 @@
                 failureCallback(e);
             }
 
-            db.query("" +
+            dbWrapper.query("" +
                 "INSERT INTO UserAccount (genericId, displayName, password, email, token, authorizationProvider, registeredDate) " +
                 "VALUES (:genericId, :displayName, :password, :email, :token, :authorizationProvider, :registeredDate)", {
                 params: {
@@ -461,7 +461,7 @@
             }).then(function (results) {
                 var userAccount = results[0];
 
-                db.query("" +
+                dbWrapper.query("" +
                     "INSERT INTO User (accountId) " +
                     "VALUES (:accountId)", {
                     params: {
@@ -475,7 +475,7 @@
 
                         userAccount.userId = userId;
 
-                        db.query("" +
+                        dbWrapper.query("" +
                             "UPDATE UserAccount " +
                             "SET userId = :userId " +
                             "WHERE @rid = :id", {
@@ -512,7 +512,7 @@
             var successCallback = callback.success;
             var failureCallback = callback.failure;
 
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT * " +
                 "FROM UserAccount " +
                 "WHERE genericId = :genericId", {
@@ -532,7 +532,7 @@
         }
 
         function getItems(workspaceId, userId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT * " +
                 "FROM Todo " +
                 "WHERE workspaceId = :workspaceId", {
@@ -563,7 +563,7 @@
         }
 
         function saveItem(workspaceId, userId, todoModel, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "INSERT INTO Todo (workspaceId, creatorId, title, completed, creationDate, priority) " +
                 "VALUES (:workspaceId, :creatorId, :title, :completed, :creationDate, :priority)", {
                 params: {
@@ -587,7 +587,7 @@
 
         function updateItems(workspaceId, userId, todoModels, callback) {
             asyncEach(todoModels, function (todoModel, index, next) {
-                db.query("" +
+                dbWrapper.query("" +
                     "UPDATE Todo " +
                     "SET title = :title, completed = :completed, priority = :priority " +
                     "WHERE @rid = :id", {
@@ -609,7 +609,7 @@
 
         function removeItems(workspaceId, userId, todoIds, callback) {
             asyncEach(todoIds, function (todoId, index, next) {
-                db.query("" +
+                dbWrapper.query("" +
                     "DELETE FROM Todo " +
                     "WHERE @rid = :id", {
                     params: {
@@ -626,7 +626,7 @@
         }
 
         function setUserWorkspaceId(userId, workspaceId, rootWorkspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "UPDATE User " +
                 "SET currentWorkspaceId = :currentWorkspaceId, currentRootWorkspaceId = :currentRootWorkspaceId " +
                 "WHERE @rid = :id", {
@@ -652,7 +652,7 @@
         }
 
         function getUserWorkspaceId(userId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT currentWorkspaceId, currentRootWorkspaceId " +
                 "FROM User " +
                 "WHERE @rid = :id", {
@@ -684,7 +684,7 @@
         }
 
         function updateWorkspace(workspaceId, data, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "UPDATE Workspace " +
                 "SET name = :name " +
                 "WHERE @rid = :id", {
@@ -702,7 +702,7 @@
         function removeWorkspace(userId, workspaceId, callback) {
 
             function removeRecords(workspaceId, callback) {
-                db.query("" +
+                dbWrapper.query("" +
                     "DELETE FROM Todo " +
                     "WHERE workspaceId = :workspaceId", {
                     params: {
@@ -719,7 +719,7 @@
                 if (stack.length > 0) {
                     var parentWorkspaceId = stack.pop();
 
-                    db.query("" +
+                    dbWrapper.query("" +
                         "DELETE FROM Workspace " +
                         "RETURN BEFORE " +
                         "WHERE parentWorkspaceId = :parentWorkspaceId", {
@@ -737,7 +737,7 @@
                                 next();
                             });
                         }, function () {
-                            db.query("" +
+                            dbWrapper.query("" +
                                 "DELETE FROM PermittedWorkspace " +
                                 "WHERE parentWorkspaceId = :parentWorkspaceId", {
                                 params: {
@@ -760,7 +760,7 @@
             }
 
             function removeWorkspace(topLevelWorkspaceIdCollection) {
-                db.query("" +
+                dbWrapper.query("" +
                     "DELETE FROM Workspace " +
                     "RETURN BEFORE " +
                     "WHERE @rid = :id", {
@@ -773,7 +773,7 @@
                     var workspaceId = extractPropertyId(workspace);
 
                     removeOwnWorkspace(workspace.creatorId, workspaceId, function () {
-                        db.query("" +
+                        dbWrapper.query("" +
                             "DELETE FROM PermittedWorkspace " +
                             "WHERE workspaceId = :workspaceId", {
                             params: {
@@ -798,7 +798,7 @@
                 });
             }
 
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT userId " +
                 "FROM PermittedWorkspace " +
                 "WHERE workspaceId = :workspaceId AND userId <> :userId", {
@@ -833,7 +833,7 @@
         }
 
         function getWorkspaces(userId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT expand(ownWorkspaces) " +
                 "FROM User " +
                 "WHERE @rid = :id", {
@@ -856,7 +856,7 @@
         }
 
         function getWorkspace(workspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT name, creatorId, creationDate " +
                 "FROM Workspace " +
                 "WHERE @rid = :id", {
@@ -881,7 +881,7 @@
         }
 
         function getDefaultWorkspaceId(userId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT workspaceId " +
                 "FROM PermittedWorkspace " +
                 "WHERE userId = :userId AND isDefault = true", {
@@ -902,7 +902,7 @@
         }
 
         function getUser(userId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT displayName, registeredDate " +
                 "FROM UserAccount " +
                 "WHERE userId = :userId", {
@@ -929,7 +929,7 @@
             var result = [];
 
             asyncEach(ids, function (userId, index, next) {
-                db.query("" +
+                dbWrapper.query("" +
                     "SELECT displayName, registeredDate " +
                     "FROM UserAccount " +
                     "WHERE userId = :userId", {
@@ -963,7 +963,7 @@
                 if (rootWorkspaceId == workspaceId) {
                     callback('success', result);
                 } else {
-                    db.query("" +
+                    dbWrapper.query("" +
                         "SELECT workspaceId, parentWorkspaceId " +
                         "FROM PermittedWorkspace " +
                         "WHERE userId = :userId AND workspaceId = :workspaceId", {
@@ -993,7 +993,7 @@
         }
 
         function getPermittedWorkspaces(userId, parentWorkspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT * " +
                 "FROM PermittedWorkspace " +
                 "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
@@ -1007,7 +1007,7 @@
                 var result = [];
 
                 asyncEach(permittedWorkspaces, function (permittedWorkspace, index, next) {
-                    db.query("" +
+                    dbWrapper.query("" +
                         "SELECT * " +
                         "FROM Workspace " +
                         "WHERE @rid = :id", {
@@ -1067,7 +1067,7 @@
         }
 
         function getAllWorkspaces(parentWorkspaceId, callback) {
-            db.query("" +
+            dbWrapper.query("" +
                 "SELECT @rid, name " +
                 "FROM Workspace " +
                 "WHERE parentWorkspaceId = :parentWorkspaceId", {
@@ -1105,7 +1105,7 @@
         function getAllUsers(skip, limit, callback) {
             getUsersCount(function (count) {
                 if (count > 0) {
-                    db.query("" +
+                    dbWrapper.query("" +
                         "SELECT userId, displayName, registeredDate " +
                         "FROM UserAccount SKIP :skip LIMIT :limit", {
                         params: {
@@ -1146,7 +1146,7 @@
         function getAllUsersWithPermissions(workspaceId, skip, limit, callback) {
             getUsersCount(function (count) {
                 if (count > 0) {
-                    db.query("" +
+                    dbWrapper.query("" +
                         "SELECT userId, displayName, registeredDate " +
                         "FROM UserAccount SKIP :skip LIMIT :limit", {
                         params: {
@@ -1216,7 +1216,7 @@
 
                     var isPermittedWorkspaceExist = function (workspaceId, callback) {
 
-                        db.query("" +
+                        dbWrapper.query("" +
                             "SELECT COUNT(*) AS count " +
                             "FROM PermittedWorkspace " +
                             "WHERE userId = :userId AND workspaceId = :workspaceId", {
@@ -1235,7 +1235,7 @@
 
                         if (isExist) {
 
-                            db.query("" +
+                            dbWrapper.query("" +
                                 "UPDATE PermittedWorkspace " +
                                 "SET reader = :reader, writer = :writer, admin = :admin, isAvailable = :isAvailable " +
                                 "WHERE userId = :userId AND workspaceId = :workspaceId", {
@@ -1262,7 +1262,7 @@
                         } else {
 
                             var addPermittedWorkspace = function (parentWorkspaceId, callback) {
-                                db.query("" +
+                                dbWrapper.query("" +
                                     "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, reader, writer, admin, parentWorkspaceId, isAvailable) " +
                                     "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :reader, :writer, :admin, :parentWorkspaceId, :isAvailable)", {
                                     params: {
@@ -1323,7 +1323,7 @@
 
                                                         getParentWorkspaceId(id, function (parentWorkspaceId) {
 
-                                                            db.query("" +
+                                                            dbWrapper.query("" +
                                                                 "INSERT INTO PermittedWorkspace (userId, workspaceId, isOwn, isDefault, parentWorkspaceId, isAvailable) " +
                                                                 "VALUES (:userId, :workspaceId, :isOwn, :isDefault, :parentWorkspaceId, :isAvailable)", {
                                                                 params: {
@@ -1364,7 +1364,7 @@
                     });
                 } else {
 
-                    db.query("" +
+                    dbWrapper.query("" +
                         "DELETE FROM PermittedWorkspace " +
                         "RETURN BEFORE " +
                         "WHERE userId = :userId AND workspaceId = :workspaceId", {
@@ -1384,7 +1384,7 @@
                                     if (isAvailable) {
                                         callback(workspaceId);
                                     } else {
-                                        db.query("" +
+                                        dbWrapper.query("" +
                                             "SELECT COUNT(*) AS count " +
                                             "FROM PermittedWorkspace " +
                                             "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
@@ -1397,7 +1397,7 @@
                                             if (results[0].count > 0) {
                                                 callback(workspaceId);
                                             } else {
-                                                db.query("" +
+                                                dbWrapper.query("" +
                                                     "DELETE FROM PermittedWorkspace " +
                                                     "RETURN BEFORE " +
                                                     "WHERE userId = :userId AND workspaceId = :workspaceId", {
@@ -1426,7 +1426,7 @@
                             if (stack.length > 0) {
                                 var parentWorkspaceId = stack.pop();
 
-                                db.query("" +
+                                dbWrapper.query("" +
                                     "DELETE FROM PermittedWorkspace " +
                                     "RETURN BEFORE " +
                                     "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {

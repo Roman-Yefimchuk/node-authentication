@@ -81,7 +81,7 @@ angular.module('application')
             }
 
             return {
-                openCollection: function (options, callback) {
+                openConnection: function (options, callback) {
 
                     var url = options.url;
                     var userId = options.userId;
@@ -166,9 +166,7 @@ angular.module('application')
                         });
                     }
                 },
-                closeConnection: function () {
-                    closeConnection();
-                }
+                closeConnection: closeConnection
             };
         }
     ]

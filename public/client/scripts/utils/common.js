@@ -2,7 +2,7 @@ String.prototype.format = function (args) {
     var value = this;
     for (var key in args) {
         if (args[key] != undefined) {
-            var pattern = new RegExp('@{ *' + key + ' *}', 'g');
+            var pattern = new RegExp('@{' + key + '}', 'g');
             value = value.replace(pattern, args[key]);
         }
     }

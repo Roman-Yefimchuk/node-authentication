@@ -1010,7 +1010,7 @@ angular.module('application')
                         loaderService.hideLoader();
                     });
 
-                    socketsService.openCollection({
+                    socketsService.openConnection({
                         url: SOCKET_URL,
                         userId: user.userId,
                         workspaceId: user.workspaceId

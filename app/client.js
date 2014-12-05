@@ -4,8 +4,9 @@
 
     var fs = require("fs");
 
-    module.exports = function (app, developmentMode) {
+    module.exports = function (app) {
 
+        var developmentMode = true;
         var indexFile = null;
 
         function getIndexFile(callback) {

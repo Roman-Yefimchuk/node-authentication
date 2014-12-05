@@ -3,7 +3,7 @@
 (function (require) {
 
     module.exports = {
-        connect: function (callback, developmentMode) {
+        connect: function (callback) {
 
             var databaseConfig = require('../../config/database-config');
             var Oriento = require('oriento');
@@ -54,7 +54,7 @@
                 }
             })();
 
-            var dbProvider = require('./db-provider')(dbWrapper, developmentMode);
+            var dbProvider = require('./db-provider')(dbWrapper);
             callback(dbProvider);
         }
     };
