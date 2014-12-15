@@ -13,19 +13,17 @@
 
     var Exception = require('./app/exception');
 
-    function isDevelopmentMode() {
+    var developmentMode = (function () {
         var args = process['argv'];
         if (args.length > 2) {
             if (args[2] == 'development-mode') {
-                console.log('Server started in [development] mode');
+                console.log('Server started in DEVELOPMENT mode');
                 return true;
             }
         }
-        console.log('Server started in [standard] mode');
+        console.log('Server started in STANDARD mode');
         return false;
-    }
-
-    var developmentMode = isDevelopmentMode();
+    })();
 
     var dbConnector = require('./app/db/db-connector');
     dbConnector.connect(function (dbProvider) {
@@ -40,9 +38,9 @@
 
             app.set('view engine', 'ejs');
 
-            var secret = require('./app/utils/security');
+            var securityUtils = require('./app/utils/security-utils');
             app.use(express.session({
-                secret: secret.randomString()
+                secret: securityUtils.randomString()
             }));
 
             app.use(passport.initialize());
@@ -132,7 +130,7 @@
             }
         });
 
-        require('./app/sockets-handler')(io, dbProvider);
+        require('./app/socket/sockets-handler')(io, dbProvider);
 
         require('./app/authenticate/local-authenticate')(app, passport, dbProvider);
         require('./app/authenticate/external-authenticate')(app, passport);
@@ -145,7 +143,7 @@
 
         server.listen(port);
 
-        console.log('The magic happens on port ' + port);
+        console.log('Server successfully started on port ' + port);
 
     }, developmentMode);
 

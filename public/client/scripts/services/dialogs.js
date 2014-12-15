@@ -91,6 +91,74 @@ angular.module('application')
                             }
                         }
                     });
+                },
+                showAdditionLinkEditor: function (options) {
+                    return open({
+                        templateUrl: '/public/client/views/controllers/dialogs/addition-link-editor-dialog-view.html',
+                        controller: 'AdditionalLinkEditorDialogController',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
+                },
+                showQuestionEditor: function (options) {
+                    return open({
+                        templateUrl: '/public/client/views/controllers/dialogs/question-editor/question-editor-view.html',
+                        controller: 'QuestionEditorController',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
+                },
+                showSuspendedDialog: function (options) {
+                    return open({
+                        templateUrl: '/public/client/views/controllers/dialogs/suspended-dialog.html',
+                        controller: 'SuspendDialogController',
+                        backdrop: 'static',
+                        keyboard: false,
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
+                },
+                showPresentListeners: function (options) {
+                    return open({
+                        templateUrl: '/public/client/views/controllers/dialogs/present-listeners-view.html',
+                        controller: 'PresentListenersController',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
+                },
+                showAnsweredListeners: function (options) {
+                    return open({
+                        templateUrl: '/public/client/views/controllers/dialogs/answered-listeners-view.html',
+                        controller: 'AnsweredListenersController',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
+                },
+                showProfileEditor: function (options) {
+                    return open({
+                        templateUrl: '/public/client/views/controllers/dialogs/profile-editor-dialog-view.html',
+                        controller: 'ProfileEditorDialogController',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
                 }
             };
         }

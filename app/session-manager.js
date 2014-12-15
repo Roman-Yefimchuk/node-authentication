@@ -3,8 +3,9 @@
 module.exports = function (app, dbProvider, serviceProvider) {
 
     var Exception = require('../app/exception');
+    var RestApi = require('../public/common-scripts/rest-api');
 
-    serviceProvider.get('/is-authenticated', function (request, response, resultCallback) {
+    serviceProvider.get(RestApi.IS_AUTHENTICATED, function (request, response, resultCallback) {
         var userAccount = request.user;
 
         if (userAccount && userAccount.isAuthenticated()) {
@@ -23,7 +24,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         }
     });
 
-    serviceProvider.get('/get-user-data', function (request, response, resultCallback) {
+    serviceProvider.get(RestApi.GET_USER_DATA, function (request, response, resultCallback) {
         var userAccount = request.user;
 
         if (userAccount && userAccount.isAuthenticated()) {
@@ -73,7 +74,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         }
     });
 
-    serviceProvider.get('/logout', function (request, response, resultCallback) {
+    serviceProvider.get(RestApi.LOGOUT, function (request, response, resultCallback) {
         request.logout();
         resultCallback();
     });

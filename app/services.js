@@ -2,8 +2,17 @@
 
 module.exports = function (app, dbProvider, serviceProvider) {
 
+    var _ = require('underscore');
+
     var Exception = require('../app/exception');
     var emailSender = require('../app/email-sender');
+    var RestApi = require('../public/common-scripts/rest-api');
+
+    function checkAuthenticated(request) {
+        if (!request.user) {
+            throw new Exception(Exception.NOT_AUTHENTICATED, 'You are not authenticated');
+        }
+    }
 
     function getParam(paramName, request) {
         var params = request.params;
@@ -19,7 +28,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         }
     }
 
-    serviceProvider.get('/api/get-default-workspace-id/:userId', function (request, response, resultCallback) {
+    serviceProvider.get(RestApi.GET_DEFAULT_WORKSPACE_ID, function (request, response, resultCallback) {
         var userId = getParam('userId', request);
         dbProvider.getDefaultWorkspaceId(userId, function (workspaceId) {
             resultCallback({
@@ -31,7 +40,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/get-workspace/:workspaceId', function (request, response, resultCallback) {
+    serviceProvider.get(RestApi.GET_WORKSPACE_BY_ID, function (request, response, resultCallback) {
         var workspaceId = getParam('workspaceId', request);
         dbProvider.getWorkspace(workspaceId, function (workspace) {
             resultCallback({
@@ -41,7 +50,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/get-user/:userId', function (request, response, resultCallback) {
+    serviceProvider.get(RestApi.GET_USER_BY_ID, function (request, response, resultCallback) {
         var userId = getParam('userId', request);
         dbProvider.getUser(userId, function (user) {
             resultCallback({
@@ -51,7 +60,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/get-users', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.GET_USERS, function (request, response, resultCallback) {
         var userId = getUserId(request);
         var ids = request.body['ids'];
         dbProvider.getUsers(ids, function (users) {
@@ -62,7 +71,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/set-users-permissions-for-workspace', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.SET_PERMISSIONS_FOR_WORKSPACE, function (request, response, resultCallback) {
         var userId = getUserId(request);
 
         var workspaceId = request.body['workspaceId'];
@@ -77,7 +86,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/get-all-users-with-permissions/:workspaceId', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.GET_ALL_USERS_WITH_PERMISSIONS, function (request, response, resultCallback) {
         var userId = getUserId(request);
         var workspaceId = getParam('workspaceId', request);
 
@@ -92,9 +101,11 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/get-permitted-workspaces', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.GET_PERMITTED_WORKSPACES, function (request, response, resultCallback) {
+
         var userId = getUserId(request);
         var parentWorkspaceId = request.body['parentWorkspaceId'];
+
         dbProvider.getPermittedWorkspaces(userId, parentWorkspaceId, function (workspaces) {
             resultCallback({
                 message: 'Selected ' + workspaces.length + ' permitted workspaces(s)',
@@ -103,7 +114,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/get-all-users', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.GET_ALL_USERS, function (request, response, resultCallback) {
 
         var skip = request.body['skip'];
         var limit = request.body['limit'];
@@ -116,7 +127,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/get-all-workspaces', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.GET_ALL_WORKSPACES, function (request, response, resultCallback) {
         var parentWorkspaceId = request.body['parentWorkspaceId'];
         dbProvider.getAllWorkspaces(parentWorkspaceId, function (workspaces) {
             resultCallback({
@@ -126,7 +137,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/get-workspaces/:userId', function (request, response, resultCallback) {
+    serviceProvider.get(RestApi.GET_WORKSPACES_FOR_USER, function (request, response, resultCallback) {
         var userId = getParam('userId', request);
         dbProvider.getWorkspaces(userId, function (workspaces) {
             resultCallback({
@@ -136,7 +147,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/get-user-workspace', function (request, response, resultCallback) {
+    serviceProvider.get(RestApi.GET_CURRENT_USER_WORKSPACE, function (request, response, resultCallback) {
         var userId = getUserId(request);
         dbProvider.getUserWorkspaceId(userId, function (workspaceId, rootWorkspaceId) {
             resultCallback({
@@ -149,7 +160,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/set-user-workspace', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.SET_CURRENT_USER_WORKSPACE, function (request, response, resultCallback) {
         var userId = getUserId(request);
 
         var workspaceId = request.body['workspaceId'];
@@ -166,7 +177,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/create-workspace', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.CREATE_WORKSPACE, function (request, response, resultCallback) {
         var userId = getUserId(request);
         var workspaceName = request.body['workspaceName'];
         var parentWorkspaceId = request.body['parentWorkspaceId'];
@@ -180,7 +191,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/load-hierarchy', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.LOAD_HIERARCHY, function (request, response, resultCallback) {
         var userId = getUserId(request);
 
         var workspaceId = request.body['workspaceId'];
@@ -196,7 +207,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.post('/api/update-workspace/:workspaceId', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.UPDATE_WORKSPACE, function (request, response, resultCallback) {
         var userId = getUserId(request);
 
         var workspaceId = getParam('workspaceId', request);
@@ -206,7 +217,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/remove-workspace/:workspaceId', function (request, response, resultCallback) {
+    serviceProvider.get(RestApi.REMOVE_WORKSPACE, function (request, response, resultCallback) {
         var userId = getUserId(request);
 
         var workspaceId = getParam('workspaceId', request);
@@ -218,48 +229,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get('/api/items/:workspaceId', function (request, response, resultCallback) {
-        var userId = getUserId(request);
-        var workspaceId = getParam('workspaceId', request);
-        dbProvider.getItems(workspaceId, userId, function (items) {
-            resultCallback({
-                message: 'Selected ' + items.length + ' item(s)',
-                data: items
-            });
-        });
-    });
-
-    serviceProvider.post('/api/save/:workspaceId', function (request, response, resultCallback) {
-        var userId = getUserId(request);
-        var workspaceId = getParam('workspaceId', request);
-        var todoModel = request.body['todoModel'];
-        dbProvider.saveItem(workspaceId, userId, todoModel, function (item) {
-            resultCallback({
-                message: 'Item[' + item.itemId + '] saved',
-                data: item
-            });
-        });
-    });
-
-    serviceProvider.post('/api/update/:workspaceId', function (request, response, resultCallback) {
-        var userId = getUserId(request);
-        var workspaceId = getParam('workspaceId', request);
-        var todoModels = request.body['todoModels'];
-        dbProvider.updateItems(workspaceId, userId, todoModels, function () {
-            resultCallback('Updated ' + todoModels.length + ' item(s)');
-        });
-    });
-
-    serviceProvider.post('/api/remove/:workspaceId', function (request, response, resultCallback) {
-        var userId = getUserId(request);
-        var workspaceId = getParam('workspaceId', request);
-        var todoIds = request.body['todoIds'];
-        dbProvider.removeItems(workspaceId, userId, todoIds, function () {
-            resultCallback('Removed ' + todoIds.length + ' item(s)');
-        });
-    });
-
-    serviceProvider.post('/api/feedback', function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.FEEDBACK, function (request, response, resultCallback) {
         var feedbackModel = request.body['feedbackModel'];
 
         var subject = feedbackModel.subject;
@@ -268,6 +238,245 @@ module.exports = function (app, dbProvider, serviceProvider) {
 
         emailSender.sendEmail(subject, senderAddress, message, function (error, response) {
             resultCallback('OK');
+        });
+    });
+
+    serviceProvider.post(RestApi.CREATE_LECTURE, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var data = request.body;
+
+        dbProvider.createLecture(data, function (lecture) {
+            resultCallback({
+                data: lecture
+            });
+        });
+    });
+
+    serviceProvider.post(RestApi.UPDATE_LECTURE, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.params['lectureId'];
+        var lectureData = request.body;
+
+        dbProvider.updateLecture(lectureId, lectureData, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.REMOVE_LECTURE, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.params['lectureId'];
+
+        dbProvider.removeLecture(lectureId, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_LECTURE_BY_AUTHOR_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var authorId = request.params['authorId'];
+
+        dbProvider.getLecturesByAuthorId(authorId, function (lectures) {
+            resultCallback({
+                data: lectures
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_LECTURE_BY_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.params['lectureId'];
+
+        dbProvider.getLectureById(lectureId, function (lecture) {
+            resultCallback({
+                data: lecture
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_LECTURE_BY_WORKSPACE_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var workspaceId = request.params['workspaceId'];
+
+        dbProvider.getLecturesByWorkspaceId(workspaceId, function (lectures) {
+            resultCallback({
+                data: lectures
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.LOAD_LECTURE_STATISTIC, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.params['lectureId'];
+
+        dbProvider.loadStatisticForLecture(lectureId, function (data) {
+            resultCallback({
+                data: data
+            });
+        });
+    });
+
+    serviceProvider.post(RestApi.UPDATE_LECTURE_STATISTIC, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.params['lectureId'];
+        var data = request.body;
+
+        dbProvider.updateStatisticForLecture(lectureId, data, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_LECTURE_CONDITION, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.params['lectureId'];
+
+        dbProvider.getLectureCondition(lectureId, function (condition) {
+            resultCallback({
+                data: condition
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_ACTIVE_LECTURES, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        dbProvider.getActiveLectures(function (activeLectures) {
+            resultCallback({
+                data: activeLectures
+            });
+        });
+    });
+
+    serviceProvider.post(RestApi.UPDATE_LECTURE_STATUS, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.params['lectureId'];
+        var status = request.body['status'];
+        var lecturerId = request.body['lecturerId'];
+
+        dbProvider.updateLectureStatus(lectureId, lecturerId, status, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.post(RestApi.CREATE_QUESTION, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.body['lectureId'];
+        var questionModel = request.body['questionModel'];
+
+        dbProvider.createQuestion(lectureId, questionModel, function (questionId) {
+            resultCallback({
+                data: {
+                    questionId: questionId
+                }
+            });
+        });
+    });
+
+    serviceProvider.post(RestApi.UPDATE_QUESTION, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var questionId = request.params['questionId'];
+        var questionModel = request.body['questionModel'];
+
+        dbProvider.updateQuestion(questionId, questionModel, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.REMOVE_QUESTION, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var questionId = request.params['questionId'];
+
+        dbProvider.removeQuestion(questionId, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_QUESTION_BY_LECTURE_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.params['lectureId'];
+
+        dbProvider.getQuestionsByLectureId(lectureId, function (questions) {
+            resultCallback({
+                data: {
+                    questions: questions
+                }
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_QUESTION_BY_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var questionId = request.params['questionId'];
+
+        dbProvider.getQuestionById(questionId, function (question) {
+            resultCallback({
+                data: {
+                    question: question
+                }
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_USER_PROFILE, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var userId = request.params['userId'];
+
+        dbProvider.getUserProfile(userId, function (userProfile) {
+            resultCallback({
+                data: userProfile
+            });
+        });
+    });
+
+    serviceProvider.post(RestApi.UPDATE_USER_PROFILE, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var userId = request.params['userId'];
+        var data = request.body['data'];
+
+        dbProvider.updateUserProfile(userId, data, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_QUICK_TIMESTAMP, function (request, response, resultCallback) {
+        resultCallback({
+            data: {
+                timestamp: _.now()
+            }
         });
     });
 };

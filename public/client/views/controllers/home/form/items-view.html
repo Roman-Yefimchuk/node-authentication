@@ -1,80 +1,28 @@
-<form ng-submit="addTodo()" ng-show="canManageCollection()">
+<form ng-submit="addLecture()" ng-show="canManageCollection()">
 
     <div class="input-group task-add">
 
-        <span class="input-group-btn dropdown" is-open="itemPriorityDropdown.isOpen">
-
-            <span class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
-                  tooltip="{{ 'home.priority' | translate }}">
-                <i class="fa fa-star"
-                   ng-class="{ 'star-priority-none' : newTodo.priority == 'none',
-                               'star-priority-low' : newTodo.priority == 'low',
-                               'star-priority-medium' : newTodo.priority == 'medium',
-                               'star-priority-high' : newTodo.priority == 'high'
-                             }">
-                </i>
-            </span>
-
-            <ul class="dropdown-menu" role="menu">
-                <li>
-                    <a href ng-click="setItemPriority('high')">
-                        <i class="fa fa-star star-priority-high"></i>
-                        &nbsp;
-                        <span l10n key="home.high_priority"
-                              ng-class="{ 'bold-fond' : newTodo.priority == 'high' }">
-                        </span>
-                    </a>
-                </li>
-                <li>
-                    <a href ng-click="setItemPriority('medium')">
-                        <i class="fa fa-star star-priority-medium"></i>
-                        &nbsp;
-                        <span l10n key="home.medium_priority"
-                              ng-class="{ 'bold-fond' : newTodo.priority == 'medium' }">
-                        </span>
-                    </a>
-                </li>
-                <li>
-                    <a href ng-click="setItemPriority('low')">
-                        <i class="fa fa-star star-priority-low"></i>
-                        &nbsp;
-                        <span l10n key="home.low_priority"
-                              ng-class="{ 'bold-fond' : newTodo.priority == 'low' }">
-                        </span>
-                    </a>
-                </li>
-                <li>
-                    <a href ng-click="setItemPriority('none')">
-                        <i class="fa fa-star star-priority-none"></i>
-                        &nbsp;
-                        <span l10n key="home.without_priority"
-                              ng-class="{ 'bold-fond' : newTodo.priority == 'none' }">
-                        </span>
-                    </a>
-                </li>
-            </ul>
-        </span>
-
-        <div class="form-group-sm" ng-class="{ 'has-feedback' : !!newTodo.title }">
+        <div class="form-group-sm" ng-class="{ 'has-feedback' : !!lectureModel.title }">
             <label class="control-label" ng-show="false"></label>
             <input type="text" class="form-control input-sm" id="main-input"
-                   l10n="placeholder" placeholder-key="home.what_needs_to_be_done"
-                   autofocus autocomplete="off" ng-model="newTodo.title">
+                   l10n="placeholder" placeholder-key="home.enter_lecture_title"
+                   autofocus autocomplete="off" ng-model="lectureModel.title"
+                   style="border-top-left-radius: 4px;border-bottom-left-radius: 4px;">
                 <span class="form-control-feedback" style="top: 0"
-                      ng-show="!!newTodo.title">
+                      ng-show="!!lectureModel.title">
                     <i class="fa fa-times" style="cursor: pointer"
                        tooltip="{{ 'home.clear' | translate }}"
-                       ng-click="newTodo.title = ''"></i>
+                       ng-click="lectureModel.title = ''"></i>
                 </span>
         </div>
 
          <span class="input-group-btn">
 
              <span class="btn btn-success btn-sm"
-                   ng-click="addTodo()">
+                   ng-click="addLecture()">
                  <i class="fa fa-plus"></i>
                  &nbsp;
-                 <span l10n key="home.add_task"></span>
+                 <span l10n key="home.add_lecture"></span>
              </span>
 
          </span>
@@ -85,88 +33,210 @@
 
 <div class="panel-body">
 
-    <div class="task-content">
+<div class="task-content">
 
-        <div ng-switch="loading">
+<div ng-switch="loading">
+    <div ng-switch-when="true">
+        <div static-include="/public/client/views/common/loader-view.html"></div>
+    </div>
+    <div ng-switch-when="false">
+
+        <div ng-switch="lectures.length > 0">
             <div ng-switch-when="true">
-                <div static-include="/public/client/views/common/loader-view.html"></div>
-            </div>
-            <div ng-switch-when="false">
 
-                <div ng-switch="todos.length > 0 && (todos | filter:statusFilter).length > 0">
-                    <div ng-switch-when="true">
+                <ul class="task-list">
 
-                        <ul class="task-list">
+                    <li ng-repeat="lecture in lectures"
+                        style="list-style-type: none;"
+                        is-lats-item="{{ $last }}"
+                        ng-class="{ 'task-done' : lecture.condition['status'] == 'suspended' }">
 
-                            <li ng-repeat="todo in todos | filter:statusFilter"
-                                ng-class="{ 'task-done' : todo.completed }"
-                                is-lats-item="{{ $last }}">
+                        <span ng-switch="canManageLecture(lecture)">
+                            <span ng-switch-when="true">
 
-                                <div class="task-checkbox" ng-show="canManageCollection()">
+                                <span class="task-title">
 
-                                    <i class="fa" style="cursor: pointer;vertical-align: sub;margin-left: 8px;"
-                                       btn-checkbox ng-model="todo.completed" ng-change="mark(todo)"
-                                       ng-class="{ 'fa-square-o' : !todo.completed, 'fa-check-square-o' : todo.completed }">
-                                    </i>
-
-                                </div>
-
-                                <div class="task-title">
-
-                                <span class="task-title-sp"
-                                      style="vertical-align: sub;">
-                                    {{ todo.title }}
-                                </span>
-
-                                    <div class="pull-right hidden-phone">
-
-                                        <i class="fa fa-star" ng-show="todo.priority != 'none'"
-                                           ng-class="{ 'star-priority-low' : todo.priority == 'low',
-                                                       'star-priority-medium' : todo.priority == 'medium',
-                                                       'star-priority-high' : todo.priority == 'high'
-                                                     }"
-                                           tooltip="{{ 'home.' + todo.priority + '_priority' | translate }}"
-                                           style="vertical-align: sub;">
-                                        </i>
+                                    <span class="pull-left">
 
                                         &nbsp;
 
-                                        <span style="padding-right: 8px;vertical-align: sub;">
-                                            {{ todo.creationDate | formatDate:'mmm d, yyyy, h:MM TT' }}
+                                        <a class="btn btn-success btn-xs"
+                                           tooltip="{{ 'home.start_lecture' | translate }}"
+                                           ng-show="lecture.condition['status'] == 'stopped'"
+                                           ng-click="startLecture(lecture)">
+                                            <i class="fa fa-play"></i>
+                                        </a>
+
+                                        <a class="btn btn-primary btn-xs"
+                                             tooltip="{{ 'home.resume_lecture' | translate }}"
+                                             ng-show="lecture.condition['status'] == 'suspended'"
+                                             ng-click="resumeLecture(lecture)">
+                                            <i class="fa fa-play"></i>
+                                        </a>
+
+                                        <a class="btn btn-primary btn-xs"
+                                             tooltip="{{ 'home.suspend_lecture' | translate }}"
+                                             ng-show="lecture.condition['status'] == 'started'"
+                                             ng-click="suspendLecture(lecture)">
+                                            <i class="fa fa-pause"></i>
+                                        </a>
+
+                                        <a class="btn btn-danger btn-xs"
+                                             tooltip="{{ 'home.stop_lecture' | translate }}"
+                                             ng-show="lecture.condition['status'] == 'started' || lecture.condition['status'] == 'suspended'"
+                                             ng-click="stopLecture(lecture)">
+                                            <i class="fa fa-stop"></i>
+                                        </a>
+
+                                    </span>
+
+                                    &nbsp;
+
+                                    <span class="task-title-sp" style="vertical-align: sub;">
+                                        <span ng-switch="lecture.condition['status']">
+                                            <span ng-switch-when="stopped">
+                                                {{ lecture.title }}
+                                            </span>
+                                            <span ng-switch-default>
+                                                <a ng-href="/#/lectures/lecture-board/{{ lecture.id }}">
+                                                    {{ lecture.title }}
+                                                </a>
+                                            </span>
+                                        </span>
+                                    </span>
+
+                                    <span class="pull-right hidden-phone">
+
+                                        <span ng-switch="lecture.condition['status']">
+                                            <span ng-switch-when="stopped">
+                                                <span style="padding-right: 8px;vertical-align: sub;">
+                                                    {{ lecture.creationDate | formatDate:'mmm d, yyyy, h:MM TT' }}
+                                                </span>
+                                            </span>
+                                            <span ng-switch-default>
+                                                <span class="pull-left"
+                                                      style="padding-right: 6px;padding-top: 4px;cursor: pointer">
+                                                    <i class="fa fa-users"
+                                                       tooltip="Присутні слухачі"
+                                                       ng-click="showPresentListeners(lecture)">
+                                                    </i>&nbsp;<b>{{ getPresentListenersCount(lecture) }}</b>
+                                                </span>
+
+                                                <span class="pull-left"
+                                                      style="padding-right: 3px;padding-top: 4px;">
+                                                    <i class="fa fa-clock-o"
+                                                       tooltip="Продовження леції">
+                                                    </i>&nbsp;<b>{{ getLectureDuration(lecture) |
+                                                    formatTimestamp
+                                                    }}</b>
+                                                </span>
+
+                                                &nbsp;
+
+                                            </span>
                                         </span>
 
-                                        <span class="btn btn-primary btn-xs"
-                                              tooltip="{{ 'home.edit' | translate }}"
-                                              ng-click="showItemEditor(todo)"
-                                              ng-show="canManageCollection()">
+                                        <a class="btn btn-default btn-xs"
+                                           ng-show="lecture.condition['status'] == 'stopped'"
+                                           tooltip="{{ 'home.show_lecture_statistic' | translate }}"
+                                           ng-href="/#/lectures/administration/lecture-statistic/{{ lecture.id }}"
+                                           style="padding-left: 4px;padding-right: 4px;">
+                                            <i class="fa fa-area-chart"></i>
+                                        </a>
+
+                                        <a class="btn btn-primary btn-xs"
+                                           ng-disabled="lecture.condition['status'] != 'stopped'"
+                                           tooltip="{{ 'home.edit' | translate }}"
+                                           ng-href="/#/lectures/administration/lecture-manager/{{ lecture.id }}"
+                                           ng-show="canManageCollection()">
                                             <i class="fa fa-pencil"></i>
-                                        </span>
+                                        </a>
 
-                                        <span class="btn btn-danger btn-xs"
-                                              tooltip="{{ 'home.remove' | translate }}"
-                                              ng-click="removeTodo(todo)"
-                                              ng-show="canManageCollection()">
+                                        <a class="btn btn-danger btn-xs"
+                                           ng-disabled="lecture.condition['status'] != 'stopped'"
+                                           tooltip="{{ 'home.remove' | translate }}"
+                                           ng-click="removeLecture(lecture)"
+                                           ng-show="canManageCollection()"
+                                           style="padding-left: 6px;padding-right: 6px;">
                                             <i class="fa fa-trash-o"></i>
+                                        </a>
+
+                                        &nbsp;
+
+                                    </span>
+
+                                </span>
+
+                            </span>
+                            <span ng-switch-when="false">
+
+                                <span class="task-title">
+
+                                    &nbsp;
+
+                                    <span class="task-title-sp" style="vertical-align: sub;">
+                                        <span ng-switch="lecture.condition['status']">
+                                            <span ng-switch-when="stopped">
+                                                {{ lecture.title }}
+                                            </span>
+                                            <span ng-switch-default>
+                                                <a ng-href="/#/lectures/lecture-hall/{{ lecture.id }}">
+                                                    {{ lecture.title }}
+                                                </a>
+                                            </span>
+                                        </span>
+                                    </span>
+
+                                    <span class="pull-right hidden-phone">
+
+                                        <span ng-switch="lecture.condition['status']">
+                                            <span ng-switch-when="stopped">
+                                                <span style="padding-right: 8px;vertical-align: sub;">
+                                                    {{ lecture.creationDate | formatDate:'mmm d, yyyy, h:MM TT' }}
+                                                </span>
+                                            </span>
+                                            <span ng-switch-default>
+                                                <span class="pull-left"
+                                                      style="padding-right: 6px;padding-top: 4px;cursor: pointer">
+                                                    <i class="fa fa-users"
+                                                       tooltip="Присутні слухачі"
+                                                       ng-click="showPresentListeners(lecture)">
+                                                    </i>&nbsp;<b>{{ getPresentListenersCount(lecture) }}</b>
+                                                </span>
+
+                                                <span class="pull-left"
+                                                      style="padding-right: 3px;padding-top: 4px;">
+                                                    <i class="fa fa-clock-o"
+                                                       tooltip="Продовження леції">
+                                                    </i>&nbsp;<b>{{ getLectureDuration(lecture) |
+                                                    formatTimestamp
+                                                    }}</b>
+                                                </span>
+                                            </span>
                                         </span>
 
-                                    </div>
-                                </div>
-                            </li>
+                                        &nbsp;
 
-                        </ul>
+                                    </span>
 
-                    </div>
+                                </span>
 
-                    <div ng-switch-when="false">
+                            </span>
+                        </span>
 
-                        <div class="text-center">
-                            <div class="row clearfix">
-                                <div class="col-md-12 column">
-                                    <span l10n key="home.no_records"></span>
-                                </div>
-                            </div>
+                    </li>
+
+                </ul>
+
+            </div>
+
+            <div ng-switch-when="false">
+
+                <div class="text-center">
+                    <div class="row clearfix">
+                        <div class="col-md-12 column">
+                            <span l10n key="home.no_lectures"></span>
                         </div>
-
                     </div>
                 </div>
 
@@ -174,46 +244,8 @@
         </div>
 
     </div>
+</div>
 
-    <div class="add-task-row">
+</div>
 
-        <div class="row clearfix">
-            <div class="col-md-3 column">
-                <span class="btn btn-primary btn-sm pull-left"
-                      ng-model="allChecked" ng-click="markAll(!allChecked)"
-                      ng-class="{ 'disabled' : !todos.length }"
-                      ng-show="canManageCollection()"
-                      btn-checkbox>
-                    <i class="fa fa-check"></i>
-                    &nbsp;
-                    <span l10n key="home.select_all"></span>
-                </span>
-            </div>
-
-            <div class="col-md-6 column text-center">
-                <div class="btn-group">
-                    <label ng-repeat="viewMode in viewModes"
-                           class="btn btn-success btn-sm"
-                           ng-model="currentViewMode"
-                           ng-click="setViewMode(viewMode)"
-                           btn-radio="viewMode">
-                        <i class="fa {{ viewMode.icon }}"></i>
-                        &nbsp;
-                        <span l10n key="{{ viewMode.titleKey }}"></span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="col-md-3 column">
-                <span class="btn btn-danger btn-sm pull-right"
-                      ng-show="remainingCount < todos.length && canManageCollection()"
-                      ng-click="clearDoneTodos()">
-                    <i class="fa fa-trash-o"></i>
-                    &nbsp;
-                    <span l10n key="home.clear_completed"></span> ({{ todos.length - remainingCount }})
-                </span>
-            </div>
-        </div>
-
-    </div>
 </div>

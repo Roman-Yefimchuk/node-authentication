@@ -1,0 +1,85 @@
+<div>
+    <div class="modal-header">
+        <span class="close" ng-click="cancel()">×</span>
+
+        <div ng-switch="mode">
+            <div ng-switch-when="create">
+                <h4 style="margin-bottom: 0;margin-top: 0;">
+                    <i class="fa fa-plus"></i>
+                    &nbsp;
+                    Створити посилання
+                </h4>
+            </div>
+            <div ng-switch-when="update">
+                <h4 style="margin-bottom: 0;margin-top: 0;">
+                    <i class="fa fa-pencil"></i>
+                    &nbsp;
+                    Редагувати посилання
+                </h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-body">
+
+        <div class="row clearfix">
+
+            <div class="form-group col-md-12 column">
+                <label>
+                    Назва посилання
+                </label>
+
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <i class="fa fa-book"></i>
+                    </div>
+                    <input maxlength="50" class="form-control input-sm" type="text"
+                           ng-model="model.title">
+                </div>
+            </div>
+
+            <div class="form-group col-md-12 column">
+                <label>
+                    Адреса посилання
+                </label>
+
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <i class="fa fa-external-link-square"></i>
+                    </div>
+                    <input class="form-control input-sm" type="text"
+                           ng-model="model.url">
+                </div>
+            </div>
+
+            <div class="form-group col-md-12 column" style="margin-bottom: 0">
+                <label>
+                    Опис посилання
+                </label>
+
+                <div>
+                    <textarea rows="5" noresize class="form-control input-sm" required style="resize: none"
+                              ng-model="model.description">
+                    </textarea>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal-footer ng-scope" style="margin-top: 0">
+        <span class="btn btn-warning btn-sm" ng-click="cancel()">
+            <i class="fa fa-reply"></i>
+            &nbsp;
+            Назад
+        </span>
+        <span class="btn btn-primary btn-sm" ng-click="save()"
+              ng-disabled="isSaveDisabled()">
+            <i class="fa fa-save"></i>
+            &nbsp;
+            Зберегти
+        </span>
+    </div>
+
+</div>

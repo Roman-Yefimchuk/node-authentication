@@ -5,6 +5,7 @@
     module.exports = function (app, passport, dbProvider, developmentMode) {
 
         var Exception = require('../exception');
+        var RestApi = require('../../public/common-scripts/rest-api');
         var JSON = require('json3');
 
         function getError(error) {
@@ -67,7 +68,7 @@
             };
         }
 
-        app.post('/api/authenticate/login', function (request, response, next) {
+        app.post(RestApi.LOGIN, function (request, response, next) {
 
             var authenticateHandler = getAuthenticateHandler(request, response, function (user, callback) {
 
@@ -80,7 +81,7 @@
             passport.authenticate('local-login', authenticateHandler)(request, response, next);
         });
 
-        app.post('/api/authenticate/sign-up', function (request, response, next) {
+        app.post(RestApi.SIGN_UP, function (request, response, next) {
 
             var authenticateHandler = getAuthenticateHandler(request, response);
 

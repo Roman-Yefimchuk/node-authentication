@@ -51,12 +51,30 @@ angular.module('application')
                 return error.message;
             }
 
+            function getUrl(urlPattern, urlParams) {
+                var url = urlPattern;
+
+                _.forEach(urlParams, function (value, key) {
+
+                    if (value != undefined) {
+                        var pattern = new RegExp(':' + key, 'g');
+                        url = url.replace(pattern, value);
+                    }
+                });
+
+                return url;
+            }
+
             return {
-                sendRequest: function (params, handler) {
+                sendRequest: function (requestParams, handler) {
                     var successCallback = handler.success || angular.noop;
                     var failureCallback = handler.failure || angular.noop;
 
-                    var request = $http(params);
+                    var request = $http({
+                        method: requestParams.method || 'GET',
+                        url: getUrl(requestParams.url, requestParams.urlParams || {}),
+                        data: requestParams.data
+                    });
 
                     request.success(function (response, status, headers, config) {
 
@@ -64,8 +82,8 @@ angular.module('application')
 
                             if (response.status) {
 
-                                $log.debug('URL[' + params.method + '] -> ' + params.url);
-                                traceResponse(params, response);
+                                $log.debug('URL[' + requestParams.method + '] -> ' + requestParams.url);
+                                traceResponse(requestParams, response);
 
                                 successCallback(response.data || {});
                             } else {

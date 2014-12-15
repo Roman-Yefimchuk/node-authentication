@@ -1,0 +1,16 @@
+<div ng-controller="TagsController">
+    <div ng-switch="lectureModel.tags['length'] > 0">
+        <div ng-switch-when="true">
+
+            <ul class="list-group" style="margin: 0;">
+                <li ng-repeat="tag in lectureModel.tags" class="list-group-item text-left">
+                    {{ tag.title }}
+                </li>
+            </ul>
+
+        </div>
+        <div ng-switch-when="false" class="text-center">
+            Немає тегів, <a ng-click="addTag()" style="cursor: pointer">додати</a>
+        </div>
+    </div>
+</div>

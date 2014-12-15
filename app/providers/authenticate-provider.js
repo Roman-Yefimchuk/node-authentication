@@ -8,7 +8,7 @@
     var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
 
     var _ = require('underscore');
-    var security = require('../utils/security');
+    var security = require('../utils/security-utils');
     var authorizationConfig = require('./../../config/authorization-config');
 
     module.exports = function (passport, dbProvider) {

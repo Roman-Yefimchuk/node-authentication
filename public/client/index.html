@@ -46,6 +46,7 @@
 <script type="text/javascript" src="/public/bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 <script type="text/javascript" src="/public/bower_components/notifyjs/dist/notify-combined.js"></script>
 <script type="text/javascript" src="/public/bower_components/underscore/underscore.js"></script>
+<script type="text/javascript" src="/public/bower_components/Chart.js/Chart.js"></script>
 <!-- endbower -->
 <!-- endbuild -->
 
@@ -79,6 +80,29 @@
 <script type="text/javascript" src="/public/client/scripts/controllers/dialogs/confirmation-dialog.js"></script>
 <script type="text/javascript" src="/public/client/scripts/controllers/dialogs/alert-dialog.js"></script>
 <script type="text/javascript" src="/public/client/scripts/controllers/dialogs/feedback-dialog.js"></script>
+<script type="text/javascript" src="/public/client/scripts/controllers/dialogs/answered-listeners.js"></script>
+<script type="text/javascript" src="/public/client/scripts/controllers/dialogs/present-listeners.js"></script>
+<script type="text/javascript" src="/public/client/scripts/controllers/dialogs/suspend-dialog.js"></script>
+<script type="text/javascript"
+        src="/public/client/scripts/controllers/dialogs/additional-link-editor-dialog.js"></script>
+
+<script type="text/javascript" src="/public/client/scripts/controllers/lectures/lecture-board.js"></script>
+<script type="text/javascript" src="/public/client/scripts/controllers/lectures/lecture-hall.js"></script>
+
+<script type="text/javascript"
+        src="/public/client/scripts/controllers/lectures/administration/lecture-manager/lecture-manager.js"></script>
+<script type="text/javascript"
+        src="/public/client/scripts/controllers/lectures/administration/lecture-manager/tabs/additional-links.js"></script>
+<script type="text/javascript"
+        src="/public/client/scripts/controllers/lectures/administration/lecture-manager/tabs/lecture.js"></script>
+<script type="text/javascript"
+        src="/public/client/scripts/controllers/lectures/administration/lecture-manager/tabs/questions.js"></script>
+<script type="text/javascript"
+        src="/public/client/scripts/controllers/lectures/administration/lecture-manager/tabs/tags.js"></script>
+
+<script type="text/javascript"
+        src="/public/client/scripts/controllers/lectures/administration/question-manager.js"></script>
+<script type="text/javascript" src="/public/client/scripts/controllers/lectures/administration/statistic.js"></script>
 <!--end_controllers-->
 
 <!--begin_directives-->
@@ -88,12 +112,17 @@
 <script type="text/javascript" src="/public/client/scripts/directives/l10n.js"></script>
 <script type="text/javascript" src="/public/client/scripts/directives/static-include.js"></script>
 <script type="text/javascript" src="/public/client/scripts/directives/info-widget.js"></script>
+<script type="text/javascript" src="/public/client/scripts/directives/active-lecture-chart.js"></script>
+<script type="text/javascript" src="/public/client/scripts/directives/lecture-statistic.js"></script>
+<script type="text/javascript" src="/public/client/scripts/directives/survey-donut.js"></script>
+<script type="text/javascript" src="/public/client/scripts/directives/generic-header.js"></script>
 <!--end_directives-->
 
 <!--begin_filters-->
 <script type="text/javascript" src="/public/client/scripts/filters/format-date.js"></script>
 <script type="text/javascript" src="/public/client/scripts/filters/translate.js"></script>
 <script type="text/javascript" src="/public/client/scripts/filters/search-highlight.js"></script>
+<script type="text/javascript" src="/public/client/scripts/filters/format-timestamp.js"></script>
 <!--end_filters-->
 
 <!--begin_services-->
@@ -106,6 +135,7 @@
 <script type="text/javascript" src="/public/client/scripts/services/user.js"></script>
 <script type="text/javascript" src="/public/client/scripts/services/dialogs.js"></script>
 <script type="text/javascript" src="/public/client/scripts/services/translator.js"></script>
+<script type="text/javascript" src="/public/client/scripts/services/lecture-activity.js"></script>
 
 <script type="text/javascript" src="/public/client/scripts/services/language-services/en.js"></script>
 <script type="text/javascript" src="/public/client/scripts/services/language-services/ru.js"></script>
@@ -115,6 +145,12 @@
 <!--begin_common-->
 <script type="text/javascript" src="/public/client/scripts/utils/common.js"></script>
 <!--end_common-->
+
+<!--begin_common_scripts-->
+<script type="text/javascript" src="/public/common-scripts/async-utils.js"></script>
+<script type="text/javascript" src="/public/common-scripts/socket-commands.js"></script>
+<script type="text/javascript" src="/public/common-scripts/rest-api.js"></script>
+<!--begin_common_scripts-->
 
 <!-- endbuild -->
 

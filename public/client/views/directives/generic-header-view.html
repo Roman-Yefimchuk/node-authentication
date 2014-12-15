@@ -1,0 +1,18 @@
+<div class="row clearfix" style="margin-bottom: 15px;">
+
+    <span ng-show="!!backLink" class="col-md-6 text-left">
+        <i class="fa fa-reply"></i>
+        <a ng-href="{{ backLink }}">Назад</a>
+    </span>
+
+    <div class="text-right" ng-class="{ 'col-md-6' : backLink, 'col-md-12' : !backLink }">
+
+            <span>
+                <b>{{ user.displayName }}</b>,
+            </span>
+
+        <a href="/#/logout">Вихід</a>
+
+    </div>
+
+</div>

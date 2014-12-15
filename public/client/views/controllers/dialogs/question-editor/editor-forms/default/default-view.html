@@ -1,0 +1,39 @@
+<div class="row clearfix">
+
+    <div class="col-md-6 column">
+
+        <div class="form-group-sm" ng-class="{ 'has-feedback' : !!model.data['yes'] }"
+             style="margin-bottom: 0">
+            <label class="control-label" ng-show="false"></label>
+            <input type="text" class="form-control input-sm"
+                   placeholder="Позитивна відповідь"
+                   autofocus autocomplete="off" ng-model="model.data['yes']">
+
+            <div class="form-control-feedback" style="top: 0"
+                 ng-show="!!model.data['yes']">
+                <i class="fa fa-times" style="cursor: pointer"
+                   ng-click="model.data['yes'] = ''"></i>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-6 column">
+
+        <div class="form-group-sm" ng-class="{ 'has-feedback' : !!model.data['no'] }"
+             style="margin-bottom: 0">
+            <label class="control-label" ng-show="false"></label>
+            <input type="text" class="form-control input-sm"
+                   placeholder="Негативна відповідь"
+                   autofocus autocomplete="off" ng-model="model.data['no']">
+
+            <div class="form-control-feedback" style="top: 0"
+                 ng-show="!!model.data['no']">
+                <i class="fa fa-times" style="cursor: pointer"
+                   ng-click="model.data['no'] = ''"></i>
+            </div>
+        </div>
+
+    </div>
+
+</div>

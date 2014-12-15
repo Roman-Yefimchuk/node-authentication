@@ -12,71 +12,30 @@ angular.module('application')
                 feedback: function (feedbackModel, handler) {
                     httpClientService.sendRequest({
                         method: 'POST',
+                        url: RestApi.FEEDBACK,
                         data: {
                             feedbackModel: feedbackModel
-                        },
-                        url: '/api/feedback'
+                        }
                     }, handler);
                 },
                 login: function (data, handler) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        data: data,
-                        url: '/api/authenticate/login'
+                        url: RestApi.LOGIN,
+                        data: data
                     }, handler);
                 },
                 signUp: function (data, handler) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        data: data,
-                        url: '/api/authenticate/sign-up'
+                        url: RestApi.SIGN_UP,
+                        data: data
                     }, handler);
-                },
-                items: function (workspaceId, callback) {
-                    httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/items/' + workspaceId
-                    }, {
-                        success: callback
-                    });
-                },
-                save: function (workspaceId, todoModel, callback) {
-                    httpClientService.sendRequest({
-                        method: 'POST',
-                        url: '/api/save/' + workspaceId,
-                        data: {
-                            todoModel: todoModel
-                        }
-                    }, {
-                        success: callback
-                    });
-                },
-                update: function (workspaceId, todoModels, callback) {
-                    httpClientService.sendRequest({
-                        method: 'POST',
-                        url: '/api/update/' + workspaceId,
-                        data: {
-                            todoModels: todoModels
-                        }
-                    }, {
-                        success: callback
-                    });
-                },
-                remove: function (workspaceId, todoIds, callback) {
-                    httpClientService.sendRequest({
-                        method: 'POST',
-                        url: '/api/remove/' + workspaceId,
-                        data: {
-                            todoIds: todoIds
-                        }
-                    }, {
-                        success: callback
-                    });
                 },
                 getAllWorkspaces: function (parentWorkspaceId, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/get-all-workspaces',
+                        url: RestApi.GET_ALL_WORKSPACES,
                         data: {
                             parentWorkspaceId: parentWorkspaceId
                         }
@@ -87,7 +46,7 @@ angular.module('application')
                 setUserWorkspace: function (workspaceId, rootWorkspaceId, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/set-user-workspace',
+                        url: RestApi.SET_CURRENT_USER_WORKSPACE,
                         data: {
                             workspaceId: workspaceId,
                             rootWorkspaceId: rootWorkspaceId
@@ -99,7 +58,7 @@ angular.module('application')
                 getAllUsers: function (options, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/get-all-users',
+                        url: RestApi.GET_ALL_USERS,
                         data: {
                             skip: options.skip,
                             limit: options.limit
@@ -111,7 +70,7 @@ angular.module('application')
                 getPermittedWorkspaces: function (parentWorkspaceId, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/get-permitted-workspaces',
+                        url: RestApi.GET_PERMITTED_WORKSPACES,
                         data: {
                             parentWorkspaceId: parentWorkspaceId
                         }
@@ -122,10 +81,13 @@ angular.module('application')
                 getAllUsersWithPermissions: function (workspaceId, options, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/get-all-users-with-permissions/' + workspaceId,
+                        url: RestApi.GET_ALL_USERS_WITH_PERMISSIONS,
                         data: {
                             skip: options.skip,
                             limit: options.limit
+                        },
+                        urlParams: {
+                            workspaceId: workspaceId
                         }
                     }, {
                         success: callback
@@ -134,7 +96,7 @@ angular.module('application')
                 setUsersPermissionsForWorkspace: function (workspaceId, parentWorkspaceId, collection, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/set-users-permissions-for-workspace',
+                        url: RestApi.SET_PERMISSIONS_FOR_WORKSPACE,
                         data: {
                             workspaceId: workspaceId,
                             parentWorkspaceId: parentWorkspaceId,
@@ -147,7 +109,7 @@ angular.module('application')
                 getUsers: function (ids, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/get-users',
+                        url: RestApi.GET_USERS,
                         data: {
                             ids: ids
                         }
@@ -157,24 +119,30 @@ angular.module('application')
                 },
                 getUser: function (userId, callback) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/get-user/' + userId
+                        url: RestApi.GET_USER_BY_ID,
+                        urlParams: {
+                            userId: userId
+                        }
                     }, {
                         success: callback
                     });
                 },
                 getWorkspace: function (workspaceId, callback) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/get-workspace/' + workspaceId
+                        url: RestApi.GET_WORKSPACE_BY_ID,
+                        urlParams: {
+                            workspaceId: workspaceId
+                        }
                     }, {
                         success: callback
                     });
                 },
                 getDefaultWorkspaceId: function (userId, callback) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/get-default-workspace-id/' + userId
+                        url: RestApi.GET_DEFAULT_WORKSPACE_ID,
+                        urlParams: {
+                            userId: userId
+                        }
                     }, {
                         success: callback
                     });
@@ -182,7 +150,7 @@ angular.module('application')
                 createWorkspace: function (workspaceName, parentWorkspaceId, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/create-workspace',
+                        url: RestApi.CREATE_WORKSPACE,
                         data: {
                             workspaceName: workspaceName,
                             parentWorkspaceId: parentWorkspaceId
@@ -194,7 +162,7 @@ angular.module('application')
                 loadHierarchy: function (workspaceId, rootWorkspaceId, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/load-hierarchy',
+                        url: RestApi.LOAD_HIERARCHY,
                         data: {
                             workspaceId: workspaceId,
                             rootWorkspaceId: rootWorkspaceId
@@ -206,9 +174,12 @@ angular.module('application')
                 updateWorkspace: function (workspaceId, data, callback) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: '/api/update-workspace/' + workspaceId,
+                        url: RestApi.UPDATE_WORKSPACE,
                         data: {
                             data: data
+                        },
+                        urlParams: {
+                            workspaceId: workspaceId
                         }
                     }, {
                         success: callback
@@ -216,8 +187,206 @@ angular.module('application')
                 },
                 removeWorkspace: function (workspaceId, callback) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/api/remove-workspace/' + workspaceId
+                        url: RestApi.REMOVE_WORKSPACE,
+                        urlParams: {
+                            workspaceId: workspaceId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                createLecture: function (data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.CREATE_LECTURE,
+                        data: data
+                    }, {
+                        success: callback
+                    });
+                },
+                updateLecture: function (lectureId, data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_LECTURE,
+                        data: data,
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                removeLecture: function (lectureId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.REMOVE_LECTURE,
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getLecturesByAuthorId: function (authorId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_LECTURE_BY_AUTHOR_ID,
+                        urlParams: {
+                            authorId: authorId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getLectureById: function (lectureId, handler) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_LECTURE_BY_ID,
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, handler);
+                },
+                getLecturesByWorkspaceId: function (workspaceId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_LECTURE_BY_WORKSPACE_ID,
+                        urlParams: {
+                            workspaceId: workspaceId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getLectureStatisticById: function (lectureId, handler) {
+                    httpClientService.sendRequest({
+                        url: RestApi.LOAD_LECTURE_STATISTIC,
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, handler);
+                },
+                updateStatisticForLecture: function (lectureId, data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_LECTURE_STATISTIC,
+                        data: data,
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getLectureCondition: function (lectureId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_LECTURE_CONDITION,
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getActiveLectures: function (callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_ACTIVE_LECTURES
+                    }, {
+                        success: callback
+                    });
+                },
+                updateLectureStatus: function (lectureId, lecturerId, status, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_LECTURE_STATUS,
+                        data: {
+                            lecturerId: lecturerId,
+                            status: status
+                        },
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                createQuestion: function (lectureId, questionModel, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.CREATE_QUESTION,
+                        data: {
+                            lectureId: lectureId,
+                            questionModel: questionModel
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                updateQuestion: function (questionId, questionModel, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_QUESTION,
+                        data: {
+                            questionModel: questionModel
+                        },
+                        urlParams: {
+                            questionId: questionId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                removeQuestion: function (questionId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.REMOVE_QUESTION,
+                        urlParams: {
+                            questionId: questionId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getQuestionsByLectureId: function (lectureId, handler) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_QUESTION_BY_LECTURE_ID,
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, handler);
+                },
+                getQuestionById: function (questionId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_QUESTION_BY_ID,
+                        urlParams: {
+                            questionId: questionId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getUserProfile: function (userId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_USER_PROFILE,
+                        urlParams: {
+                            userId: userId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                updateUserProfile: function (userId, data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_USER_PROFILE,
+                        data: {
+                            data: data
+                        },
+                        urlParams: {
+                            userId: userId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getQuickTimestamp: function (callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_QUICK_TIMESTAMP
                     }, {
                         success: callback
                     });

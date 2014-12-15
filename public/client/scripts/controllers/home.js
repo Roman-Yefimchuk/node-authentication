@@ -7,6 +7,8 @@ angular.module('application')
         '$scope',
         '$rootScope',
         '$location',
+        '$timeout',
+        '$interval',
         'apiService',
         'socketsService',
         'notificationsService',
@@ -19,21 +21,11 @@ angular.module('application')
         'DEBUG_MODE',
         'ROOT_ID',
 
-        function ($scope, $rootScope, $location, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, translatorService, SOCKET_URL, DEBUG_MODE, ROOT_ID) {
+        function ($scope, $rootScope, $location, $timeout, $interval, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, translatorService, SOCKET_URL, DEBUG_MODE, ROOT_ID) {
 
             var errorsTranslator = translatorService.getSector('home.errors');
             var notificationsTranslator = translatorService.getSector('home.notifications');
 
-            var indexOf = _.indexOf;
-            var forEach = _.forEach;
-            var findWhere = _.findWhere;
-            var filter = _.filter;
-            var without = _.without;
-            var contains = _.contains;
-
-            var itemPriorityDropdown = {
-                isOpen: false
-            };
             var workspaceDropdown = {
                 isOpen: false
             };
@@ -43,9 +35,8 @@ angular.module('application')
             var searchOptionsDropdown = {
                 isOpen: false
             };
-            var newTodo = {
-                title: '',
-                priority: 'none'
+            var lectureModel = {
+                title: ''
             };
             var searchModel = {
                 searchQuery: '',
@@ -54,7 +45,7 @@ angular.module('application')
                 caseSensitive: false,
                 showHighlight: true
             };
-
+            var activeLectures = [];
             var BreadcrumbItem = (function () {
 
                 function BreadcrumbItem(node) {
@@ -96,15 +87,15 @@ angular.module('application')
                         searchQuery = searchQuery.toLowerCase();
                     }
 
-                    forEach($scope.todos, function (todo) {
-                        var title = todo.title;
+                    _.forEach($scope.lectures, function (lecture) {
+                        var title = lecture.title;
 
                         if (!caseSensitive) {
                             title = title.toLowerCase();
                         }
 
                         if (title.indexOf(searchQuery) != -1) {
-                            result.push(todo);
+                            result.push(lecture);
                         }
                     });
 
@@ -117,7 +108,7 @@ angular.module('application')
             function updateSearchHistory() {
                 var searchHistory = searchModel.searchHistory;
                 var searchQuery = searchModel.searchQuery;
-                if (indexOf(searchHistory, searchQuery) == -1) {
+                if (_.indexOf(searchHistory, searchQuery) == -1) {
                     searchHistory.push(searchQuery);
                 }
             }
@@ -138,12 +129,6 @@ angular.module('application')
             function setFocus() {
                 var input = angular.element('#main-input');
                 input.focus();
-            }
-
-            function setItemPriority(priority) {
-                newTodo.priority = priority;
-                itemPriorityDropdown.isOpen = false;
-                setFocus();
             }
 
             function showWorkspaceId() {
@@ -179,10 +164,6 @@ angular.module('application')
                 });
             }
 
-            function setViewMode(viewMode) {
-                $scope.currentViewMode = viewMode;
-            }
-
             function provideAccessForWorkspace(userId, workspaceId, parentWorkspaceId, permissions, hierarchy) {
                 permissionsChangeNotification(userId, workspaceId, function (userName, workspaceName) {
 
@@ -201,7 +182,7 @@ angular.module('application')
 
                                 apiService.getPermittedWorkspaces(parentWorkspaceId, function (workspaces) {
 
-                                    var workspace = findWhere(workspaces, {
+                                    var workspace = _.findWhere(workspaces, {
                                         id: workspaceId
                                     });
 
@@ -215,7 +196,7 @@ angular.module('application')
                         var nextNode = null;
                         var prevWorkspaceId = ROOT_ID;
 
-                        asyncEach(hierarchy, function (id, index, next, interrupt) {
+                        AsyncUtils.each(hierarchy, function (id, index, next, interrupt) {
 
                             if (id != ROOT_ID) {
 
@@ -230,7 +211,7 @@ angular.module('application')
 
                                             function updateNode(insert) {
 
-                                                var workspace = findWhere(workspaces, {
+                                                var workspace = _.findWhere(workspaces, {
                                                     id: id
                                                 });
 
@@ -324,7 +305,7 @@ angular.module('application')
 
             function userHasLeft(userId, callback) {
                 apiService.getUser(userId, function (user) {
-                    $scope.presentUsers = filter($scope.presentUsers, function (value) {
+                    $scope.presentUsers = _.filter($scope.presentUsers, function (value) {
                         return value != userId;
                     });
                     callback(user);
@@ -341,7 +322,7 @@ angular.module('application')
 
             function canManageCollection() {
                 var permissions = $scope.permissions;
-                return permissions.writer;
+                return permissions.writer || permissions.admin;
             }
 
             function canManageAccess() {
@@ -349,169 +330,106 @@ angular.module('application')
                 return permissions.admin;
             }
 
-            function addedItem(userId, item) {
+            function canManageLecture(lecture) {
+                if (canManageCollection()) {
+                    if (lecture.condition['status'] == 'stopped') {
+                        return true;
+                    }
+                    return lecture.condition['lecturerId'] == $scope.user['userId'];
+                }
+                return false;
+            }
+
+            function addedLecture(userId, lecture) {
                 changeNotification(userId, function (userName) {
 
-                    $scope.todos.push(item);
+                    $scope.lectures.push(lecture);
 
-                    return notificationsTranslator.format('user_added_item', {
+                    return notificationsTranslator.format('user_added_lecture', {
                         userName: userName
                     });
                 });
             }
 
-            function updatedItems(userId, items) {
+            function updatedLecture(userId, lecture) {
                 changeNotification(userId, function (userName) {
 
-                    forEach(items, function (item) {
+                    _.findWhere($scope.lectures, {
+                        id: lecture.id
+                    }).title = lecture.title;
 
-                        var todo = findWhere($scope.todos, {
-                            id: item.id
-                        });
-
-                        todo.title = item.title;
-                        todo.completed = item.completed;
-                        todo.priority = item.priority;
-                    });
-
-                    return notificationsTranslator.format('user_updated_items', {
-                        userName: userName,
-                        count: items.length
+                    return notificationsTranslator.format('user_updated_lecture', {
+                        userName: userName
                     });
                 });
             }
 
-            function removedItems(userId, itemIds) {
+            function removedLecture(userId, lectureId) {
                 changeNotification(userId, function (userName) {
 
-                    $scope.todos = filter($scope.todos, function (todo) {
-                        return !contains(itemIds, todo.id);
+                    $scope.lectures = _.filter($scope.lectures, function (lecture) {
+                        return lecture.id != lectureId;
                     });
 
-                    return notificationsTranslator.format('user_removed_items', {
-                        userName: userName,
-                        count: itemIds.length
+                    return notificationsTranslator.format('user_removed_lecture', {
+                        userName: userName
                     });
                 });
             }
 
-            function addTodo() {
-                var title = newTodo['title'].trim();
+            function addLecture() {
+                var title = lectureModel['title'].trim();
                 if (!title.length) {
                     return;
                 }
 
-                var item = {
+                var lecture = {
                     title: title,
-                    completed: false,
-                    priority: newTodo.priority
+                    authorId: $scope.user['userId'],
+                    workspaceId: getWorkspaceId(),
+                    description: '',
+                    tags: [],
+                    additionalLinks: [],
+                    condition: {
+                        status: 'stopped'
+                    }
                 };
 
-                apiService.save(getWorkspaceId(), item, function (response) {
-                    item.id = response.itemId;
-                    item.creationDate = response.creationDate;
+                apiService.createLecture(lecture, function (response) {
+                    lecture.id = response.lectureId;
+                    lecture.creationDate = response.creationDate;
 
-                    $scope.todos.push(item);
-                    newTodo.title = '';
-                    newTodo.priority = 'none';
+                    $scope.lectures.push(lecture);
+                    lectureModel.title = '';
 
                     var socketConnection = $scope.socketConnection;
-                    socketConnection.addedItem(item);
+                    socketConnection.addedItem(lecture);
 
                     setFocus();
                 });
             }
 
-            function showItemEditor(todo) {
+            function removeLecture(lecture) {
+                apiService.removeLecture(lecture.id, function () {
+
+                    $scope.lectures = _.without($scope.lectures, lecture);
+
+                    var socketConnection = $scope.socketConnection;
+                    socketConnection.removedItem(lecture.id);
+                });
+            }
+
+            function showItemEditor(lecture) {
                 dialogsService.showItemEditor({
-                    item: todo,
-                    onUpdate: function (todo, closeCallback) {
-                        apiService.update(getWorkspaceId(), [todo], function () {
+                    item: lecture,
+                    onUpdate: function (lecture, closeCallback) {
+                        apiService.updateLecture(lecture.id, lecture, function () {
                             var socketConnection = $scope.socketConnection;
-                            socketConnection.updatedItems([todo]);
+                            socketConnection.updatedItem(lecture);
 
                             closeCallback();
                         });
                     }
-                });
-            }
-
-            function removeTodo(todo) {
-                apiService.remove(getWorkspaceId(), [todo.id], function () {
-
-                    $scope.todos = without($scope.todos, todo);
-
-                    var socketConnection = $scope.socketConnection;
-                    socketConnection.removedItems([todo.id]);
-                });
-            }
-
-            function clearDoneTodos() {
-
-                var ids = [];
-                forEach($scope.todos, function (todo) {
-                    if (todo.completed) {
-                        ids.push(todo.id);
-                    }
-                });
-
-                dialogsService.showConfirmation({
-                    context: {
-                        count: ids.length
-                    },
-                    title: 'Remove completed items',
-                    message: 'Remove <b>{{ count }}</b> completed item(s)?',
-                    onAccept: function (closeCallback) {
-                        apiService.remove(getWorkspaceId(), ids, function () {
-                            $scope.todos = filter($scope.todos, function (item) {
-                                return !item.completed;
-                            });
-
-                            var socketConnection = $scope.socketConnection;
-                            socketConnection.removedItems(ids);
-
-                            closeCallback();
-                        });
-                    }
-                });
-            }
-
-            function mark(todo) {
-                apiService.update(getWorkspaceId(), [
-                    {
-                        id: todo.id,
-                        title: todo.title,
-                        completed: todo.completed,
-                        priority: todo.priority
-                    }
-                ], function () {
-                    var socketConnection = $scope.socketConnection;
-                    socketConnection.updatedItems([todo]);
-                });
-            }
-
-            function markAll(done) {
-                var todos = [];
-
-                forEach($scope.todos, function (todo) {
-                    if (todo.completed != done) {
-                        todos.push({
-                            id: todo.id,
-                            title: todo.title,
-                            completed: done,
-                            priority: todo.priority
-                        });
-                    }
-                });
-
-                apiService.update(getWorkspaceId(), todos, function () {
-
-                    forEach($scope.todos, function (todo) {
-                        todo.completed = done;
-                    });
-
-                    var socketConnection = $scope.socketConnection;
-                    socketConnection.updatedItems(todos);
                 });
             }
 
@@ -737,12 +655,24 @@ angular.module('application')
                 });
             }
 
+            function findActiveLectureById(lectureId) {
+                return _.findWhere(activeLectures, {
+                    lectureId: lectureId
+                });
+            }
+
+            function findLectureById(lectureId) {
+                return _.findWhere($scope.lectures, {
+                    id: lectureId
+                });
+            }
+
             function subscribeForSocketEvent() {
-                $scope.$on('socketsService:userConnected', function (event, data) {
+                $scope.$on('socketsService:' + SocketCommands.USER_CONNECTED, function (event, data) {
                     $scope.presentUsers = data['presentUsers'];
                 });
 
-                $scope.$on('socketsService:userDisconnected', function (event, data) {
+                $scope.$on('socketsService:' + SocketCommands.USER_DISCONNECTED, function (event, data) {
                     userHasLeft(data['userId'], function (user) {
 
                         var notification = notificationsTranslator.format('user_disconnected', {
@@ -752,7 +682,7 @@ angular.module('application')
                     });
                 });
 
-                $scope.$on('socketsService:changedWorkspace', function (event, data) {
+                $scope.$on('socketsService:' + SocketCommands.CHANGED_WORKSPACE, function (event, data) {
                     if (data['workspaceId'] == getWorkspaceId()) {
                         userJoined(data['userId'], function (user) {
 
@@ -772,7 +702,7 @@ angular.module('application')
                     }
                 });
 
-                $scope.$on('socketsService:updatedWorkspace', function (event, data) {
+                $scope.$on('socketsService:' + SocketCommands.UPDATED_WORKSPACE, function (event, data) {
 
                     var userId = data['userId'];
                     var workspaceId = data['workspaceId'];
@@ -794,7 +724,7 @@ angular.module('application')
                     });
                 });
 
-                $scope.$on('socketsService:removedWorkspace', function (event, data) {
+                $scope.$on('socketsService:' + SocketCommands.REMOVED_WORKSPACE, function (event, data) {
                     var topLevelWorkspaceId = data['topLevelWorkspaceId'];
                     searchNode(topLevelWorkspaceId, function (node) {
 
@@ -816,19 +746,19 @@ angular.module('application')
                     });
                 });
 
-                $scope.$on('socketsService:addedItem', function (event, data) {
-                    addedItem(data['userId'], data['item']);
+                $scope.$on('socketsService:' + SocketCommands.ADDED_ITEM, function (event, data) {
+                    addedLecture(data['userId'], data['item']);
                 });
 
-                $scope.$on('socketsService:updatedItems', function (event, data) {
-                    updatedItems(data['userId'], data['items']);
+                $scope.$on('socketsService:' + SocketCommands.UPDATED_ITEM, function (event, data) {
+                    updatedLecture(data['userId'], data['item']);
                 });
 
-                $scope.$on('socketsService:removedItems', function (event, data) {
-                    removedItems(data['userId'], data['itemIds']);
+                $scope.$on('socketsService:' + SocketCommands.REMOVED_ITEM, function (event, data) {
+                    removedLecture(data['userId'], data['itemId']);
                 });
 
-                $scope.$on('socketsService:permissionsChanged', function (event, data) {
+                $scope.$on('socketsService:' + SocketCommands.PERMISSIONS_CHANGED, function (event, data) {
                     var userId = data['userId'];
                     var workspaceId = data['workspaceId'];
                     var parentWorkspaceId = data['parentWorkspaceId'];
@@ -857,14 +787,168 @@ angular.module('application')
                     }
                 });
 
-                $scope.$on('socketsService:updatePresentUsers', function (event, data) {
+                $scope.$on('socketsService:' + SocketCommands.UPDATE_PRESENT_USERS, function (event, data) {
                     $scope.presentUsers = data['presentUsers'];
                 });
 
-                $scope.$on('socketsService:disconnect', function (event, data) {
+                $scope.$on('socketsService:' + SocketCommands.LECTURE_STARTED, function (event, data) {
+                    var lecturerId = data['lecturerId'];
+                    var lectureId = data['lectureId'];
+                    var lecture = findLectureById(lectureId);
+                    lecture.condition = {
+                        status: 'started',
+                        lecturerId: lecturerId
+                    };
+
+                    if (canManageLecture(lecture)) {
+                        $location.path("/lectures/lecture-board/" + lectureId);
+                    } else {
+                        var activeLecture = getActiveLecture(lecture);
+                        activeLectures.push(activeLecture);
+                        activeLecture.startTimer(function () {
+                            var socketConnection = $scope.socketConnection;
+                            socketConnection.getLectureDuration(lectureId);
+                        });
+                    }
+                });
+
+                $scope.$on('socketsService:' + SocketCommands.LECTURE_RESUMED, function (event, data) {
+                    var lectureId = data['lectureId'];
+                    var activeLecture = findActiveLectureById(lectureId);
+                    if (activeLecture) {
+                        var lecture = activeLecture.lecture;
+                        lecture.condition['status'] = 'started';
+                        activeLecture.startTimer(function () {
+                            var socketConnection = $scope.socketConnection;
+                            socketConnection.getLectureDuration(lectureId);
+                        });
+                    }
+                });
+
+                $scope.$on('socketsService:' + SocketCommands.LECTURE_SUSPENDED, function (event, data) {
+                    var lectureId = data['lectureId'];
+                    var activeLecture = findActiveLectureById(lectureId);
+                    if (activeLecture) {
+                        var lecture = activeLecture.lecture;
+                        lecture.condition['status'] = 'suspended';
+                        activeLecture.stopTimer();
+                    }
+                });
+
+                $scope.$on('socketsService:' + SocketCommands.LECTURE_STOPPED, function (event, data) {
+                    var lectureId = data['lectureId'];
+                    var activeLecture = findActiveLectureById(lectureId);
+                    if (activeLecture) {
+
+                        var lecture = activeLecture.lecture;
+                        lecture.condition = {
+                            status: 'stopped'
+                        };
+
+                        activeLecture.stopTimer();
+
+                        activeLectures = _.without(activeLectures, activeLecture);
+                    }
+                });
+
+                $scope.$on('socketsService:' + SocketCommands.UPDATE_LECTURE_DURATION, function (event, data) {
+                    var lectureId = data['lectureId'];
+                    var activeLecture = findActiveLectureById(lectureId);
+                    if (activeLecture) {
+                        $timeout(function () {
+                            activeLecture.duration = data['duration'];
+                        });
+                    }
+                });
+
+                $scope.$on('socketsService:' + SocketCommands.UPDATE_PRESENT_LISTENERS, function (event, data) {
+                    var lectureId = data['lectureId'];
+                    var activeLecture = findActiveLectureById(lectureId);
+                    if (activeLecture) {
+                        $timeout(function () {
+                            activeLecture.presentListeners = data['presentListeners'];
+                        });
+                    }
+                });
+
+                $scope.$on('socketsService:disconnect', function () {
                     var message = notificationsTranslator.translate('you_lost_connection');
                     notificationsService.error(message);
                 });
+            }
+
+            function startLecture(lecture) {
+                var socketConnection = $scope.socketConnection;
+                socketConnection.startLecture(lecture.id);
+            }
+
+            function resumeLecture(lecture) {
+                var socketConnection = $scope.socketConnection;
+                socketConnection.resumeLecture(lecture.id);
+            }
+
+            function suspendLecture(lecture) {
+                var socketConnection = $scope.socketConnection;
+                socketConnection.suspendLecture(lecture.id);
+            }
+
+            function stopLecture(lecture) {
+                var socketConnection = $scope.socketConnection;
+                socketConnection.stopLecture(lecture.id);
+            }
+
+            function getLectureDuration(lecture) {
+                var lectureId = lecture.id;
+                var activeLecture = findActiveLectureById(lectureId);
+                if (activeLecture) {
+                    return activeLecture.duration;
+                }
+                return 0;
+            }
+
+            function getPresentListenersCount(lecture) {
+                var lectureId = lecture.id;
+                var activeLecture = findActiveLectureById(lectureId);
+                if (activeLecture) {
+                    return activeLecture.presentListeners['length'];
+                }
+                return 0;
+            }
+
+            function showPresentListeners(lecture) {
+                var lectureId = lecture.id;
+                dialogsService.showPresentListeners({
+                    lectureId: lectureId,
+                    presentListeners: (function () {
+                        var activeLecture = findActiveLectureById(lectureId);
+                        if (activeLecture) {
+                            return activeLecture.presentListeners;
+                        }
+                        return [];
+                    })()
+                });
+            }
+
+            function getActiveLecture(lecture) {
+
+                var intervalId = null;
+
+                return {
+                    lectureId: lecture.id,
+                    lecture: lecture,
+                    duration: 0,
+                    presentListeners: [],
+                    startTimer: function (task) {
+                        task();
+                        intervalId = $interval(task, 1000, 0, false);
+                    },
+                    stopTimer: function () {
+                        if (intervalId) {
+                            $interval.cancel(intervalId);
+                            intervalId = null;
+                        }
+                    }
+                }
             }
 
             $scope.formMode = 'view';
@@ -874,12 +958,11 @@ angular.module('application')
             $scope.errorMessage = null;
             $scope.currentWorkspace = undefined;
             $scope.loading = true;
-            $scope.todos = [];
-            $scope.newTodo = newTodo;
+            $scope.lectures = [];
+            $scope.lectureModel = lectureModel;
             $scope.presentUsers = [];
             $scope.workspaces = [];
             $scope.user = {};
-            $scope.itemPriorityDropdown = itemPriorityDropdown;
             $scope.workspaceDropdown = workspaceDropdown;
             $scope.queryHistoryDropdown = queryHistoryDropdown;
             $scope.searchOptionsDropdown = searchOptionsDropdown;
@@ -888,53 +971,9 @@ angular.module('application')
                 writer: false,
                 admin: false
             };
-            $scope.viewModes = [
-                {
-                    titleKey: 'home.all',
-                    name: 'all',
-                    icon: 'fa-book'
-                },
-                {
-                    titleKey: 'home.active',
-                    name: 'active',
-                    icon: 'fa-rocket'
-                },
-                {
-                    titleKey: 'home.completed',
-                    name: 'completed',
-                    icon: 'fa-flag'
-                }
-            ];
-            $scope.currentViewMode = findWhere($scope.viewModes, {
-                name: 'all'
-            });
 
             $scope.$watch('searchModel.searchQuery', function (searchQuery) {
                 search(searchQuery);
-            });
-
-            $scope.$watch('currentViewMode', function (viewMode) {
-                switch (viewMode.name) {
-                    case 'active':
-                    {
-                        $scope.statusFilter = {
-                            completed: false
-                        };
-                        break;
-                    }
-                    case 'completed':
-                    {
-                        $scope.statusFilter = {
-                            completed: true
-                        };
-                        break;
-                    }
-                    default :
-                    {
-                        $scope.statusFilter = null;
-                        break
-                    }
-                }
             });
 
             $scope.$watch('currentWorkspace', function (workspace) {
@@ -955,50 +994,55 @@ angular.module('application')
                         $scope.permissions = data.permissions;
                         $scope.isOwnWorkspace = data.isOwnWorkspace;
 
-                        apiService.items(workspaceId, function (items) {
-                            $scope.todos = items;
+                        apiService.getLecturesByWorkspaceId(workspaceId, function (lectures) {
+                            $scope.lectures = lectures;
+
+                            _.forEach(lectures, function (lecture) {
+                                if (lecture.condition['status'] != 'stopped') {
+                                    var lectureId = lecture.id;
+                                    var activeLecture = getActiveLecture(lecture);
+                                    activeLectures.push(activeLecture);
+                                    activeLecture.startTimer(function () {
+                                        socketConnection.getLectureDuration(lectureId);
+                                    });
+                                }
+                            });
+
                             $scope.loading = false;
                         });
                     });
                 }
             });
 
-            $scope.$watch('todos', function () {
-
-                $scope.remainingCount = filterFilter($scope.todos, {
-                    completed: false
-                }).length;
-
-                $scope.doneCount = $scope.todos.length - $scope.remainingCount;
-                $scope.allChecked = !$scope.remainingCount;
-            }, true);
-
             $scope.updateSearchHistory = updateSearchHistory;
             $scope.search = search;
             $scope.clearSearchQuery = clearSearchQuery;
             $scope.toggleFormMode = toggleFormMode;
-            $scope.setItemPriority = setItemPriority;
             $scope.showWorkspaceId = showWorkspaceId;
             $scope.onWorkspaceChanged = onWorkspaceChanged;
             $scope.onWorkspaceLoading = onWorkspaceLoading;
-            $scope.setViewMode = setViewMode;
             $scope.canReadOnly = canReadOnly;
             $scope.canManageCollection = canManageCollection;
             $scope.canManageAccess = canManageAccess;
-            $scope.addedItem = addedItem;
-            $scope.updatedItems = updatedItems;
-            $scope.removedItems = removedItems;
-            $scope.addTodo = addTodo;
+            $scope.addedLecture = addedLecture;
+            $scope.updatedLecture = updatedLecture;
+            $scope.removedLecture = removedLecture;
+            $scope.addLecture = addLecture;
+            $scope.removeLecture = removeLecture;
             $scope.showItemEditor = showItemEditor;
-            $scope.removeTodo = removeTodo;
-            $scope.clearDoneTodos = clearDoneTodos;
-            $scope.mark = mark;
-            $scope.markAll = markAll;
             $scope.showWorkspaceManager = showWorkspaceManager;
             $scope.showPresentUsers = showPresentUsers;
             $scope.showWorkspaceCreator = showWorkspaceCreator;
             $scope.showWorkspaceInfo = showWorkspaceInfo;
             $scope.logout = logout;
+            $scope.startLecture = startLecture;
+            $scope.resumeLecture = resumeLecture;
+            $scope.suspendLecture = suspendLecture;
+            $scope.stopLecture = stopLecture;
+            $scope.getLectureDuration = getLectureDuration;
+            $scope.getPresentListenersCount = getPresentListenersCount;
+            $scope.showPresentListeners = showPresentListeners;
+            $scope.canManageLecture = canManageLecture;
 
             loaderService.showLoader();
 
@@ -1023,7 +1067,7 @@ angular.module('application')
 
                             var treeModel = [];
 
-                            forEach(workspaces, function (workspace) {
+                            _.forEach(workspaces, function (workspace) {
                                 var item = workspaceToItem(workspace);
                                 treeModel.push(item);
                             });
@@ -1057,7 +1101,7 @@ angular.module('application')
                                                     {
                                                         var activeNode = rootNode;
 
-                                                        asyncEach(data.workspaces, function (workspaceId, index, next) {
+                                                        AsyncUtils.each(data.workspaces, function (workspaceId, index, next) {
                                                             activeNode.expand(function () {
                                                                 searchNode(workspaceId, function (node) {
                                                                     activeNode = node;

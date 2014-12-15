@@ -13,13 +13,16 @@
             admin: false
         };
 
+        var q = require('q');
         var _ = require('underscore');
 
-        var asyncEach = require('../utils/async-each');
-        var security = require('../utils/security');
+        var AsyncUtils = require('../../public/common-scripts/async-utils');
+        var SecurityUtils = require('../utils/security-utils');
+        var DbList = require('../db/db-list');
+        var StringWrapper = require('../db/string-wrapper');
 
-        var encodeBase64 = security.encodeBase64;
-        var decodeBase64 = security.decodeBase64;
+        var encodeBase64 = SecurityUtils.encodeBase64;
+        var decodeBase64 = SecurityUtils.decodeBase64;
         var forEach = _.forEach;
 
         function extractPropertyId(property) {
@@ -531,100 +534,6 @@
             });
         }
 
-        function getItems(workspaceId, userId, callback) {
-            dbWrapper.query("" +
-                "SELECT * " +
-                "FROM Todo " +
-                "WHERE workspaceId = :workspaceId", {
-                params: {
-                    workspaceId: workspaceId
-                }
-            }).then(function (results) {
-                var items = results;
-
-                var result = [];
-
-                forEach(items, function (item) {
-                    result.push({
-                        id: extractPropertyId(item),
-                        creatorId: item.creatorId,
-                        title: item.title,
-                        completed: item.completed,
-                        workspaceId: item.workspaceId,
-                        creationDate: item.creationDate,
-                        priority: item.priority
-                    });
-                });
-
-                callback(result);
-            }).catch(function (error) {
-                throw error;
-            });
-        }
-
-        function saveItem(workspaceId, userId, todoModel, callback) {
-            dbWrapper.query("" +
-                "INSERT INTO Todo (workspaceId, creatorId, title, completed, creationDate, priority) " +
-                "VALUES (:workspaceId, :creatorId, :title, :completed, :creationDate, :priority)", {
-                params: {
-                    workspaceId: workspaceId,
-                    creatorId: userId,
-                    title: todoModel.title,
-                    completed: todoModel.completed,
-                    creationDate: _.now(),
-                    priority: todoModel.priority
-                }
-            }).then(function (results) {
-                var item = results[0];
-                callback({
-                    itemId: extractPropertyId(item),
-                    creationDate: item.creationDate
-                });
-            }).catch(function (error) {
-                throw error;
-            });
-        }
-
-        function updateItems(workspaceId, userId, todoModels, callback) {
-            asyncEach(todoModels, function (todoModel, index, next) {
-                dbWrapper.query("" +
-                    "UPDATE Todo " +
-                    "SET title = :title, completed = :completed, priority = :priority " +
-                    "WHERE @rid = :id", {
-                    params: {
-                        id: todoModel.id,
-                        title: todoModel.title,
-                        completed: todoModel.completed,
-                        priority: todoModel.priority
-                    }
-                }).then(function (total) {
-                    next();
-                }).catch(function (error) {
-                    throw error;
-                });
-            }, function () {
-                callback();
-            });
-        }
-
-        function removeItems(workspaceId, userId, todoIds, callback) {
-            asyncEach(todoIds, function (todoId, index, next) {
-                dbWrapper.query("" +
-                    "DELETE FROM Todo " +
-                    "WHERE @rid = :id", {
-                    params: {
-                        id: todoId
-                    }
-                }).then(function (total) {
-                    next();
-                }).catch(function (error) {
-                    throw error;
-                });
-            }, function () {
-                callback();
-            });
-        }
-
         function setUserWorkspaceId(userId, workspaceId, rootWorkspaceId, callback) {
             dbWrapper.query("" +
                 "UPDATE User " +
@@ -701,6 +610,7 @@
 
         function removeWorkspace(userId, workspaceId, callback) {
 
+            //TODO: remove all items
             function removeRecords(workspaceId, callback) {
                 dbWrapper.query("" +
                     "DELETE FROM Todo " +
@@ -728,7 +638,7 @@
                         }
                     }).then(function (results) {
 
-                        asyncEach(results, function (workspace, index, next) {
+                        AsyncUtils.each(results, function (workspace, index, next) {
 
                             var workspaceId = extractPropertyId(workspace);
                             stack.push(workspaceId);
@@ -901,7 +811,7 @@
             });
         }
 
-        function getUser(userId, callback) {
+        function getUserById(userId, callback) {
             dbWrapper.query("" +
                 "SELECT displayName, registeredDate " +
                 "FROM UserAccount " +
@@ -925,10 +835,10 @@
             });
         }
 
-        function getUsers(ids, callback) {
+        function getUsersById(ids, callback) {
             var result = [];
 
-            asyncEach(ids, function (userId, index, next) {
+            AsyncUtils.each(ids, function (userId, index, next) {
                 dbWrapper.query("" +
                     "SELECT displayName, registeredDate " +
                     "FROM UserAccount " +
@@ -1006,7 +916,7 @@
 
                 var result = [];
 
-                asyncEach(permittedWorkspaces, function (permittedWorkspace, index, next) {
+                AsyncUtils.each(permittedWorkspaces, function (permittedWorkspace, index, next) {
                     dbWrapper.query("" +
                         "SELECT * " +
                         "FROM Workspace " +
@@ -1079,7 +989,7 @@
 
                 var result = [];
 
-                asyncEach(workspaces, function (workspace, index, next) {
+                AsyncUtils.each(workspaces, function (workspace, index, next) {
 
                     var workspaceId = extractPropertyId(workspace);
 
@@ -1117,7 +1027,7 @@
 
                         var users = [];
 
-                        asyncEach(usersAccount, function (userAccount, index, next) {
+                        AsyncUtils.each(usersAccount, function (userAccount, index, next) {
                             users.push({
                                 id: userAccount.userId,
                                 displayName: userAccount.displayName,
@@ -1158,7 +1068,7 @@
 
                         var users = [];
 
-                        asyncEach(usersAccount, function (userAccount, index, next) {
+                        AsyncUtils.each(usersAccount, function (userAccount, index, next) {
                             var userId = userAccount.userId;
 
                             getUserPermissionsForWorkspace(userId, workspaceId, function (permissions) {
@@ -1206,7 +1116,7 @@
 
             var accessResultCollection = [];
 
-            asyncEach(collection, function (collectionItem, index, next) {
+            AsyncUtils.each(collection, function (collectionItem, index, next) {
 
                 var userId = collectionItem.userId;
                 var permissions = collectionItem.permissions;
@@ -1302,7 +1212,7 @@
                             } else {
 
                                 quickLoadHierarchy(workspaceId, function (hierarchy) {
-                                    asyncEach(hierarchy, function (id, index, next) {
+                                    AsyncUtils.each(hierarchy, function (id, index, next) {
 
                                         if (id == workspaceId) {
 
@@ -1471,6 +1381,885 @@
             });
         }
 
+        /*TODO: begin_integration*/
+
+        function createTag(data, callback) {
+            dbWrapper.query("" +
+                "INSERT INTO Tag (title, categoryId, authorId, description)" +
+                "VALUES (:title, :categoryId, :authorId, :description", {
+                params: {
+                    title: data.title,
+                    categoryId: data.categoryId,
+                    authorId: data.authorId,
+                    description: data.description
+                }
+            }).then(function (results) {
+                var tagId = extractPropertyId(results[0]);
+                callback(tagId);
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getTagById(tagId, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Tag " +
+                "WHERE @rid = :tagId", {
+                params: {
+                    tagId: tagId
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+                    var tag = results[0];
+                    callback({
+                        id: extractPropertyId(tag),
+                        title: tag.title,
+                        categoryId: tag.categoryId,
+                        authorId: tag.authorId,
+                        description: tag.description
+                    });
+                } else {
+                    throw 'Tag not found';
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getTagsById(tagIds, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Tag " +
+                "WHERE @rid IN [:recordCollection]", {
+                params: {
+                    recordCollection: (function () {
+                        var recordCollection = [];
+                        forEach(tagIds, function (tagId) {
+                            var recordId = new StringWrapper(tagId);
+                            recordCollection.push(recordId);
+                        });
+                        return new DbList(recordCollection);
+                    })()
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+                    var tags = [];
+
+                    forEach(results, function (tag) {
+                        tags.push({
+                            id: extractPropertyId(tag),
+                            title: tag.title,
+                            categoryId: tag.categoryId,
+                            authorId: tag.authorId,
+                            description: tag.description
+                        });
+                    });
+
+                    callback(tags);
+                } else {
+                    callback([]);
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function updateTag(tagId, data, callback) {
+            dbWrapper.query("" +
+                "UPDATE Tag " +
+                "SET title = :title, categoryId = :categoryId, description = :description " +
+                "WHERE @rid = :tagId", {
+                params: {
+                    title: data.title,
+                    categoryId: data.categoryId,
+                    description: data.description,
+                    tagId: tagId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function removeTag(tagId, callback) {
+            dbWrapper.query("" +
+                "DELETE FROM Tag " +
+                "WHERE @rid = :tagId", {
+                params: {
+                    tagId: tagId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function createCategory(data, callback) {
+            dbWrapper.query("" +
+                "INSERT INTO Category (title, authorId, parentCategoryId, description)" +
+                "VALUES (:title, :authorId, :parentCategoryId, :description", {
+                params: {
+                    title: data.title,
+                    authorId: data.authorId,
+                    parentCategoryId: data.parentCategoryId,
+                    description: data.description
+                }
+            }).then(function (results) {
+                var categoryId = extractPropertyId(results[0]);
+                callback(categoryId);
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getCategoryById(categoryId, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Category " +
+                "WHERE @rid = :categoryId", {
+                params: {
+                    categoryId: categoryId
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+                    var category = results[0];
+                    callback({
+                        id: extractPropertyId(category),
+                        title: category.title,
+                        parentCategoryId: category.parentCategoryId,
+                        authorId: category.authorId,
+                        description: category.description
+                    });
+                } else {
+                    throw 'Category not found';
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getCategoriesById(categoryIds, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Category " +
+                "WHERE @rid IN [:recordCollection]", {
+                params: {
+                    recordCollection: (function () {
+                        var recordCollection = [];
+                        forEach(categoryIds, function (tagId) {
+                            var recordId = new StringWrapper(tagId);
+                            recordCollection.push(recordId);
+                        });
+                        return new DbList(recordCollection);
+                    })()
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+                    var categories = [];
+
+                    forEach(results, function (category) {
+                        categories.push({
+                            id: extractPropertyId(category),
+                            title: category.title,
+                            parentCategoryId: category.parentCategoryId,
+                            authorId: category.authorId,
+                            description: category.description
+                        });
+                    });
+
+                    callback(categories);
+                } else {
+                    callback([]);
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function updateCategory(categoryId, data, callback) {
+            dbWrapper.query("" +
+                "UPDATE Category " +
+                "SET title = :title, description = :description " +
+                "WHERE @rid = :categoryId", {
+                params: {
+                    title: data.title,
+                    description: data.description,
+                    categoryId: categoryId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function removeCategory(categoryId, callback) {
+            dbWrapper.query("" +
+                "DELETE FROM Category " +
+                "WHERE @rid = :categoryId", {
+                params: {
+                    categoryId: categoryId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function createLink(data, callback) {
+            dbWrapper.query("" +
+                "INSERT INTO Link(title, authorId, url, description) " +
+                "VALUES(:title, :authorId, :url, :description", {
+                params: {
+                    title: data.name,
+                    authorId: data.authorId,
+                    url: data.url,
+                    description: data.description
+                }
+            }).then(function (results) {
+                var linkId = extractPropertyId(results[0]);
+                callback(linkId);
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getLinkById(linkId, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Link " +
+                "WHERE @rid = :linkId", {
+                params: {
+                    linkId: linkId
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+                    var link = results[0];
+                    callback({
+                        id: extractPropertyId(link),
+                        authorId: link.authorId,
+                        title: link.title,
+                        url: link.url,
+                        description: link.description
+                    });
+                } else {
+                    throw 'Link not found';
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getLinksById(linkIds, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Link " +
+                "WHERE @rid IN [:recordCollection]", {
+                params: {
+                    recordCollection: (function () {
+                        var recordCollection = [];
+                        forEach(linkIds, function (linkId) {
+                            var recordId = new StringWrapper(linkId);
+                            recordCollection.push(recordId);
+                        });
+                        return new DbList(recordCollection);
+                    })()
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+                    var links = [];
+
+                    forEach(results, function (link) {
+                        links.push({
+                            id: extractPropertyId(link),
+                            authorId: link.authorId,
+                            title: link.title,
+                            url: link.url,
+                            description: link.description
+                        });
+                    });
+
+                    callback(links);
+                } else {
+                    callback([]);
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function updateLink(linkId, data, callback) {
+            dbWrapper.query("" +
+                "UPDATE Link " +
+                "SET title = :title, url = :url, description = :description " +
+                "WHERE @rid = :linkId", {
+                params: {
+                    title: data.name,
+                    url: data.url,
+                    description: data.description,
+                    linkId: linkId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function removeLink(linkId, callback) {
+            dbWrapper.query("" +
+                "DELETE FROM Link " +
+                "WHERE @rid = :linkId", {
+                params: {
+                    linkId: linkId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function createLecture(data, callback) {
+            dbWrapper.query("" +
+                "INSERT INTO Lecture (title, authorId, workspaceId, description, tags, additionalLinks, creationDate) " +
+                "VALUES (:title, :authorId, :workspaceId, :description, [:tags], [:additionalLinks], :creationDate)", {
+                params: {
+                    title: data.title,
+                    authorId: data.authorId,
+                    workspaceId: data.workspaceId,
+                    description: data.description,
+                    tags: new DbList(data.tags),
+                    additionalLinks: new DbList(data.additionalLinks),
+                    creationDate: _.now()
+                }
+            }).then(function (results) {
+                var lecture = results[0];
+                callback({
+                    lectureId: extractPropertyId(lecture),
+                    creationDate: lecture.creationDate
+                });
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getLectureById(lectureId, callback) {
+            dbWrapper.query("" +
+                "SELECT title, authorId, workspaceId, description, creationDate " +
+                "FROM Lecture " +
+                "WHERE @rid = :lectureId", {
+                params: {
+                    lectureId: lectureId
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+
+                    var getLectureTags = function (lectureId, callback) {
+                        dbWrapper.query("" +
+                            "SELECT EXPAND(tags) " +
+                            "FROM Lecture " +
+                            "WHERE lectureId = :lectureId", {
+                            params: {
+                                lectureId: lectureId
+                            }
+                        }).then(function (results) {
+                            var tags = [];
+                            if (results.length > 0) {
+                                AsyncUtils.each(results, function (tagId, index, next) {
+                                    getTagById(tagId, function (tag) {
+                                        tags.push(tag);
+                                        next();
+                                    });
+                                }, function () {
+                                    callback(tags);
+                                });
+                            } else {
+                                callback(tags);
+                            }
+                        }).catch(function (error) {
+                            throw error;
+                        });
+                    };
+
+                    var getLectureStatisticCharts = function (lectureId, callback) {
+                        callback([]);
+                    };
+
+                    var getLectureAdditionalLinks = function (lectureId, callback) {
+                        dbWrapper.query("" +
+                            "SELECT EXPAND(additionalLinks) " +
+                            "FROM Lecture " +
+                            "WHERE lectureId = :lectureId", {
+                            params: {
+                                lectureId: lectureId
+                            }
+                        }).then(function (results) {
+                            var links = [];
+                            if (results.length > 0) {
+                                AsyncUtils.each(results, function (linkId, index, next) {
+                                    getLinkById(linkId, function (link) {
+                                        links.push(link);
+                                        next();
+                                    });
+                                }, function () {
+                                    callback(links);
+                                });
+                            } else {
+                                callback(links);
+                            }
+                        }).catch(function (error) {
+                            throw error;
+                        });
+                    };
+
+                    var lecture = results[0];
+
+                    AsyncUtils.parallel({
+                        user: function (resolve, reject) {
+                            var authorId = lecture.authorId;
+                            getUserById(authorId, function (user) {
+                                resolve(user);
+                            });
+                        },
+                        tags: function (resolve, reject) {
+                            getLectureTags(lectureId, function (tags) {
+                                resolve(tags);
+                            });
+                        },
+                        statisticCharts: function (resolve, reject) {
+                            getLectureStatisticCharts(lectureId, function (statisticCharts) {
+                                resolve(statisticCharts);
+                            });
+                        },
+                        additionalLinks: function (resolve, reject) {
+                            getLectureAdditionalLinks(lectureId, function (additionalLinks) {
+                                resolve(additionalLinks);
+                            });
+                        },
+                        condition: function (resolve, reject) {
+                            getLectureCondition(lectureId, function (condition) {
+                                resolve(condition);
+                            });
+                        }
+                    }, function (result) {
+                        callback({
+                            id: lectureId,
+                            title: lecture.title,
+                            author: (function () {
+                                var user = result.user;
+                                return {
+                                    id: user.id,
+                                    name: user.displayName,
+                                    registeredDate: user.registeredDate
+                                }
+                            })(),
+                            workspaceId: lecture.workspaceId,
+                            description: lecture.description,
+                            tags: result.tags,
+                            statisticCharts: result.statisticCharts,
+                            additionalLinks: result.additionalLinks,
+                            creationDate: lecture.creationDate,
+                            condition: result.condition
+                        });
+                    }, function (error) {
+                        throw error;
+                    });
+                } else {
+                    throw 'getLectureById -> Lecture not found';
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getLecturesByWorkspaceId(workspaceId, callback) {
+            dbWrapper.query("" +
+                "SELECT @rid " +
+                "FROM Lecture " +
+                "WHERE workspaceId = :workspaceId", {
+                params: {
+                    workspaceId: workspaceId
+                }
+            }).then(function (results) {
+
+                var lectures = [];
+
+                if (results.length > 0) {
+                    AsyncUtils.each(results, function (lecture, index, next) {
+                        var lectureId = extractPropertyId(lecture);
+                        getLectureById(lectureId, function (lecture) {
+                            lectures.push(lecture);
+                            next();
+                        });
+                    }, function () {
+                        callback(lectures);
+                    });
+                } else {
+                    callback(lectures);
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getLecturesByAuthorId(authorId, callback) {
+            dbWrapper.query("" +
+                "SELECT @rid " +
+                "FROM Lecture " +
+                "WHERE authorId = :authorId", {
+                params: {
+                    authorId: authorId
+                }
+            }).then(function (results) {
+
+                var lectures = [];
+
+                if (results.length > 0) {
+                    AsyncUtils.each(results, function (lecture, index, next) {
+                        var lectureId = extractPropertyId(lecture);
+                        getLectureById(lectureId, function (lecture) {
+                            lectures.push(lecture);
+                            next();
+                        });
+                    }, function () {
+                        callback(lectures);
+                    });
+                } else {
+                    callback(lectures);
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getActiveLectures(callback) {
+            dbWrapper.query("" +
+                "SELECT lectureId " +
+                "FROM ActiveLecture " +
+                "WHERE status <> 'stopped'", {
+            }).then(function (results) {
+
+                var lectures = [];
+
+                AsyncUtils.each(results, function (activeLecture, index, next) {
+                    var lectureId = activeLecture.lectureId;
+                    getLectureById(lectureId, function (lecture) {
+                        lectures.push(lecture);
+                        next();
+                    });
+                }, function () {
+                    callback(lectures);
+                });
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function updateLecture(lectureId, data, callback) {
+            dbWrapper.query("" +
+                "UPDATE Lecture " +
+                "SET title = :title, description = :description " +
+                "WHERE @rid = :lectureId", {
+                params: {
+                    title: data.title,
+                    description: data.description,
+                    lectureId: lectureId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function removeLecture(lectureId, callback) {
+            dbWrapper.query("" +
+                "DELETE FROM Lecture " +
+                "WHERE @rid = :lectureId", {
+                params: {
+                    lectureId: lectureId
+                }
+            }).then(function (total) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function loadStatisticForLecture(lectureId, callback) {
+            callback([]);
+        }
+
+        function updateStatisticForLecture(lectureId, statisticData, callback) {
+            callback();
+        }
+
+        function getLectureCondition(lectureId, callback) {
+            dbWrapper.query("" +
+                "SELECT COUNT(*) AS count " +
+                "FROM ActiveLecture " +
+                "WHERE lectureId = :lectureId", {
+                params: {
+                    lectureId: lectureId
+                }
+            }).then(function (results) {
+                if (results[0].count > 0) {
+
+                    dbWrapper.query("" +
+                        "SELECT status, lecturerId " +
+                        "FROM ActiveLecture " +
+                        "WHERE lectureId = :lectureId", {
+                        params: {
+                            lectureId: lectureId
+                        }
+                    }).then(function (results) {
+                        var activeLecture = results[0];
+
+                        callback({
+                            status: activeLecture.status,
+                            lecturerId: activeLecture.lecturerId
+                        });
+                    }).catch(function (error) {
+                        throw error;
+                    });
+
+                } else {
+                    callback({
+                        status: 'stopped'
+                    });
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function updateLectureStatus(lectureId, lecturerId, status, callback) {
+            dbWrapper.query("" +
+                "SELECT COUNT(*) AS count " +
+                "FROM ActiveLecture " +
+                "WHERE lectureId = :lectureId", {
+                params: {
+                    lectureId: lectureId
+                }
+            }).then(function (results) {
+
+                if (results[0].count > 0) {
+
+                    if (status == 'stopped') {
+                        dbWrapper.query("" +
+                            "DELETE FROM ActiveLecture " +
+                            "WHERE lectureId = :lectureId", {
+                            params: {
+                                lectureId: lectureId
+                            }
+                        }).then(function (total) {
+                            callback();
+                        }).catch(function (error) {
+                            throw error;
+                        });
+                    } else {
+                        dbWrapper.query("" +
+                            "UPDATE ActiveLecture " +
+                            "SET status = :status, lecturerId = :lecturerId " +
+                            "WHERE lectureId = :lectureId", {
+                            params: {
+                                lectureId: lectureId,
+                                status: status,
+                                lecturerId: lecturerId
+                            }
+                        }).then(function (total) {
+                            callback();
+                        }).catch(function (error) {
+                            throw error;
+                        });
+                    }
+                } else {
+                    if (status == 'started') {
+                        dbWrapper.query("" +
+                            "INSERT INTO ActiveLecture (lectureId, lecturerId, status) " +
+                            "VALUES (:lectureId, :lecturerId, :status)", {
+                            params: {
+                                lectureId: lectureId,
+                                lecturerId: lecturerId,
+                                status: status
+                            }
+                        }).then(function (total) {
+                            callback();
+                        }).catch(function (error) {
+                            throw error;
+                        });
+                    } else {
+                        throw 'updateLectureStatus-> Lecture not found';
+                    }
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function createQuestion(lectureId, questionModel, callback) {
+            dbWrapper.query("" +
+                "INSERT INTO Question (title, lectureId, creationDate, type, data) " +
+                "VALUES (:title, :lectureId, :creationDate, :type, :data)", {
+                params: {
+                    title: questionModel.title,
+                    lectureId: lectureId,
+                    creationDate: _.now(),
+                    type: questionModel.type,
+                    data: JSON.stringify(questionModel.data)
+                }
+            }).then(function (results) {
+                var question = results[0];
+                var questionId = extractPropertyId(question);
+                callback(questionId);
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function updateQuestion(questionId, questionModel, callback) {
+            dbWrapper.query("" +
+                "UPDATE Question " +
+                "SET title = :title, type = :type, data = :data " +
+                "WHERE @rid = :questionId", {
+                params: {
+                    title: questionModel.title,
+                    type: questionModel.type,
+                    data: JSON.stringify(questionModel.data),
+                    questionId: questionId
+                }
+            }).then(function (total) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function removeQuestion(questionId, callback) {
+            dbWrapper.query("" +
+                "DELETE FROM Question " +
+                "WHERE @rid = :questionId", {
+                params: {
+                    questionId: questionId
+                }
+            }).then(function (total) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getQuestionById(questionId, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Question " +
+                "WHERE @rid = :questionId", {
+                params: {
+                    questionId: questionId
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+                    var model = results[0];
+
+                    callback({
+                        id: questionId,
+                        title: model.title,
+                        lectureId: model.lectureId,
+                        creationDate: model.creationDate,
+                        type: model.type,
+                        data: JSON.parse(model.data)
+                    });
+                } else {
+                    throw 'Question not found';
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getQuestionsByLectureId(lectureId, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Question " +
+                "WHERE lectureId = :lectureId", {
+                params: {
+                    lectureId: lectureId
+                }
+            }).then(function (results) {
+
+                var result = [];
+
+                if (results.length > 0) {
+                    _.forEach(results, function (question) {
+                        result.push({
+                            id: extractPropertyId(question),
+                            title: question.title,
+                            lectureId: question.lectureId,
+                            creationDate: question.creationDate,
+                            type: question.type,
+                            data: JSON.parse(question.data)
+                        });
+                    });
+                }
+
+                callback(result);
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getUserProfile(userId, callback) {
+            db.query("" +
+                "SELECT displayName AS name, email, avatarUrl, gender, birthday " +
+                "FROM UserAccount " +
+                "WHERE @rid = :userId", {
+                params: {
+                    userId: userId
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+                    var userProfile = results[0];
+                    callback({
+                        userId: userId,
+                        name: userProfile.name,
+                        email: userProfile.email,
+                        avatarUrl: userProfile.avatarUrl,
+                        gender: userProfile.gender || 'not_defined',
+                        birthday: userProfile.birthday
+                    });
+                } else {
+                    throw 'User not found';
+                }
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function updateUserProfile(userId, data, callback) {
+            db.query("" +
+                "UPDATE User " +
+                "SET displayName = :name, gender = :gender, birthday = :birthday " +
+                "WHERE @rid = :userId", {
+                params: {
+                    userId: userId,
+                    name: data.name,
+                    gender: data.gender,
+                    birthday: data.birthday || 0
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        /*TODO: end_integration*/
+
         function isSystemId(id) {
             if (id) {
                 return SYSTEM_ID_PATTERN.test(id);
@@ -1536,62 +2325,6 @@
             },
             findUser: function (genericId, callback) {
                 findUser(genericId, getAccountEncoder(callback));
-            },
-            getItems: function (workspaceId, userId, callback) {
-
-                workspaceId = decodeId(workspaceId);
-                userId = decodeId(userId);
-
-                getItems(workspaceId, userId, function (items) {
-
-                    forEach(items, function (item) {
-                        encodeObject(item, [
-                            'id',
-                            'creatorId',
-                            'workspaceId'
-                        ]);
-                    });
-
-                    callback(items);
-                });
-            },
-            saveItem: function (workspaceId, userId, todoModel, callback) {
-
-                workspaceId = decodeId(workspaceId);
-                userId = decodeId(userId);
-
-                saveItem(workspaceId, userId, todoModel, function (item) {
-
-                    encodeObject(item, [
-                        'itemId'
-                    ]);
-
-                    callback(item);
-                });
-            },
-            updateItems: function (workspaceId, userId, todoModels, callback) {
-
-                workspaceId = decodeId(workspaceId);
-                userId = decodeId(userId);
-
-                forEach(todoModels, function (todoModel) {
-                    decodeObject(todoModel, [
-                        'id'
-                    ]);
-                });
-
-                updateItems(workspaceId, userId, todoModels, callback);
-            },
-            removeItems: function (workspaceId, userId, todoIds, callback) {
-
-                workspaceId = decodeId(workspaceId);
-                userId = decodeId(userId);
-
-                forEach(todoIds, function (todoId, index) {
-                    todoIds[index] = decodeId(todoId);
-                });
-
-                removeItems(workspaceId, userId, todoIds, callback);
             },
             setUserWorkspaceId: function (userId, workspaceId, rootWorkspaceId, callback) {
 
@@ -1705,7 +2438,7 @@
 
                 userId = decodeId(userId);
 
-                getUser(userId, function (user) {
+                getUserById(userId, function (user) {
 
                     encodeObject(user, [
                         'id'
@@ -1720,7 +2453,7 @@
                     ids[index] = decodeId(id);
                 });
 
-                getUsers(ids, function (users) {
+                getUsersById(ids, function (users) {
 
                     forEach(users, function (user) {
                         encodeObject(user, [
@@ -1880,7 +2613,358 @@
             removeUserFromGroup: function (userId, groupName, callback) {
                 userId = decodeId(userId);
                 removeUserFromGroup(userId, groupName, callback);
+            },
+            /*TODO: begin_integration*/
+            createTag: function (data, callback) {
+                decodeObject(data, [
+                    'categoryId',
+                    'authorId'
+                ]);
+                createTag(data, function (tagId) {
+                    tagId = encodeId(tagId);
+                    callback(tagId);
+                });
+            },
+            getTagById: function (tagId, callback) {
+                tagId = decodeId(tagId);
+                getTagById(tagId, function (tag) {
+                    encodeObject(tag, [
+                        'id',
+                        'categoryId',
+                        'authorId'
+                    ]);
+                    callback(tag);
+                });
+            },
+            getTagsById: function (tagIds, callback) {
+
+                forEach(tagIds, function (tagId, index) {
+                    tagIds[index] = decodeId(tagId);
+                });
+
+                getTagsById(tagIds, function (tags) {
+
+                    forEach(tags, function (tag) {
+                        encodeObject(tag, [
+                            'id',
+                            'categoryId',
+                            'authorId'
+                        ]);
+                    });
+
+                    callback(tags);
+                });
+            },
+            updateTag: function (tagId, data, callback) {
+                tagId = decodeId(tagId);
+
+                decodeObject(data, [
+                    'categoryId'
+                ]);
+
+                updateTag(tagId, data, callback);
+            },
+            removeTag: function (tagId, callback) {
+                tagId = decodeId(tagId);
+                removeTag(tagId, callback);
+            },
+            createCategory: function (data, callback) {
+                decodeObject(data, [
+                    'authorId',
+                    'parentCategoryId'
+                ]);
+                createCategory(data, function (categoryId) {
+                    categoryId = encodeId(categoryId);
+                    callback(categoryId);
+                });
+            },
+            getCategoryById: function (categoryId, callback) {
+                categoryId = decodeId(categoryId);
+                getCategoryById(categoryId, function (category) {
+                    encodeObject(category, [
+                        'id',
+                        'parentCategoryId',
+                        'authorId'
+                    ]);
+                    callback(category);
+                });
+            },
+            getCategoriesById: function (categoryIds, callback) {
+
+                forEach(categoryIds, function (categoryId, index) {
+                    categoryIds[index] = decodeId(categoryId);
+                });
+
+                getCategoriesById(categoryIds, function (categories) {
+
+                    forEach(categories, function (tag) {
+                        encodeObject(tag, [
+                            'id',
+                            'parentCategoryId',
+                            'authorId'
+                        ]);
+                    });
+
+                    callback(categories);
+                });
+            },
+            updateCategory: function (categoryId, data, callback) {
+                categoryId = decodeId(categoryId);
+                updateCategory(categoryId, data, callback);
+            },
+            removeCategory: function (categoryId, callback) {
+                categoryId = decodeId(categoryId);
+                removeCategory(categoryId, callback);
+            },
+            createLink: function (data, callback) {
+                decodeObject(data, [
+                    'authorId'
+                ]);
+                createLink(data, function (linkId) {
+                    linkId = encodeId(linkId);
+                    callback(linkId);
+                });
+            },
+            getLinkById: function (linkId, callback) {
+                linkId = decodeId(linkId);
+                getLinkById(linkId, function (link) {
+                    encodeObject(link, [
+                        'id',
+                        'authorId'
+                    ]);
+                    callback(link);
+                });
+            },
+            getLinksById: function (linkIds, callback) {
+
+                forEach(linkIds, function (linkId, index) {
+                    linkIds[index] = decodeId(linkId);
+                });
+
+                getLinksById(linkIds, function (links) {
+
+                    forEach(links, function (tag) {
+                        encodeObject(tag, [
+                            'id',
+                            'authorId'
+                        ]);
+                    });
+
+                    callback(links);
+                });
+            },
+            updateLink: function (linkId, data, callback) {
+                linkId = decodeId(linkId);
+                updateLink(linkId, data, callback);
+            },
+            removeLink: function (linkId, callback) {
+                linkId = decodeId(linkId);
+                removeLink(linkId, callback);
+            },
+            createLecture: function (data, callback) {
+
+                decodeObject(data, [
+                    'authorId',
+                    'workspaceId'
+                ]);
+
+                createLecture(data, function (lecture) {
+                    encodeObject(lecture, [
+                        'lectureId'
+                    ]);
+                    callback(lecture);
+                });
+            },
+            getLectureById: function (lectureId, callback) {
+                lectureId = decodeId(lectureId);
+                getLectureById(lectureId, function (lecture) {
+
+                    encodeObject(lecture, [
+                        'id',
+                        'authorId',
+                        'workspaceId'
+                    ]);
+
+                    encodeObject(lecture.author, [
+                        'id'
+                    ]);
+
+                    if (lecture.condition['status'] != 'stopped') {
+                        encodeObject(lecture.condition, [
+                            'lecturerId'
+                        ]);
+                    }
+
+                    callback(lecture);
+                });
+            },
+            getLecturesByWorkspaceId: function (workspaceId, callback) {
+                workspaceId = decodeId(workspaceId);
+                getLecturesByWorkspaceId(workspaceId, function (lectures) {
+
+                    forEach(lectures, function (lecture) {
+
+                        encodeObject(lecture, [
+                            'id',
+                            'authorId',
+                            'workspaceId'
+                        ]);
+
+                        encodeObject(lecture.author, [
+                            'id'
+                        ]);
+
+                        if (lecture.condition['status'] != 'stopped') {
+                            encodeObject(lecture.condition, [
+                                'lecturerId'
+                            ]);
+                        }
+                    });
+
+                    callback(lectures);
+                })
+            },
+            getLecturesByAuthorId: function (authorId, callback) {
+                authorId = decodeId(authorId);
+                getLecturesByAuthorId(authorId, function (lectures) {
+
+                    forEach(lectures, function (lecture) {
+
+                        encodeObject(lecture, [
+                            'id',
+                            'authorId',
+                            'workspaceId'
+                        ]);
+
+                        encodeObject(lecture.author, [
+                            'id'
+                        ]);
+
+                        if (lecture.condition['status'] != 'stopped') {
+                            encodeObject(lecture.condition, [
+                                'lecturerId'
+                            ]);
+                        }
+                    });
+
+                    callback(lectures);
+                })
+            },
+            getActiveLectures: function (callback) {
+                getActiveLectures(function (lectures) {
+
+                    forEach(lectures, function (lecture) {
+
+                        encodeObject(lecture, [
+                            'id',
+                            'authorId',
+                            'workspaceId'
+                        ]);
+
+                        encodeObject(lecture.author, [
+                            'id'
+                        ]);
+
+                        if (lecture.condition['status'] != 'stopped') {
+                            encodeObject(lecture.condition, [
+                                'lecturerId'
+                            ]);
+                        }
+                    });
+
+                    callback(lectures);
+                });
+            },
+            updateLecture: function (lectureId, data, callback) {
+                lectureId = decodeId(lectureId);
+                updateLecture(lectureId, data, callback);
+            },
+            removeLecture: function (lectureId, callback) {
+                lectureId = decodeId(lectureId);
+                removeLecture(lectureId, callback);
+            },
+            loadStatisticForLecture: function (lectureId, callback) {
+                loadStatisticForLecture(lectureId, callback);
+            },
+            updateStatisticForLecture: function (lectureId, statisticData, callback) {
+                updateStatisticForLecture(lectureId, statisticData, callback);
+            },
+            getLectureCondition: function (lectureId, callback) {
+                lectureId = encodeId(lectureId);
+                getLectureCondition(lectureId, function (condition) {
+                    if (condition.status != 'stopped') {
+                        encodeObject(condition, [
+                            'lecturerId'
+                        ]);
+                    }
+                    callback(condition);
+                });
+            },
+            updateLectureStatus: function (lectureId, lecturerId, status, callback) {
+                lectureId = decodeId(lectureId);
+                lecturerId = decodeId(lecturerId);
+                updateLectureStatus(lectureId, lecturerId, status, callback);
+            },
+            createQuestion: function (lectureId, questionModel, callback) {
+                lectureId = decodeId(lectureId);
+                createQuestion(lectureId, questionModel, function (questionId) {
+                    questionId = encodeId(questionId);
+                    callback(questionId);
+                });
+            },
+            updateQuestion: function (questionId, questionModel, callback) {
+                questionId = decodeId(questionId);
+                updateQuestion(questionId, questionModel, callback);
+            },
+            removeQuestion: function (questionId, callback) {
+                questionId = decodeId(questionId);
+                removeQuestion(questionId, callback);
+            },
+            getQuestionById: function (questionId, callback) {
+
+                questionId = decodeId(questionId);
+
+                getQuestionById(questionId, function (question) {
+
+                    encodeObject(question, [
+                        'id',
+                        'lectureId'
+                    ]);
+
+                    callback(question);
+                });
+            },
+            getQuestionsByLectureId: function (lectureId, callback) {
+
+                lectureId = decodeId(lectureId);
+
+                getQuestionsByLectureId(lectureId, function (questions) {
+                    forEach(questions, function (question) {
+                        encodeObject(question, [
+                            'id',
+                            'lectureId'
+                        ]);
+                    });
+
+                    callback(questions);
+                });
+            },
+            getUserProfile: function (userId, callback) {
+                userId = decodeId(userId);
+                getUserProfile(userId, function (userProfile) {
+
+                    encodeObject(userProfile, [
+                        'userId'
+                    ]);
+
+                    callback(userProfile);
+                });
+            },
+            updateUserProfile: function (userId, data, callback) {
+                userId = decodeId(userId);
+                updateUserProfile(userId, data, callback);
             }
+            /*TODO: end_integration*/
         };
     };
 

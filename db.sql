@@ -1,12 +1,69 @@
 CREATE database plocal:local_db admin admin plocal graph
 
-CREATE CLASS Todo
-CREATE PROPERTY Todo.userId STRING
-CREATE PROPERTY Todo.title STRING
-CREATE PROPERTY Todo.completed BOOLEAN
-CREATE PROPERTY Todo.workspaceId STRING
-CREATE PROPERTY Todo.creationDate LONG
-CREATE PROPERTY Todo.priority STRING
+## begin_integration
+
+CREATE CLASS ChartPoint
+CREATE PROPERTY ChartPoint.timestamp LONG
+CREATE PROPERTY ChartPoint.presentListeners INTEGER
+CREATE PROPERTY ChartPoint.understandingPercentage FLOAT
+
+CREATE CLASS Lecture
+CREATE PROPERTY Lecture.title STRING
+CREATE PROPERTY Lecture.authorId STRING
+CREATE PROPERTY Lecture.workspaceId STRING
+CREATE PROPERTY Lecture.description STRING
+CREATE PROPERTY Lecture.tags EMBEDDEDLIST STRING
+CREATE PROPERTY Lecture.statisticCharts EMBEDDEDLIST STRING
+CREATE PROPERTY Lecture.additionalLinks EMBEDDEDLIST STRING
+CREATE PROPERTY Lecture.creationDate LONG
+
+CREATE CLASS Question
+CREATE PROPERTY Question.title STRING
+CREATE PROPERTY Question.lectureId STRING
+CREATE PROPERTY Question.creationDate LONG
+CREATE PROPERTY Question.type STRING
+CREATE PROPERTY Question.data STRING
+
+CREATE CLASS StatisticChart
+CREATE PROPERTY StatisticChart.lectureId STRING
+CREATE PROPERTY StatisticChart.chartPoints EMBEDDEDLIST STRING
+CREATE PROPERTY StatisticChart.timeline EMBEDDEDLIST STRING
+CREATE PROPERTY StatisticChart.totalDuration LONG
+
+CREATE CLASS TimeMarker
+CREATE PROPERTY TimeMarker.statisticChartId STRING
+CREATE PROPERTY TimeMarker.startTime LONG
+CREATE PROPERTY TimeMarker.finishTime LONG
+CREATE PROPERTY TimeMarker.status STRING
+
+CREATE CLASS JoinedUser
+CREATE PROPERTY JoinedUser.userId STRING
+CREATE PROPERTY JoinedUser.lectureId STRING
+
+CREATE CLASS ActiveLecture
+CREATE PROPERTY ActiveLecture.lectureId STRING
+CREATE PROPERTY ActiveLecture.lecturerId STRING
+CREATE PROPERTY ActiveLecture.status STRING
+
+CREATE CLASS Tag
+CREATE PROPERTY Tag.title STRING
+CREATE PROPERTY Tag.authorId STRING
+CREATE PROPERTY Tag.categoryId STRING
+CREATE PROPERTY Tag.description STRING
+
+CREATE CLASS Category
+CREATE PROPERTY Category.title STRING
+CREATE PROPERTY Category.authorId STRING
+CREATE PROPERTY Category.parentCategoryId STRING
+CREATE PROPERTY Category.description STRING
+
+CREATE CLASS Link
+CREATE PROPERTY Link.title STRING
+CREATE PROPERTY Link.authorId STRING
+CREATE PROPERTY Link.url STRING
+CREATE PROPERTY Link.description STRING
+
+## end_integration
 
 CREATE CLASS User
 CREATE PROPERTY User.accountId STRING 

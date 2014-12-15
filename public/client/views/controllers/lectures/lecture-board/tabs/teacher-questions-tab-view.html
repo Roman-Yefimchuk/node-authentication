@@ -1,0 +1,83 @@
+<section>
+
+    <div style="padding: 0;">
+
+        <div>
+
+            <div ng-switch="loading">
+
+                <div ng-switch-when="true">
+                    <div static-include="/client/views/common/loader-view.html"></div>
+                </div>
+
+                <div ng-switch-when="false">
+
+                    <div ng-switch="questions.length > 0">
+                        <div ng-switch-when="true">
+
+                            <ul class="list-group"
+                                style="margin-bottom: 0">
+                                <li ng-repeat="question in questions" class="list-group-item">
+
+                                    <div class="row clearfix">
+                                        <div class="col-md-12" style="margin-bottom: 15px;">
+                                            <div>
+                                                {{ question.title }}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+
+                                            <div class="pull-left" ng-show="!question.isAsked">
+
+                                                <div class="btn btn-success"
+                                                     ng-disabled="lecture.status != 'started'"
+                                                     tooltip="Задати запитання"
+                                                     ng-click="askQuestion(question)">
+                                                    <i class="fa fa-bullhorn"></i>
+                                                </div>
+
+                                            </div>
+
+
+                                            <div class="pull-right">
+
+                                                <div ng-show="question.isAsked" class="pull-left"
+                                                     style="cursor: pointer;padding-right: 6px;margin-top: 2px;"
+                                                     ng-click="showAnsweredListeners(question)">
+                                                    <i class="fa fa-users"
+                                                       tooltip="Слухачі, які відповіли"></i>&nbsp;<b>{{
+                                                    (question.answers || []).length }}</b>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+
+
+                                </li>
+                            </ul>
+
+                        </div>
+
+                        <div ng-switch-when="false">
+
+                            <div class="text-center">
+                                <div class="row clearfix">
+                                    <div class="col-md-12 column">
+                                        Немає запитань
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>

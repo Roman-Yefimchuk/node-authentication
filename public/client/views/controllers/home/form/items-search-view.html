@@ -90,15 +90,8 @@
 
         <div ng-switch-when="true">
             <ul class="task-list">
-                <li ng-repeat="todo in searchModel.result"
-                    ng-class="{ 'task-done' : todo.completed }"
+                <li ng-repeat="lecture in searchModel.result"
                     is-lats-item="{{ $last }}">
-                    <div class="task-checkbox" ng-show="canManageCollection()">
-                        <i class="fa" style="cursor: pointer;vertical-align: sub;margin-left: 8px;"
-                           btn-checkbox ng-model="todo.completed" ng-change="mark(todo)"
-                           ng-class="{ 'fa-square-o' : !todo.completed, 'fa-check-square-o' : todo.completed }">
-                        </i>
-                    </div>
 
                     <div class="task-title">
 
@@ -106,41 +99,31 @@
                               style="vertical-align: sub;">
                             <span ng-switch="searchModel.showHighlight">
                                 <span ng-switch-when="true">
-                                    <span ng-bind-html="todo.title | searchHighlight:searchModel">
+                                    <span ng-bind-html="lecture.title | searchHighlight:searchModel">
                                     </span>
                                 </span>
                                 <span ng-switch-when="false">
-                                    {{ todo.title }}
+                                    {{ lecture.title }}
                                 </span>
                             </span>
                         </span>
 
                         <div class="pull-right hidden-phone">
 
-                            <i class="fa fa-star" ng-show="todo.priority != 'none'"
-                               ng-class="{ 'star-priority-low' : todo.priority == 'low',
-                                           'star-priority-medium' : todo.priority == 'medium',
-                                           'star-priority-high' : todo.priority == 'high' }"
-                               tooltip="{{ 'home.' + todo.priority + '_priority' | translate }}"
-                               style="vertical-align: sub;">
-                            </i>
-
-                            &nbsp;
-
                             <span style="padding-right: 8px;vertical-align: sub;">
-                                {{ todo.creationDate | formatDate:'mmm d, yyyy, h:MM TT' }}
+                                {{ lecture.creationDate | formatDate:'mmm d, yyyy, h:MM TT' }}
                             </span>
 
                             <span class="btn btn-primary btn-xs"
                                   tooltip="{{ 'home.edit' | translate }}"
-                                  ng-click="showItemEditor(todo)"
+                                  ng-click="showItemEditor(lecture)"
                                   ng-show="canManageCollection()">
                                 <i class="fa fa-pencil"></i>
                             </span>
 
                             <span class="btn btn-danger btn-xs"
                                   tooltip="{{ 'home.remove' | translate }}"
-                                  ng-click="removeTodo(todo)"
+                                  ng-click="removeLecture(lecture)"
                                   ng-show="canManageCollection()">
                                 <i class="fa fa-trash-o"></i>
                             </span>

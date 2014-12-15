@@ -79,23 +79,20 @@ angular.module('application')
 
             function addLocale(localeCode, localeData) {
                 if (locales[localeCode]) {
-                    console.log("Locale '" + localeCode + "' is already added");
+                    $log.debug("Locale '" + localeCode + "' is already added");
                 } else {
-
-                    var getDictionary = function () {
-                        if (localeCode == currentLocaleCode) {
-                            var translations = localeData['translations'];
-                            return makeDictionary(translations);
-                        }
-                        return null;
-                    };
-
                     locales[localeCode] = {
                         code: localeCode,
                         data: {
                             config: localeData['config'],
                             translations: localeData['translations'],
-                            dictionary: getDictionary()
+                            dictionary: (function () {
+                                if (localeCode == currentLocaleCode) {
+                                    var translations = localeData['translations'];
+                                    return makeDictionary(translations);
+                                }
+                                return null;
+                            })()
                         }
                     };
                 }

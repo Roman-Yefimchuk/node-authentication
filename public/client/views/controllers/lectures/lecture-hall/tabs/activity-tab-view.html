@@ -1,0 +1,63 @@
+<div class="row clearfix">
+    <div class="col-md-12 col-xs-12 column">
+
+        <div class="row clearfix" style="margin-top: 15px;">
+            <div class="col-md-12 column">
+                <textarea rows="3" noresize class="form-control" required
+                          style="resize: none;/*border-top-left-radius: 0;border-top-right-radius: 0;"
+                          ng-model="message.text">
+                </textarea>
+
+                <div class="btn btn-success btn-sm btn-xs" ng-click="sendMessage()" style="margin-top: 15px;"
+                     ng-disabled="!message.text">
+                    <i class="fa fa-paper-plane"></i>
+                    &nbsp;
+                    Відправити
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-default" style="margin-top: 15px;margin-bottom: 0;">
+            <div id="activity-list" class="panel-body" style="/*height: 200px;overflow-y: auto;">
+
+                <div ng-switch="activityCollection.length > 0">
+                    <div ng-switch-when="true">
+
+                        <ul class="list-group" style="margin: 0;">
+                            <li ng-repeat="activityItem in activityCollection" class="list-group-item text-left">
+
+                                <div>
+                                    <b>{{ activityItem.timestamp | formatDate : 'ISO_TIME' }}</b>
+                                </div>
+                                <div ng-init="activity = activityItem.activity"
+                                     ng-switch="activity.activityCommand">
+
+                                    <div ng-switch-when="ActivityCommands.ON_MESSAGE">
+                                        {{ activity.userName }}: {{ activity.message }}
+                                    </div>
+                                    <div ng-switch-when="ActivityCommands.QUESTION_ASKED">
+                                        Lecturer asked question: {{ activity.question['title'] }}
+                                    </div>
+                                    <div ng-switch-when="ActivityCommands.LISTENER_JOINED">
+                                        User {{ activity.userName }} joined to lecture
+                                    </div>
+                                    <div ng-switch-when="ActivityCommands.LISTENER_HAS_LEFT">
+                                        User {{ activity.userName }} has left lefture
+                                    </div>
+
+                                </div>
+
+                            </li>
+                        </ul>
+
+                    </div>
+                    <div ng-switch-when="false">
+                        Немає активності
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>

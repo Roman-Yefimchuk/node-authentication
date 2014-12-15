@@ -56,6 +56,8 @@
 
             var dbProvider = require('./db-provider')(dbWrapper);
             callback(dbProvider);
+
+            console.log('DbConnector successfully initialized');
         }
     };
 

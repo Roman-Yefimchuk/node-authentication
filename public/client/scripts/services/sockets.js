@@ -26,45 +26,45 @@ angular.module('application')
             function getSocketConnection(userId, emit) {
                 return  {
                     changedWorkspace: function (workspaceId) {
-                        emit('changed_workspace', {
+                        emit(SocketCommands.CHANGED_WORKSPACE, {
                             userId: userId,
                             workspaceId: workspaceId
                         });
                     },
                     updatedWorkspace: function (workspaceId, data) {
-                        emit('updated_workspace', {
+                        emit(SocketCommands.UPDATED_WORKSPACE, {
                             userId: userId,
                             workspaceId: workspaceId,
                             data: data
                         });
                     },
                     removedWorkspace: function (workspaceId, result) {
-                        emit('removed_workspace', {
+                        emit(SocketCommands.REMOVED_WORKSPACE, {
                             userId: userId,
                             workspaceId: workspaceId,
                             result: result
                         });
                     },
                     addedItem: function (item) {
-                        emit('added_item', {
+                        emit(SocketCommands.ADDED_ITEM, {
                             userId: userId,
                             item: item
                         });
                     },
-                    updatedItems: function (items) {
-                        emit('updated_items', {
+                    updatedItem: function (item) {
+                        emit(SocketCommands.UPDATED_ITEM, {
                             userId: userId,
-                            items: items
+                            item: item
                         });
                     },
-                    removedItems: function (itemIds) {
-                        emit('removed_items', {
+                    removedItem: function (itemId) {
+                        emit(SocketCommands.REMOVED_ITEM, {
                             userId: userId,
-                            itemIds: itemIds
+                            itemId: itemId
                         });
                     },
                     permissionsChanged: function (accessResultCollection, workspaceId, parentWorkspaceId) {
-                        emit('permissions_changed', {
+                        emit(SocketCommands.PERMISSIONS_CHANGED, {
                             userId: userId,
                             workspaceId: workspaceId,
                             parentWorkspaceId: parentWorkspaceId,
@@ -72,9 +72,105 @@ angular.module('application')
                         });
                     },
                     updatePresentUsers: function (workspaceId) {
-                        emit('update_present_users', {
+                        emit(SocketCommands.UPDATE_PRESENT_USERS, {
                             userId: userId,
                             workspaceId: workspaceId
+                        });
+                    },
+                    startLecture: function (lectureId) {
+                        emit(SocketCommands.START_LECTURE, {
+                            userId: userId,
+                            lectureId: lectureId
+                        });
+                    },
+                    resumeLecture: function (lectureId) {
+                        emit(SocketCommands.RESUME_LECTURE, {
+                            userId: userId,
+                            lectureId: lectureId
+                        });
+                    },
+                    suspendLecture: function (lectureId) {
+                        emit(SocketCommands.SUSPEND_LECTURE, {
+                            userId: userId,
+                            lectureId: lectureId
+                        });
+                    },
+                    stopLecture: function (lectureId) {
+                        emit(SocketCommands.STOP_LECTURE, {
+                            userId: userId,
+                            lectureId: lectureId
+                        });
+                    },
+                    getLectureDuration: function (lectureId) {
+                        emit(SocketCommands.GET_LECTURE_DURATION, {
+                            userId: userId,
+                            lectureId: lectureId
+                        });
+                    },
+                    getTotalLectureDuration: function (lectureId) {
+                        emit(SocketCommands.GET_TOTAL_LECTURE_DURATION, {
+                            userId: userId,
+                            lectureId: lectureId
+                        });
+                    },
+                    askQuestion: function (lectureId, question) {
+                        emit(SocketCommands.ASK_QUESTION, {
+                            userId: userId,
+                            lectureId: lectureId,
+                            question: question
+                        });
+                    },
+                    updatePresentListeners: function (lectureId) {
+                        emit(SocketCommands.UPDATE_PRESENT_LISTENERS, {
+                            userId: userId,
+                            lectureId: lectureId
+                        });
+                    },
+                    joinToLecture: function (lectureId) {
+                        emit(SocketCommands.JOIN_TO_LECTURE, {
+                            userId: userId,
+                            lectureId: lectureId
+                        });
+                    },
+                    leftFromLecture: function (lectureId) {
+                        emit(SocketCommands.LEFT_FROM_LECTURE, {
+                            userId: userId,
+                            lectureId: lectureId
+                        });
+                    },
+                    getQuestionInfo: function (lectureId, questionId) {
+                        emit(SocketCommands.GET_QUESTION_INFO, {
+                            userId: userId,
+                            lectureId: lectureId,
+                            questionId: questionId
+                        });
+                    },
+                    replyForTeacherQuestion: function (lectureId, questionId, answer) {
+                        emit(SocketCommands.REPLY_FOR_TEACHER_QUESTION, {
+                            userId: userId,
+                            lectureId: lectureId,
+                            questionId: questionId,
+                            answer: answer
+                        });
+                    },
+                    updateStatistic: function (lectureId, value) {
+                        emit(SocketCommands.UPDATE_STATISTIC, {
+                            userId: userId,
+                            lectureId: lectureId,
+                            value: value
+                        });
+                    },
+                    sendMessage: function (lectureId, message) {
+                        emit(SocketCommands.SEND_MESSAGE, {
+                            userId: userId,
+                            lectureId: lectureId,
+                            message: message
+                        });
+                    },
+                    updateChart: function (lectureId) {
+                        emit(SocketCommands.UPDATE_CHART, {
+                            userId: userId,
+                            lectureId: lectureId
                         });
                     }
                 };
@@ -121,31 +217,41 @@ angular.module('application')
                             }
                         };
 
-                        _.forEach({
-                            'user_connected': 'userConnected',
-                            'user_disconnected': 'userDisconnected',
-
-                            'changed_workspace': 'changedWorkspace',
-                            'updated_workspace': 'updatedWorkspace',
-                            'removed_workspace': 'removedWorkspace',
-
-                            'added_item': 'addedItem',
-                            'updated_items': 'updatedItems',
-                            'removed_items': 'removedItems',
-
-                            'permissions_changed': 'permissionsChanged',
-
-                            'update_present_users': 'updatePresentUsers'
-                        }, function (value, command) {
+                        _.forEach([
+                            SocketCommands.USER_CONNECTED,
+                            SocketCommands.USER_DISCONNECTED,
+                            SocketCommands.CHANGED_WORKSPACE,
+                            SocketCommands.UPDATED_WORKSPACE,
+                            SocketCommands.REMOVED_WORKSPACE,
+                            SocketCommands.ADDED_ITEM,
+                            SocketCommands.UPDATED_ITEM,
+                            SocketCommands.REMOVED_ITEM,
+                            SocketCommands.PERMISSIONS_CHANGED,
+                            SocketCommands.UPDATE_PRESENT_USERS,
+                            SocketCommands.LECTURE_STARTED,
+                            SocketCommands.LECTURE_RESUMED,
+                            SocketCommands.LECTURE_SUSPENDED,
+                            SocketCommands.LECTURE_STOPPED,
+                            SocketCommands.UPDATE_LECTURE_DURATION,
+                            SocketCommands.UPDATE_TOTAL_LECTURE_DURATION,
+                            SocketCommands.QUESTION_ASKED,
+                            SocketCommands.UPDATE_QUESTION_INFO,
+                            SocketCommands.UPDATE_PRESENT_LISTENERS,
+                            SocketCommands.LISTENER_JOINED,
+                            SocketCommands.LISTENER_HAS_LEFT,
+                            SocketCommands.ON_MESSAGE,
+                            SocketCommands.UPDATE_STATISTIC,
+                            SocketCommands.UPDATE_CHART
+                        ], function (command) {
                             on(command, function (data) {
-                                $rootScope.$broadcast('socketsService:' + value, data);
+                                $rootScope.$broadcast('socketsService:' + command, data);
                             });
                         });
 
-                        on('connect', function (data) {
+                        on('connect', function () {
                             isConnected = true;
 
-                            emit('user_connection', {
+                            emit(SocketCommands.USER_CONNECTION, {
                                 userId: userId,
                                 workspaceId: workspaceId
                             });

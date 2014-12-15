@@ -1,0 +1,122 @@
+<div>
+    <div class="modal-header">
+        <span class="close" ng-click="cancel()">×</span>
+        <h4 style="margin-bottom: 0;margin-top: 0;">
+            <i class="fa fa-pencil-square-o"></i>
+            &nbsp;
+            Редагування профіля
+        </h4>
+    </div>
+
+    <div class="modal-body">
+
+        <div>
+            <div class="row clearfix">
+                <div class="col-md-6 column">
+                    <span class="col-md-12">
+
+                    Ім'я:
+
+                    <div class="form-group-sm" ng-class="{ 'has-feedback' : !!userProfile.name }"
+                         style="margin-bottom: 0">
+                        <label class="control-label" ng-show="false"></label>
+                        <input type="text" class="form-control input-sm"
+                               placeholder="Введіть ім'я"
+                               autofocus autocomplete="off" ng-model="userProfile.name">
+                        <span class="form-control-feedback" style="top: 0"
+                              ng-show="!!userProfile.name">
+                            <i class="fa fa-times" style="cursor: pointer"
+                               tooltip="Очистити"
+                               ng-click="userProfile.name = ''"></i>
+                        </span>
+                    </div>
+
+                    </span>
+                </div>
+                <div class="col-md-6 column">
+                    <span class="col-md-12">
+
+                    Вибрати стать:
+
+                        <br>
+
+                    <div class="btn-group btn-group-sm col-md-12" dropdown is-open="status.isopen"
+                         style="padding: 0px;">
+                        <button type="button" class="btn btn-primary dropdown-toggle col-md-12">
+                            {{ {'not_defined':'Не вказано','male':'Чоловіча','female':'Жіноча'}[userProfile.sex] }}
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                            <li>
+                                <a href ng-click="userProfile.sex = 'male'">
+                                    Чоловіча
+                                </a>
+                            </li>
+                            <li>
+                                <a href ng-click="userProfile.sex = 'female'">
+                                    Жіноча
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    </span>
+                </div>
+            </div>
+            <div class="row clearfix">
+                <div class="col-md-6 column">
+                    <span class="col-md-12" style="margin-left: 15px;margin-top: 15px;">
+
+                    <div class="row clearfix">
+                        <div class="column">
+                            <span>
+
+                            <div>
+
+                                    <span>
+                                        {{ userProfile.email }}
+                                    </span>
+
+                                <i class="fa fa-pencil" style="cursor: pointer"
+                                   tooltip="Змінити електронну адресу"
+                                   ng-click=""></i>
+
+                            </div>
+
+                            </span>
+                        </div>
+
+                        <div class="column">
+                            <span class="">
+                                <a href="/#/logout">Змінити пароль</a>
+                            </span>
+                        </div>
+
+                    </div>
+
+                    </span>
+                </div>
+
+                <div class="col-md-6 column">
+                    <span class="col-md-12">
+#2
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-footer ng-scope" style="margin-top: 0">
+        <span class="btn btn-warning btn-sm" ng-click="cancel()">
+            <i class="fa fa-share"></i>
+            &nbsp;
+            Відміна
+        </span>
+        <span class="btn btn-primary btn-sm" ng-click="save()" ng-disabled="isDisabled()">
+            <i class="fa fa-floppy-o"></i>
+            &nbsp;
+            Зберегти
+        </span>
+    </div>
+</div>

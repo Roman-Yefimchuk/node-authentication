@@ -1,0 +1,16 @@
+<div ng-controller="QuestionsController">
+    <div ng-switch="lectureModel.questions['length'] > 0">
+        <div ng-switch-when="true">
+
+            <ul class="list-group" style="margin: 0;">
+                <li ng-repeat="question in lectureModel.questions" class="list-group-item text-left">
+                    {{ question.title }}
+                </li>
+            </ul>
+
+        </div>
+        <div ng-switch-when="false" class="text-center">
+            Немає запитань, <a ng-click="addQuestion()" style="cursor: pointer">додати</a>
+        </div>
+    </div>
+</div>

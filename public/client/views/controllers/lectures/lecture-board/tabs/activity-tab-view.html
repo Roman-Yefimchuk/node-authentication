@@ -1,0 +1,51 @@
+<div class="row clearfix">
+    <div class="col-md-12 col-xs-12 column text-center">
+
+        <div ng-switch="activityCollection.length > 0">
+            <div ng-switch-when="true">
+
+                <ul class="list-group" style="margin: 0;">
+                    <li ng-repeat="activityItem in activityCollection" class="list-group-item text-left">
+
+                        <div>
+                            <b>{{ activityItem.timestamp | formatDate : 'ISO_TIME' }}</b>
+                        </div>
+
+                        <div ng-init="activity = activityItem.activity"
+                             ng-switch="activity.command">
+
+                            <div ng-switch-when="ON_MESSAGE">
+                                {{ activity.userName }}: {{ activity.message }}
+                            </div>
+                            <div ng-switch-when="QUESTION_ASKED">
+                                Lecturer asked question: {{ activity.question['title'] }}
+                            </div>
+                            <div ng-switch-when="LISTENER_JOINED">
+                                User {{ activity.userName }} joined to lecture
+                            </div>
+                            <div ng-switch-when="LISTENER_HAS_LEFT">
+                                User {{ activity.userName }} has left lefture
+                            </div>
+                            <div ng-switch-when="LECTURE_STARTED">
+                                Lecture started
+                            </div>
+                            <div ng-switch-when="LECTURE_SUSPENDED">
+                                Lecture suspended
+                            </div>
+                            <div ng-switch-when="LECTURE_RESUMED">
+                                Lecture resumed
+                            </div>
+
+                        </div>
+
+                    </li>
+                </ul>
+
+            </div>
+            <div ng-switch-when="false">
+                Немає активності
+            </div>
+        </div>
+
+    </div>
+</div>

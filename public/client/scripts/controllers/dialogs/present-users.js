@@ -106,12 +106,12 @@ angular.module('application')
                 updatePage();
             });
 
-            $scope.$on('socketsService:userDisconnected', function (event, data) {
+            $scope.$on('socketsService:' + SocketCommands.USER_DISCONNECTED, function (event, data) {
                 var userId = data['userId'];
                 removeUser(userId);
             });
 
-            $scope.$on('socketsService:changedWorkspace', function (event, data) {
+            $scope.$on('socketsService:' + SocketCommands.CHANGED_WORKSPACE, function (event, data) {
                 var userId = data['userId'];
                 if (data['workspaceId'] == workspaceId) {
                     addUser(userId);

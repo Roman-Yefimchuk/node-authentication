@@ -28,14 +28,6 @@ angular.module('application', [
 
             $logProvider.debugEnabled(DEBUG_MODE);
 
-            if (DEBUG_MODE) {
-                //TODO: debug mode
-                window.onerror = function (message, file) {
-                    alert(message);
-                    alert(file);
-                };
-            }
-
             $routeProvider.when('/', {
                 templateUrl: '/public/client/views/controllers/index-view.html',
                 controller: 'IndexController',
@@ -71,6 +63,36 @@ angular.module('application', [
                 controller: 'SettingsController',
                 options: {
                     title: 'routes.settings'
+                }
+            }).when('/lectures/administration/lecture-manager/:lectureId', {
+                templateUrl: '/public/client/views/controllers/lectures/administration/lecture-manager/lecture-manager-view.html',
+                controller: 'LectureManagerController',
+                options: {
+                    title: 'routes.lecture_manager'
+                }
+            }).when('/lectures/administration/question-manager/:questionId', {
+                templateUrl: '/public/client/views/controllers/lectures/administration/question-manager-view.html',
+                controller: 'QuestionManagerController',
+                options: {
+                    title: 'routes.question_manager'
+                }
+            }).when('/lectures/administration/lecture-statistic/:lectureId', {
+                templateUrl: '/public/client/views/controllers/lectures/administration/lecture-statistic-view.html',
+                controller: 'StatisticController',
+                options: {
+                    title: 'routes.lecture_statistic'
+                }
+            }).when('/lectures/lecture-board/:lectureId', {
+                templateUrl: '/public/client/views/controllers/lectures/lecture-board/lecture-board-view.html',
+                controller: 'LectureBoardController',
+                options: {
+                    title: 'routes.lecture_board'
+                }
+            }).when('/lectures/lecture-hall/:lectureId', {
+                templateUrl: '/public/client/views/controllers/lectures/lecture-hall/lecture-hall-view.html',
+                controller: 'LectureHallController',
+                options: {
+                    title: 'routes.lecture_hall'
                 }
             }).when('/logout', {
                 template: '',

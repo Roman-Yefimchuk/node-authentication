@@ -10,20 +10,17 @@ angular.module('application')
             return {
                 isAuthenticated: function (handler) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/is-authenticated'
+                        url: RestApi.IS_AUTHENTICATED
                     }, handler);
                 },
                 getUserData: function (handler) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/get-user-data'
+                        url: RestApi.GET_USER_DATA
                     }, handler);
                 },
                 logout: function (handler) {
                     httpClientService.sendRequest({
-                        method: 'GET',
-                        url: '/logout'
+                        url: RestApi.LOGOUT
                     }, handler);
                 }
             };
