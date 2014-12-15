@@ -1,9 +1,9 @@
-<div ng-controller="AdditionalLinksController">
-    <div ng-switch="lectureModel.additionalLinks['length'] > 0">
+<div ng-controller="LinksController">
+    <div ng-switch="lectureModel.links['length'] > 0">
         <div ng-switch-when="true">
 
             <ul class="list-group" style="margin: 0;">
-                <li ng-repeat="link in lectureModel.additionalLinks" class="list-group-item text-left">
+                <li ng-repeat="link in lectureModel.links" class="list-group-item text-left">
                     <a ng-href="{{ link.url }}"
                        tooltip="{{ link.description }}">
                         {{ link.title }}
@@ -13,7 +13,7 @@
 
         </div>
         <div ng-switch-when="false" class="text-center">
-            Немає додаткових посилань, <a ng-click="addAdditionalLink()" style="cursor: pointer">додати</a>
+            Немає додаткових посилань, <a ng-click="addLink()" style="cursor: pointer">додати</a>
         </div>
     </div>
 </div>

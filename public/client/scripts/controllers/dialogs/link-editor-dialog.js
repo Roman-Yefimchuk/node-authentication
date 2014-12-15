@@ -2,7 +2,7 @@
 
 angular.module('application')
 
-    .controller('AdditionalLinkEditorDialogController', [
+    .controller('LinkEditorDialogController', [
 
         '$scope',
         '$modalInstance',

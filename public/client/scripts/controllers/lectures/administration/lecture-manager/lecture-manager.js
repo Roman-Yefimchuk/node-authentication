@@ -33,10 +33,10 @@ angular.module('application')
                     isActive: false
                 },
                 {
-                    id: 'additional-links',
+                    id: 'links',
                     title: 'Додаткові посилання',
                     icon: 'fa-external-link-square',
-                    templateUrl: '/public/client/views/controllers/lectures/administration/lecture-manager/tabs/additional-links-tab-view.html',
+                    templateUrl: '/public/client/views/controllers/lectures/administration/lecture-manager/tabs/links-tab-view.html',
                     isActive: false
                 },
                 {

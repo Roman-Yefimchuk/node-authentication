@@ -2,7 +2,7 @@
 
 angular.module('application')
 
-    .controller('AdditionalLinksController', [
+    .controller('LinksController', [
 
         '$scope',
         'apiService',
@@ -15,8 +15,8 @@ angular.module('application')
                 var lecture = model['lecture'];
                 var user = model['user'];
 
-                function addAdditionalLink() {
-                    dialogsService.showAdditionLinkEditor({
+                function addLink() {
+                    dialogsService.showLinkEditor({
                         mode: 'create',
                         title: '',
                         url: '',
@@ -27,8 +27,8 @@ angular.module('application')
                     });
                 }
 
-                function editAdditionalLink(link) {
-                    dialogsService.showAdditionLinkEditor({
+                function editLink(link) {
+                    dialogsService.showLinkEditor({
                         mode: 'update',
                         title: link.title,
                         url: link.url,
@@ -39,12 +39,12 @@ angular.module('application')
                     });
                 }
 
-                function removeAdditionalLink(link) {
+                function removeLink(link) {
                 }
 
-                $scope.addAdditionalLink = addAdditionalLink;
-                $scope.editAdditionalLink = editAdditionalLink;
-                $scope.removeAdditionalLink = removeAdditionalLink;
+                $scope.addLink = addLink;
+                $scope.editLink = editLink;
+                $scope.removeLink = removeLink;
             });
         }
     ]

@@ -389,7 +389,7 @@ angular.module('application')
                     workspaceId: getWorkspaceId(),
                     description: '',
                     tags: [],
-                    additionalLinks: [],
+                    links: [],
                     condition: {
                         status: 'stopped'
                     }

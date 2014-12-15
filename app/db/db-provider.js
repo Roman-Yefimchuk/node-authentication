@@ -1726,15 +1726,15 @@
 
         function createLecture(data, callback) {
             dbWrapper.query("" +
-                "INSERT INTO Lecture (title, authorId, workspaceId, description, tags, additionalLinks, creationDate) " +
-                "VALUES (:title, :authorId, :workspaceId, :description, [:tags], [:additionalLinks], :creationDate)", {
+                "INSERT INTO Lecture (title, authorId, workspaceId, description, tags, links, creationDate) " +
+                "VALUES (:title, :authorId, :workspaceId, :description, [:tags], [:links], :creationDate)", {
                 params: {
                     title: data.title,
                     authorId: data.authorId,
                     workspaceId: data.workspaceId,
                     description: data.description,
                     tags: new DbList(data.tags),
-                    additionalLinks: new DbList(data.additionalLinks),
+                    links: new DbList(data.links),
                     creationDate: _.now()
                 }
             }).then(function (results) {
@@ -1790,9 +1790,9 @@
                         callback([]);
                     };
 
-                    var getLectureAdditionalLinks = function (lectureId, callback) {
+                    var getLectureLinks = function (lectureId, callback) {
                         dbWrapper.query("" +
-                            "SELECT EXPAND(additionalLinks) " +
+                            "SELECT EXPAND(links) " +
                             "FROM Lecture " +
                             "WHERE lectureId = :lectureId", {
                             params: {
@@ -1836,9 +1836,9 @@
                                 resolve(statisticCharts);
                             });
                         },
-                        additionalLinks: function (resolve, reject) {
-                            getLectureAdditionalLinks(lectureId, function (additionalLinks) {
-                                resolve(additionalLinks);
+                        links: function (resolve, reject) {
+                            getLectureLinks(lectureId, function (links) {
+                                resolve(links);
                             });
                         },
                         condition: function (resolve, reject) {
@@ -1862,7 +1862,7 @@
                             description: lecture.description,
                             tags: result.tags,
                             statisticCharts: result.statisticCharts,
-                            additionalLinks: result.additionalLinks,
+                            links: result.links,
                             creationDate: lecture.creationDate,
                             condition: result.condition
                         });

@@ -18,10 +18,10 @@
         <div>{{ lecture.description }}</div>
     </div>
 
-    <div ng-show="lecture.additionalLinks['length'] > 0">
+    <div ng-show="lecture.links['length'] > 0">
         <h4>Додаткові повилання</h4>
 
-        <div ng-repeat="link in lecture.additionalLinks">
+        <div ng-repeat="link in lecture.links">
             <a ng-href="http://{{ link.url }}">{{ link.title }}</a>
         </div>
     </div>

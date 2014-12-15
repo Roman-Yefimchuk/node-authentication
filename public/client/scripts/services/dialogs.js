@@ -92,10 +92,10 @@ angular.module('application')
                         }
                     });
                 },
-                showAdditionLinkEditor: function (options) {
+                showLinkEditor: function (options) {
                     return open({
-                        templateUrl: '/public/client/views/controllers/dialogs/addition-link-editor-dialog-view.html',
-                        controller: 'AdditionalLinkEditorDialogController',
+                        templateUrl: '/public/client/views/controllers/dialogs/link-editor-dialog-view.html',
+                        controller: 'LinkEditorDialogController',
                         resolve: {
                             options: function () {
                                 return options;
