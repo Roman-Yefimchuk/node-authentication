@@ -10,7 +10,7 @@ angular.module('application')
 
         function ($scope, apiService, dialogsService) {
 
-            $scope.$on('lectureManager:editorLoaded', function (event, model) {
+            $scope.$emit('lectureManager:fetchManagerModel', function (model) {
 
                 var lecture = model['lecture'];
                 var user = model['user'];

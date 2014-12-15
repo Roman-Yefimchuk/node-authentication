@@ -17,6 +17,8 @@ angular.module('application')
         function ($scope, $routeParams, $location, apiService, userService, loaderService, dialogsService) {
 
             var lectureId = $routeParams.lectureId;
+            var model = null;
+            var fetchListeners = [];
             var tabs = [
                 {
                     id: 'lecture',
@@ -53,6 +55,18 @@ angular.module('application')
                 return tab.isActive;
             });
 
+            $scope.$on('lectureManager:fetchManagerModel', function (event, callback) {
+
+                if (model) {
+                    callback(model);
+                } else {
+                    fetchListeners.push(callback);
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+            });
+
             loaderService.showLoader();
 
             AsyncUtils.parallel({
@@ -81,10 +95,18 @@ angular.module('application')
                 $scope.user = result.user;
                 $scope.lecture = result.lecture;
 
-                $scope.$broadcast('lectureManager:editorLoaded', {
+                model = {
                     user: result.user,
                     lecture: result.lecture
-                });
+                };
+
+                if (fetchListeners.length > 0) {
+                    _.forEach(fetchListeners, function (listener) {
+                        listener(model);
+                    });
+
+                    fetchListeners = [];
+                }
 
                 loaderService.hideLoader();
 
