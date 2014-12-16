@@ -1,0 +1,78 @@
+<div class="row clearfix" style="margin-top: 15px">
+
+    <div class="col-sm-8 col-sm-offset-2 column">
+
+        <div class="row clearfix" style="margin-bottom: 15px;">
+
+            <span class="col-md-6 text-left">
+                <i class="fa fa-reply"></i>
+                <a href="/#/administration">Назад</a>
+            </span>
+
+            <div class="col-md-6 text-right">
+                <i class="fa fa-user"></i>
+
+                    <span>
+                        <b>{{ user.name }}</b>,
+                    </span>
+
+                <a href="/#/logout">Вихід</a>
+            </div>
+        </div>
+
+        <section class="panel tasks-widget" style="padding: 15px">
+
+            <div class="panel-body" style="padding: 0;">
+
+                <div>
+
+                    <div ng-switch="loading">
+
+                        <div ng-switch-when="true">
+                            <div static-include="/client/views/common/loader-view.html"></div>
+                        </div>
+
+                        <div ng-switch-when="false">
+
+                            <div ng-switch="statisticCollection.length > 0">
+                                <div ng-switch-when="true">
+
+                                    <ul class="list-group"
+                                        style="margin-bottom: 0">
+                                        <li ng-repeat="statisticModel in statisticCollection" class="list-group-item">
+
+                                            <div lecture-statistic model="statisticModel.chartPoints"
+                                                 graph-id="{{ $index }}"
+                                                 style="height: 200px" class="text-center">
+                                            </div>
+
+                                        </li>
+                                    </ul>
+
+                                </div>
+
+                                <div ng-switch-when="false">
+
+                                    <div class="text-center">
+                                        <div class="row clearfix">
+                                            <div class="col-md-12 column">
+                                                Немає ститистики
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
