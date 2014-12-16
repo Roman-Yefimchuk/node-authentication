@@ -4,7 +4,7 @@
         <div ng-switch="teacherQuestions.length > 0">
             <div ng-switch-when="true">
 
-                <ul class="list-group" style="margin-top: 15px;margin-bottom: 0;">
+                <ul class="list-group" style="margin-bottom: 0;">
                     <li ng-repeat="question in teacherQuestions" class="list-group-item text-left">
 
                         <span>
@@ -38,9 +38,11 @@
 
             </div>
             <div ng-switch-when="false">
-                <div class="text-center col-md-12" style="margin-top: 15px;">
+
+                <div class="text-center col-md-12">
                     Немає запитань
                 </div>
+
             </div>
         </div>
     </div>

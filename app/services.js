@@ -479,4 +479,104 @@ module.exports = function (app, dbProvider, serviceProvider) {
             }
         });
     });
+
+
+    serviceProvider.post(RestApi.CREATE_LINK, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var data = request.body;
+
+        dbProvider.createLink(data, function (linkId) {
+            resultCallback({
+                data: {
+                    linkId: linkId
+                }
+            });
+        });
+    });
+
+    serviceProvider.post(RestApi.ATTACH_LINK, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var linkId = request.params['linkId'];
+        var lectureId = request.body['lectureId'];
+
+        dbProvider.attachLink(linkId, lectureId, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.post(RestApi.DETACH_LINK, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var linkId = request.params['linkId'];
+        var lectureId = request.body['lectureId'];
+
+        dbProvider.detachLink(linkId, lectureId, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_ATTACHED_LINKS_BY_LECTURE_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var lectureId = request.params['lectureId'];
+
+        dbProvider.getAttachedLinksByLectureId(lectureId, function (links) {
+            resultCallback({
+                data: links
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_LINK_BY_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var linkId = request.params['linkId'];
+
+        dbProvider.getLinkById(linkId, function (link) {
+            resultCallback({
+                data: link
+            });
+        });
+    });
+
+    serviceProvider.post(RestApi.GET_LINKS_BY_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var linkIds = request.body;
+
+        dbProvider.getLinksById(linkIds, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.post(RestApi.UPDATE_LINK, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var linkId = request.params['linkId'];
+        var data = request.body;
+
+        dbProvider.updateLink(linkId, data, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.REMOVE_LINK, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var linkId = request.params['linkId'];
+
+        dbProvider.removeLink(linkId, function () {
+            resultCallback();
+        });
+    });
 };

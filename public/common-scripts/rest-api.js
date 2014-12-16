@@ -51,7 +51,16 @@
         GET_QUESTION_BY_ID: '/api/questions/get-by-id/:questionId',
         GET_USER_PROFILE: '/api/users/:userId/profile',
         UPDATE_USER_PROFILE: '/api/users/:userId/profile/update',
-        GET_QUICK_TIMESTAMP: '/api/quick-timestamp'
+        GET_QUICK_TIMESTAMP: '/api/quick-timestamp',
+
+        CREATE_LINK: '/api/links/create',
+        ATTACH_LINK: '/api/links/:linkId/attach',
+        DETACH_LINK: '/api/links/:linkId/detach',
+        GET_ATTACHED_LINKS_BY_LECTURE_ID: '/api/links/get-by-lecture-id/:lectureId',
+        GET_LINK_BY_ID: '/api/links/:linkId',
+        GET_LINKS_BY_ID: '/api/links/select',
+        UPDATE_LINK: '/api/links/:linkId/update',
+        REMOVE_LINK: '/api/links/:linkId/remove'
     };
 
     if (typeof exports !== 'undefined') {

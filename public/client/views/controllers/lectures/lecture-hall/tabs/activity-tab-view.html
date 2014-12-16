@@ -1,14 +1,14 @@
 <div class="row clearfix">
     <div class="col-md-12 col-xs-12 column">
 
-        <div class="row clearfix" style="margin-top: 15px;">
+        <div class="row clearfix">
             <div class="col-md-12 column">
                 <textarea rows="3" noresize class="form-control" required
                           style="resize: none;/*border-top-left-radius: 0;border-top-right-radius: 0;"
                           ng-model="message.text">
                 </textarea>
 
-                <div class="btn btn-success btn-sm btn-xs" ng-click="sendMessage()" style="margin-top: 15px;"
+                <div class="btn btn-success btn-sm pull-right" ng-click="sendMessage()" style="margin-top: 15px;"
                      ng-disabled="!message.text">
                     <i class="fa fa-paper-plane"></i>
                     &nbsp;
@@ -23,26 +23,30 @@
                 <div ng-switch="activityCollection.length > 0">
                     <div ng-switch-when="true">
 
-                        <ul class="list-group" style="margin: 0;">
+                        <ul class="list-group" style="margin: -10px;">
                             <li ng-repeat="activityItem in activityCollection" class="list-group-item text-left">
 
                                 <div>
                                     <b>{{ activityItem.timestamp | formatDate : 'ISO_TIME' }}</b>
                                 </div>
-                                <div ng-init="activity = activityItem.activity"
-                                     ng-switch="activity.activityCommand">
 
-                                    <div ng-switch-when="ActivityCommands.ON_MESSAGE">
-                                        {{ activity.userName }}: {{ activity.message }}
+                                <div ng-init="activity = activityItem.activity"
+                                     ng-switch="activity.command">
+
+                                    <div ng-switch-when="ON_MESSAGE">
+                                        <b>{{ activity.userName }}</b>: {{ activity.message }}
                                     </div>
-                                    <div ng-switch-when="ActivityCommands.QUESTION_ASKED">
+                                    <div ng-switch-when="SEND_MESSAGE">
+                                        <b>You</b>: {{ activity.message }}
+                                    </div>
+                                    <div ng-switch-when="QUESTION_ASKED">
                                         Lecturer asked question: {{ activity.question['title'] }}
                                     </div>
-                                    <div ng-switch-when="ActivityCommands.LISTENER_JOINED">
-                                        User {{ activity.userName }} joined to lecture
+                                    <div ng-switch-when="LISTENER_JOINED">
+                                        User <b>{{ activity.userName }}</b> joined to lecture
                                     </div>
-                                    <div ng-switch-when="ActivityCommands.LISTENER_HAS_LEFT">
-                                        User {{ activity.userName }} has left lefture
+                                    <div ng-switch-when="LISTENER_HAS_LEFT">
+                                        User <b>{{ activity.userName }}</b> has left lefture
                                     </div>
 
                                 </div>

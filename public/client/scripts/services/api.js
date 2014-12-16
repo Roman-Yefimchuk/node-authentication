@@ -390,6 +390,98 @@ angular.module('application')
                     }, {
                         success: callback
                     });
+                },
+
+                createLink: function (data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.CREATE_LINK,
+                        data: data
+                    }, {
+                        success: function (response) {
+                            var linkId = response.linkId;
+                            callback(linkId);
+                        }
+                    });
+                },
+                attachLink: function (linkId, lectureId, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.ATTACH_LINK,
+                        data: {
+                            lectureId: lectureId
+                        },
+                        urlParams: {
+                            linkId: linkId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                detachLink: function (linkId, lectureId, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.DETACH_LINK,
+                        data: {
+                            lectureId: lectureId
+                        },
+                        urlParams: {
+                            linkId: linkId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getAttachedLinksByLectureId: function (lectureId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_ATTACHED_LINKS_BY_LECTURE_ID,
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getLinkById: function (linkId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_LINK_BY_ID,
+                        urlParams: {
+                            linkId: linkId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getLinksById: function (linkIds, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.GET_LINKS_BY_ID,
+                        data: linkIds
+                    }, {
+                        success: callback
+                    });
+                },
+                updateLink: function (linkId, data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_LINK,
+                        data: data,
+                        urlParams: {
+                            linkId: linkId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                removeLink: function (linkId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.REMOVE_LINK,
+                        urlParams: {
+                            linkId: linkId
+                        }
+                    }, {
+                        success: callback
+                    });
                 }
             };
         }

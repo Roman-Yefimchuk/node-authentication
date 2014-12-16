@@ -14,7 +14,6 @@ CREATE PROPERTY Lecture.workspaceId STRING
 CREATE PROPERTY Lecture.description STRING
 CREATE PROPERTY Lecture.tags EMBEDDEDLIST STRING
 CREATE PROPERTY Lecture.statisticCharts EMBEDDEDLIST STRING
-CREATE PROPERTY Lecture.links EMBEDDEDLIST STRING
 CREATE PROPERTY Lecture.creationDate LONG
 
 CREATE CLASS Question
@@ -62,6 +61,9 @@ CREATE PROPERTY Link.title STRING
 CREATE PROPERTY Link.authorId STRING
 CREATE PROPERTY Link.url STRING
 CREATE PROPERTY Link.description STRING
+
+## TODO: find more appropriate property name
+CREATE PROPERTY Link.usedLectures EMBEDDEDLIST STRING
 
 ## end_integration
 

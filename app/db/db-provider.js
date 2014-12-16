@@ -23,7 +23,6 @@
 
         var encodeBase64 = SecurityUtils.encodeBase64;
         var decodeBase64 = SecurityUtils.decodeBase64;
-        var forEach = _.forEach;
 
         function extractPropertyId(property) {
             if (property) {
@@ -351,7 +350,7 @@
             var mode = options && options.mode;
             var excludedKeys = options && options.excludedKeys;
 
-            forEach(data, function (value, key) {
+            _.forEach(data, function (value, key) {
                 if (!_.contains(excludedKeys, key)) {
                     if (result.length > 0) {
                         result += ', ';
@@ -398,7 +397,7 @@
                         var successCallback = callback.success;
                         var failureCallback = callback.failure;
 
-                        forEach([
+                        _.forEach([
                             'genericId',
                             'displayName',
                             'password',
@@ -432,7 +431,7 @@
             var failureCallback = callback.failure;
 
             try {
-                forEach([
+                _.forEach([
                     'genericId',
                     'displayName',
                     'password',
@@ -721,7 +720,7 @@
                 getParentWorkspaceId(workspaceId, function (parentWorkspaceId) {
                     var collection = [];
 
-                    forEach(results, function (item) {
+                    _.forEach(results, function (item) {
                         collection.push({
                             userId: item.userId,
                             permissions: DEFAULT_PERMISSIONS
@@ -730,7 +729,7 @@
 
                     setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function (accessResultCollection) {
 
-                        forEach(accessResultCollection, function (item) {
+                        _.forEach(accessResultCollection, function (item) {
                             item.status = null;
                         });
 
@@ -754,7 +753,7 @@
 
                 var result = [];
 
-                forEach(results, function (item) {
+                _.forEach(results, function (item) {
                     var workspaceId = item.value;
                     result.push(workspaceId);
                 });
@@ -1346,7 +1345,7 @@
                                     }
                                 }).then(function (results) {
 
-                                    forEach(results, function (permittedWorkspace) {
+                                    _.forEach(results, function (permittedWorkspace) {
                                         var workspaceId = permittedWorkspace.workspaceId;
                                         stack.push(workspaceId);
                                     });
@@ -1435,7 +1434,7 @@
                 params: {
                     recordCollection: (function () {
                         var recordCollection = [];
-                        forEach(tagIds, function (tagId) {
+                        _.forEach(tagIds, function (tagId) {
                             var recordId = new StringWrapper(tagId);
                             recordCollection.push(recordId);
                         });
@@ -1446,7 +1445,7 @@
                 if (results.length > 0) {
                     var tags = [];
 
-                    forEach(results, function (tag) {
+                    _.forEach(results, function (tag) {
                         tags.push({
                             id: extractPropertyId(tag),
                             title: tag.title,
@@ -1549,7 +1548,7 @@
                 params: {
                     recordCollection: (function () {
                         var recordCollection = [];
-                        forEach(categoryIds, function (tagId) {
+                        _.forEach(categoryIds, function (tagId) {
                             var recordId = new StringWrapper(tagId);
                             recordCollection.push(recordId);
                         });
@@ -1560,7 +1559,7 @@
                 if (results.length > 0) {
                     var categories = [];
 
-                    forEach(results, function (category) {
+                    _.forEach(results, function (category) {
                         categories.push({
                             id: extractPropertyId(category),
                             title: category.title,
@@ -1612,10 +1611,10 @@
 
         function createLink(data, callback) {
             dbWrapper.query("" +
-                "INSERT INTO Link(title, authorId, url, description) " +
-                "VALUES(:title, :authorId, :url, :description", {
+                "INSERT INTO Link(title, authorId, url, description, usedLectures) " +
+                "VALUES(:title, :authorId, :url, :description, [])", {
                 params: {
-                    title: data.name,
+                    title: data.title,
                     authorId: data.authorId,
                     url: data.url,
                     description: data.description
@@ -1623,6 +1622,66 @@
             }).then(function (results) {
                 var linkId = extractPropertyId(results[0]);
                 callback(linkId);
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function attachLink(linkId, lectureId, callback) {
+            //TODO: check duplicated linkId
+            dbWrapper.query("" +
+                "UPDATE Link " +
+                "ADD usedLectures = :lectureId " +
+                "WHERE @rid = :linkId", {
+                params: {
+                    linkId: linkId,
+                    lectureId: lectureId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function detachLink(linkId, lectureId, callback) {
+            dbWrapper.query("" +
+                "UPDATE Link " +
+                "REMOVE usedLectures = :lectureId " +
+                "WHERE @rid = :linkId", {
+                params: {
+                    linkId: linkId,
+                    lectureId: lectureId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getAttachedLinksByLectureId(lectureId, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Link " +
+                "WHERE :lectureId IN usedLectures", {
+                params: {
+                    lectureId: lectureId
+                }
+            }).then(function (results) {
+                var links = [];
+
+                _.forEach(results, function (link) {
+                    links.push({
+                        id: extractPropertyId(link),
+                        authorId: link.authorId,
+                        title: link.title,
+                        url: link.url,
+                        description: link.description
+                    });
+                });
+
+                callback(links);
             }).catch(function (error) {
                 throw error;
             });
@@ -1662,7 +1721,7 @@
                 params: {
                     recordCollection: (function () {
                         var recordCollection = [];
-                        forEach(linkIds, function (linkId) {
+                        _.forEach(linkIds, function (linkId) {
                             var recordId = new StringWrapper(linkId);
                             recordCollection.push(recordId);
                         });
@@ -1673,7 +1732,7 @@
                 if (results.length > 0) {
                     var links = [];
 
-                    forEach(results, function (link) {
+                    _.forEach(results, function (link) {
                         links.push({
                             id: extractPropertyId(link),
                             authorId: link.authorId,
@@ -1698,7 +1757,7 @@
                 "SET title = :title, url = :url, description = :description " +
                 "WHERE @rid = :linkId", {
                 params: {
-                    title: data.name,
+                    title: data.title,
                     url: data.url,
                     description: data.description,
                     linkId: linkId
@@ -1726,15 +1785,14 @@
 
         function createLecture(data, callback) {
             dbWrapper.query("" +
-                "INSERT INTO Lecture (title, authorId, workspaceId, description, tags, links, creationDate) " +
-                "VALUES (:title, :authorId, :workspaceId, :description, [:tags], [:links], :creationDate)", {
+                "INSERT INTO Lecture (title, authorId, workspaceId, description, tags, creationDate) " +
+                "VALUES (:title, :authorId, :workspaceId, :description, [:tags], :creationDate)", {
                 params: {
                     title: data.title,
                     authorId: data.authorId,
                     workspaceId: data.workspaceId,
                     description: data.description,
                     tags: new DbList(data.tags),
-                    links: new DbList(data.links),
                     creationDate: _.now()
                 }
             }).then(function (results) {
@@ -1790,33 +1848,6 @@
                         callback([]);
                     };
 
-                    var getLectureLinks = function (lectureId, callback) {
-                        dbWrapper.query("" +
-                            "SELECT EXPAND(links) " +
-                            "FROM Lecture " +
-                            "WHERE lectureId = :lectureId", {
-                            params: {
-                                lectureId: lectureId
-                            }
-                        }).then(function (results) {
-                            var links = [];
-                            if (results.length > 0) {
-                                AsyncUtils.each(results, function (linkId, index, next) {
-                                    getLinkById(linkId, function (link) {
-                                        links.push(link);
-                                        next();
-                                    });
-                                }, function () {
-                                    callback(links);
-                                });
-                            } else {
-                                callback(links);
-                            }
-                        }).catch(function (error) {
-                            throw error;
-                        });
-                    };
-
                     var lecture = results[0];
 
                     AsyncUtils.parallel({
@@ -1837,7 +1868,7 @@
                             });
                         },
                         links: function (resolve, reject) {
-                            getLectureLinks(lectureId, function (links) {
+                            getAttachedLinksByLectureId(lectureId, function (links) {
                                 resolve(links);
                             });
                         },
@@ -1985,7 +2016,20 @@
                     lectureId: lectureId
                 }
             }).then(function (total) {
-                callback();
+
+                dbWrapper.query("" +
+                    "UPDATE Link " +
+                    "REMOVE usedLectures = :lectureId " +
+                    "WHERE :lectureId IN usedLectures", {
+                    params: {
+                        lectureId: lectureId
+                    }
+                }).then(function (results) {
+                    callback();
+                }).catch(function (error) {
+                    throw error;
+                });
+
             }).catch(function (error) {
                 throw error;
             });
@@ -2289,7 +2333,7 @@
 
         function decodeObject(object, properties) {
             if (object) {
-                forEach(properties, function (property) {
+                _.forEach(properties, function (property) {
                     object[property] = decodeId(object[property]);
                 });
             }
@@ -2297,7 +2341,7 @@
 
         function encodeObject(object, properties) {
             if (object) {
-                forEach(properties, function (property) {
+                _.forEach(properties, function (property) {
                     object[property] = encodeId(object[property]);
                 });
             }
@@ -2388,7 +2432,7 @@
 
                 removeWorkspace(userId, workspaceId, function (result) {
 
-                    forEach(result.topLevelWorkspaceIdCollection, function (item) {
+                    _.forEach(result.topLevelWorkspaceIdCollection, function (item) {
                         encodeObject(item, [
                             'userId',
                             'topLevelWorkspaceId'
@@ -2404,7 +2448,7 @@
 
                 getWorkspaces(userId, function (result) {
 
-                    forEach(result, function (workspaceId, index) {
+                    _.forEach(result, function (workspaceId, index) {
                         result[index] = encodeId(workspaceId);
                     });
 
@@ -2449,13 +2493,13 @@
             },
             getUsers: function (ids, callback) {
 
-                forEach(ids, function (id, index) {
+                _.forEach(ids, function (id, index) {
                     ids[index] = decodeId(id);
                 });
 
                 getUsersById(ids, function (users) {
 
-                    forEach(users, function (user) {
+                    _.forEach(users, function (user) {
                         encodeObject(user, [
                             'id'
                         ]);
@@ -2473,7 +2517,7 @@
                 loadHierarchy(userId, workspaceId, rootWorkspaceId, function (status, hierarchy) {
 
                     if (hierarchy) {
-                        forEach(hierarchy, function (id, index) {
+                        _.forEach(hierarchy, function (id, index) {
                             hierarchy[index] = encodeId(id);
                         });
                     }
@@ -2488,7 +2532,7 @@
 
                 getPermittedWorkspaces(userId, parentWorkspaceId, function (workspaces) {
 
-                    forEach(workspaces, function (workspace) {
+                    _.forEach(workspaces, function (workspace) {
 
                         if (workspace.isAvailable) {
                             encodeObject(workspace, [
@@ -2511,7 +2555,7 @@
 
                 getAllWorkspaces(parentWorkspaceId, function (workspaces) {
 
-                    forEach(workspaces, function (workspace) {
+                    _.forEach(workspaces, function (workspace) {
                         encodeObject(workspace, [
                             'id'
                         ]);
@@ -2526,7 +2570,7 @@
             getAllUsers: function (skip, limit, callback) {
                 getAllUsers(skip, limit, function (result) {
 
-                    forEach(result.users, function (user) {
+                    _.forEach(result.users, function (user) {
                         encodeObject(user, [
                             'id'
                         ]);
@@ -2541,7 +2585,7 @@
 
                 getAllUsersWithPermissions(workspaceId, skip, limit, function (result) {
 
-                    forEach(result.users, function (user) {
+                    _.forEach(result.users, function (user) {
                         encodeObject(user, [
                             'id'
                         ]);
@@ -2562,7 +2606,7 @@
                 workspaceId = decodeId(workspaceId);
                 parentWorkspaceId = decodeId(parentWorkspaceId);
 
-                forEach(collection, function (item) {
+                _.forEach(collection, function (item) {
                     decodeObject(item, [
                         'userId'
                     ]);
@@ -2570,7 +2614,7 @@
 
                 setUsersPermissionsForWorkspace(workspaceId, parentWorkspaceId, collection, function (accessResultCollection) {
 
-                    forEach(accessResultCollection, function (item) {
+                    _.forEach(accessResultCollection, function (item) {
                         switch (item.status) {
                             case 'access_provided':
                             {
@@ -2579,7 +2623,7 @@
                                 ]);
 
                                 var hierarchy = item.hierarchy;
-                                forEach(hierarchy, function (id, index) {
+                                _.forEach(hierarchy, function (id, index) {
                                     hierarchy[index] = encodeId(id);
                                 });
 
@@ -2638,13 +2682,13 @@
             },
             getTagsById: function (tagIds, callback) {
 
-                forEach(tagIds, function (tagId, index) {
+                _.forEach(tagIds, function (tagId, index) {
                     tagIds[index] = decodeId(tagId);
                 });
 
                 getTagsById(tagIds, function (tags) {
 
-                    forEach(tags, function (tag) {
+                    _.forEach(tags, function (tag) {
                         encodeObject(tag, [
                             'id',
                             'categoryId',
@@ -2691,13 +2735,13 @@
             },
             getCategoriesById: function (categoryIds, callback) {
 
-                forEach(categoryIds, function (categoryId, index) {
+                _.forEach(categoryIds, function (categoryId, index) {
                     categoryIds[index] = decodeId(categoryId);
                 });
 
                 getCategoriesById(categoryIds, function (categories) {
 
-                    forEach(categories, function (tag) {
+                    _.forEach(categories, function (tag) {
                         encodeObject(tag, [
                             'id',
                             'parentCategoryId',
@@ -2725,6 +2769,30 @@
                     callback(linkId);
                 });
             },
+            attachLink: function (linkId, lectureId, callback) {
+                linkId = decodeId(linkId);
+                lectureId = decodeId(lectureId);
+                attachLink(linkId, lectureId, callback);
+            },
+            detachLink: function (linkId, lectureId, callback) {
+                linkId = decodeId(linkId);
+                lectureId = decodeId(lectureId);
+                detachLink(linkId, lectureId, callback);
+            },
+            getAttachedLinksByLectureId: function (lectureId, callback) {
+                lectureId = decodeId(lectureId);
+                getAttachedLinksByLectureId(lectureId, function (links) {
+
+                    _.forEach(links, function (tag) {
+                        encodeObject(tag, [
+                            'id',
+                            'authorId'
+                        ]);
+                    });
+
+                    callback(links);
+                });
+            },
             getLinkById: function (linkId, callback) {
                 linkId = decodeId(linkId);
                 getLinkById(linkId, function (link) {
@@ -2737,14 +2805,14 @@
             },
             getLinksById: function (linkIds, callback) {
 
-                forEach(linkIds, function (linkId, index) {
+                _.forEach(linkIds, function (linkId, index) {
                     linkIds[index] = decodeId(linkId);
                 });
 
                 getLinksById(linkIds, function (links) {
 
-                    forEach(links, function (tag) {
-                        encodeObject(tag, [
+                    _.forEach(links, function (link) {
+                        encodeObject(link, [
                             'id',
                             'authorId'
                         ]);
@@ -2789,6 +2857,13 @@
                         'id'
                     ]);
 
+                    _.forEach(lecture.links, function (link) {
+                        encodeObject(link, [
+                            'id',
+                            'authorId'
+                        ]);
+                    });
+
                     if (lecture.condition['status'] != 'stopped') {
                         encodeObject(lecture.condition, [
                             'lecturerId'
@@ -2802,7 +2877,7 @@
                 workspaceId = decodeId(workspaceId);
                 getLecturesByWorkspaceId(workspaceId, function (lectures) {
 
-                    forEach(lectures, function (lecture) {
+                    _.forEach(lectures, function (lecture) {
 
                         encodeObject(lecture, [
                             'id',
@@ -2813,6 +2888,13 @@
                         encodeObject(lecture.author, [
                             'id'
                         ]);
+
+                        _.forEach(lecture.links, function (link) {
+                            encodeObject(link, [
+                                'id',
+                                'authorId'
+                            ]);
+                        });
 
                         if (lecture.condition['status'] != 'stopped') {
                             encodeObject(lecture.condition, [
@@ -2828,7 +2910,7 @@
                 authorId = decodeId(authorId);
                 getLecturesByAuthorId(authorId, function (lectures) {
 
-                    forEach(lectures, function (lecture) {
+                    _.forEach(lectures, function (lecture) {
 
                         encodeObject(lecture, [
                             'id',
@@ -2839,6 +2921,13 @@
                         encodeObject(lecture.author, [
                             'id'
                         ]);
+
+                        _.forEach(lecture.links, function (link) {
+                            encodeObject(link, [
+                                'id',
+                                'authorId'
+                            ]);
+                        });
 
                         if (lecture.condition['status'] != 'stopped') {
                             encodeObject(lecture.condition, [
@@ -2853,7 +2942,7 @@
             getActiveLectures: function (callback) {
                 getActiveLectures(function (lectures) {
 
-                    forEach(lectures, function (lecture) {
+                    _.forEach(lectures, function (lecture) {
 
                         encodeObject(lecture, [
                             'id',
@@ -2864,6 +2953,13 @@
                         encodeObject(lecture.author, [
                             'id'
                         ]);
+
+                        _.forEach(lecture.links, function (link) {
+                            encodeObject(link, [
+                                'id',
+                                'authorId'
+                            ]);
+                        });
 
                         if (lecture.condition['status'] != 'stopped') {
                             encodeObject(lecture.condition, [
@@ -2939,7 +3035,7 @@
                 lectureId = decodeId(lectureId);
 
                 getQuestionsByLectureId(lectureId, function (questions) {
-                    forEach(questions, function (question) {
+                    _.forEach(questions, function (question) {
                         encodeObject(question, [
                             'id',
                             'lectureId'

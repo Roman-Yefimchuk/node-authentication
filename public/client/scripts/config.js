@@ -16,6 +16,7 @@ angular.module('application')
 
     .constant("ACTIVITY_COMMANDS", {
         ON_MESSAGE: 'ON_MESSAGE',
+        SEND_MESSAGE: 'SEND_MESSAGE',
         QUESTION_ASKED: 'QUESTION_ASKED',
         LISTENER_JOINED: 'LISTENER_JOINED',
         LISTENER_HAS_LEFT: 'LISTENER_HAS_LEFT',

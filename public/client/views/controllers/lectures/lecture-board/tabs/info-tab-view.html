@@ -22,8 +22,12 @@
         <h4>Додаткові повилання</h4>
 
         <div ng-repeat="link in lecture.links">
-            <a ng-href="http://{{ link.url }}">{{ link.title }}</a>
+            <a ng-href="{{ link.url | formatLink  }}"
+               tooltip="{{ link.description }}">
+                {{ link.title }}
+            </a>
         </div>
+
     </div>
 
 </div>

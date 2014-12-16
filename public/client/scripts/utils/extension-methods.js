@@ -13,3 +13,17 @@ String.prototype.replaceAll = function (searchValue, replaceValue) {
     var pattern = new RegExp(searchValue, 'g');
     return this.replace(pattern, replaceValue);
 };
+
+String.prototype.startWith = function (prefix) {
+    if (this.length >= prefix.length) {
+        return this.substr(0, prefix.length) == prefix;
+    }
+    return false;
+};
+
+String.prototype.endWith = function (suffix) {
+    if (this.length >= suffix.length) {
+        return this.substr(this.length - suffix.length, this.length) == suffix;
+    }
+    return false;
+};

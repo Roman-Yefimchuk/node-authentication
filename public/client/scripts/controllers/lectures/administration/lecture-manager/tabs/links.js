@@ -22,7 +22,26 @@ angular.module('application')
                         url: '',
                         description: '',
                         onSave: function (model, closeCallback) {
-                            closeCallback();
+                            apiService.createLink({
+                                title: model.title,
+                                authorId: user.userId,
+                                url: model.url,
+                                description: model.description
+                            }, function (linkId) {
+                                apiService.attachLink(linkId, lecture.id, function () {
+
+                                    var links = $scope.links;
+                                    links.push({
+                                        id: linkId,
+                                        title: model.title,
+                                        authorId: user.userId,
+                                        url: model.url,
+                                        description: model.description
+                                    });
+
+                                    closeCallback();
+                                });
+                            });
                         }
                     });
                 }
@@ -34,13 +53,25 @@ angular.module('application')
                         url: link.url,
                         description: link.description,
                         onSave: function (model, closeCallback) {
-                            closeCallback();
+                            apiService.updateLink(link.id, model, function () {
+
+                                link.title = model.title;
+                                link.url = model.url;
+                                link.description = model.description;
+
+                                closeCallback();
+                            });
                         }
                     });
                 }
 
                 function removeLink(link) {
+                    apiService.removeLink(link.id, function () {
+                        $scope.links = _.without($scope.links, link);
+                    });
                 }
+
+                $scope.links = lecture.links;
 
                 $scope.addLink = addLink;
                 $scope.editLink = editLink;

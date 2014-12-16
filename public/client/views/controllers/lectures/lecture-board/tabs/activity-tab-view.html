@@ -4,7 +4,7 @@
         <div ng-switch="activityCollection.length > 0">
             <div ng-switch-when="true">
 
-                <ul class="list-group" style="margin: 0;">
+                <ul class="list-group" style="margin: -10px;">
                     <li ng-repeat="activityItem in activityCollection" class="list-group-item text-left">
 
                         <div>
@@ -13,18 +13,17 @@
 
                         <div ng-init="activity = activityItem.activity"
                              ng-switch="activity.command">
-
                             <div ng-switch-when="ON_MESSAGE">
-                                {{ activity.userName }}: {{ activity.message }}
+                                <b>{{ activity.userName }}</b>: {{ activity.message }}
                             </div>
                             <div ng-switch-when="QUESTION_ASKED">
                                 Lecturer asked question: {{ activity.question['title'] }}
                             </div>
                             <div ng-switch-when="LISTENER_JOINED">
-                                User {{ activity.userName }} joined to lecture
+                                User <b>{{ activity.userName }}</b> joined to lecture
                             </div>
                             <div ng-switch-when="LISTENER_HAS_LEFT">
-                                User {{ activity.userName }} has left lefture
+                                User <b>{{ activity.userName }}</b> has left lecture
                             </div>
                             <div ng-switch-when="LECTURE_STARTED">
                                 Lecture started

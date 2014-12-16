@@ -1,14 +1,51 @@
 <div ng-controller="LinksController">
-    <div ng-switch="lectureModel.links['length'] > 0">
+    <div ng-switch="links.length > 0">
         <div ng-switch-when="true">
 
-            <ul class="list-group" style="margin: 0;">
-                <li ng-repeat="link in lectureModel.links" class="list-group-item text-left">
-                    <a ng-href="{{ link.url }}"
+            <div style="padding-bottom: 36px;margin: -10px;">
+                <span class="pull-right">
+
+                    <a class="btn btn-success btn-sm btn-xs"
+                       ng-click="addLink()"
+                       style="padding-left: 6px;padding-right: 6px;cursor: pointer">
+                        <i class="fa fa-plus"></i>
+                        &nbsp;
+                        Add link
+                    </a>
+
+                </span>
+            </div>
+
+            <ul class="list-group" style="margin: -10px;">
+
+                <li ng-repeat="link in links" class="list-group-item text-left">
+                    <a ng-href="{{ link.url | formatLink }}"
                        tooltip="{{ link.description }}">
                         {{ link.title }}
                     </a>
+
+                    <div>
+
+                        <span class="pull-right" style="margin-top: -20px;margin-right: -6px;">
+
+                            <a class="btn btn-primary btn-xs"
+                               tooltip="{{ 'home.edit' | translate }}"
+                               ng-click="editLink(link)">
+                                <i class="fa fa-pencil"></i>
+                            </a>
+
+                            <a class="btn btn-danger btn-xs"
+                               tooltip="{{ 'home.remove' | translate }}"
+                               ng-click="removeLink(link)">
+                                <i class="fa fa-trash-o"></i>
+                            </a>
+
+                        </span>
+
+                    </div>
+
                 </li>
+
             </ul>
 
         </div>

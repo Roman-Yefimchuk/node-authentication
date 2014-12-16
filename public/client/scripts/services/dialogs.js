@@ -6,7 +6,7 @@ angular.module('application')
 
         '$modal',
 
-        function ($modal, $window, $timeout) {
+        function ($modal) {
 
             function open(modalOptions) {
                 return $modal.open(modalOptions);

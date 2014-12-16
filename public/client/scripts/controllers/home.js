@@ -389,7 +389,6 @@ angular.module('application')
                     workspaceId: getWorkspaceId(),
                     description: '',
                     tags: [],
-                    links: [],
                     condition: {
                         status: 'stopped'
                     }

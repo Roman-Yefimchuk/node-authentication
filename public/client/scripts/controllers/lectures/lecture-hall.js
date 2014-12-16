@@ -303,7 +303,7 @@ angular.module('application')
 
                 activityCollection.push({
                     command: ACTIVITY_COMMANDS.SEND_MESSAGE,
-                    message: message
+                    message: message.text
                 });
 
                 message.text = '';
