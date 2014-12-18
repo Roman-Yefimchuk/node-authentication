@@ -1,11 +1,49 @@
 <div ng-controller="QuestionsController">
-    <div ng-switch="lectureModel.questions['length'] > 0">
+    <div ng-switch="questions.length > 0">
         <div ng-switch-when="true">
 
-            <ul class="list-group" style="margin: 0;">
-                <li ng-repeat="question in lectureModel.questions" class="list-group-item text-left">
+            <div style="padding-bottom: 36px;margin: -10px;">
+                <span class="pull-right">
+
+                    <a class="btn btn-success btn-sm btn-xs"
+                       ng-click="addQuestion()"
+                       style="padding-left: 6px;padding-right: 6px;cursor: pointer">
+                        <i class="fa fa-plus"></i>
+                        &nbsp;
+                        Add question
+                    </a>
+
+                </span>
+            </div>
+
+            <ul class="list-group" style="margin: -10px;">
+
+                <li ng-repeat="question in questions" class="list-group-item text-left">
+
                     {{ question.title }}
+
+                    <div>
+
+                        <span class="pull-right" style="margin-top: -20px;margin-right: -6px;">
+
+                            <a class="btn btn-primary btn-xs"
+                               tooltip="{{ 'home.edit' | translate }}"
+                               ng-click="editQuestion(question)">
+                                <i class="fa fa-pencil"></i>
+                            </a>
+
+                            <a class="btn btn-danger btn-xs"
+                               tooltip="{{ 'home.remove' | translate }}"
+                               ng-click="removeQuestion(question)">
+                                <i class="fa fa-trash-o"></i>
+                            </a>
+
+                        </span>
+
+                    </div>
+
                 </li>
+
             </ul>
 
         </div>

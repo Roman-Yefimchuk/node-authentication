@@ -8,17 +8,19 @@ angular.module('application')
 
         function ($scope) {
 
-            var model = $scope.model;
-            var originalModel = $scope.originalModel;
+            $scope.$emit('questionEditor:fetchModel', function (model, originalModel) {
 
-            if (originalModel.type == 'default') {
-                model.data = originalModel.data;
-            } else {
-                model.data = {
-                    'yes': 'Так',
-                    'no': 'Ні'
-                };
-            }
+                $scope.model = model;
+
+                if (originalModel.type == 'default') {
+                    model.data = originalModel.data;
+                } else {
+                    model.data = {
+                        'yes': 'Так',
+                        'no': 'Ні'
+                    };
+                }
+            });
         }
     ]
 );

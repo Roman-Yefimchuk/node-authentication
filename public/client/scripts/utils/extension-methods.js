@@ -1,11 +1,17 @@
 String.prototype.format = function (args) {
+
+    if (typeof args != 'object') {
+        return this;
+    }
+
     var value = this;
     for (var key in args) {
-        if (args[key] != undefined) {
+        if (args[key] != undefined && args.hasOwnProperty(key)) {
             var pattern = new RegExp('@{' + key + '}', 'g');
             value = value.replace(pattern, args[key]);
         }
     }
+
     return String(value);
 };
 

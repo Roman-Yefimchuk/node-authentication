@@ -385,11 +385,9 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var lectureId = request.body['lectureId'];
         var questionModel = request.body['questionModel'];
 
-        dbProvider.createQuestion(lectureId, questionModel, function (questionId) {
+        dbProvider.createQuestion(lectureId, questionModel, function (question) {
             resultCallback({
-                data: {
-                    questionId: questionId
-                }
+                data: question
             });
         });
     });
@@ -425,9 +423,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
 
         dbProvider.getQuestionsByLectureId(lectureId, function (questions) {
             resultCallback({
-                data: {
-                    questions: questions
-                }
+                data: questions
             });
         });
     });
@@ -479,7 +475,6 @@ module.exports = function (app, dbProvider, serviceProvider) {
             }
         });
     });
-
 
     serviceProvider.post(RestApi.CREATE_LINK, function (request, response, resultCallback) {
 
@@ -576,6 +571,160 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var linkId = request.params['linkId'];
 
         dbProvider.removeLink(linkId, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.CREATE_TAG, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var data = request.body;
+
+        dbProvider.createTag(data, function (tagId) {
+            resultCallback({
+                data: {
+                    tagId: tagId
+                }
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_TAG_BY_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var tagId = request.params['tagId'];
+
+        dbProvider.getTagById(tagId, function (tag) {
+            resultCallback({
+                data: tag
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_TAGS_BY_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var tagIds = request.body;
+
+        dbProvider.getTagsById(tagIds, function (tags) {
+            resultCallback({
+                data: tags
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.FIND_TAGS_BY_NAME, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var namePart = request.params['namePart'];
+
+        dbProvider.findTagsByName(namePart, function (tags) {
+            resultCallback({
+                data: tags
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.UPDATE_TAG, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var tagId = request.params['tagId'];
+        var data = request.body;
+
+        dbProvider.updateTag(tagId, data, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.REMOVE_TAG, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var tagId = request.params['tagId'];
+
+        dbProvider.removeTag(tagId, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.CREATE_CATEGORY, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var data = request.body;
+
+        dbProvider.createCategory(data, function (categoryId) {
+            resultCallback({
+                data: {
+                    categoryId: categoryId
+                }
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_CATEGORY_BY_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var categoryId = request.params['categoryId'];
+
+        dbProvider.getCategoryById(categoryId, function (tag) {
+            resultCallback({
+                data: tag
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_CATEGORIES_BY_ID, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var categoryIds = request.body;
+
+        dbProvider.getCategoriesById(categoryIds, function (categories) {
+            resultCallback({
+                data: categories
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.FIND_CATEGORIES_BY_NAME, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var namePart = request.params['namePart'];
+
+        dbProvider.findCategoriesByName(namePart, function (categories) {
+            resultCallback({
+                data: categories
+            });
+        });
+    });
+
+    serviceProvider.get(RestApi.UPDATE_CATEGORY, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var categoryId = request.params['categoryId'];
+        var data = request.body;
+
+        dbProvider.updateCategory(categoryId, data, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.REMOVE_CATEGORY, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var categoryId = request.params['categoryId'];
+
+        dbProvider.removeCategory(categoryId, function () {
             resultCallback();
         });
     });

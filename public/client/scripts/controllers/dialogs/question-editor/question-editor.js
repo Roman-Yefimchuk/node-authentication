@@ -13,31 +13,28 @@ angular.module('application')
             var editorForms = {
                 'default': {
                     'title': 'Звичайне запитання',
-                    'substrateView': '/client/views/controllers/dialogs/question-editor/editor-forms/default/' +
-                        'substrate-view.html'
+                    'templateUrl': '/public/client/views/controllers/dialogs/question-editor/editor-forms/default-form-view.html'
                 },
                 'single-choice': {
                     'title': 'Вибрати один варіант',
-                    'substrateView': '/client/views/controllers/dialogs/question-editor/editor-forms/choice/' +
-                        'substrate-view.html'
+                    'templateUrl': '/public/client/views/controllers/dialogs/question-editor/editor-forms/choice-form-view.html'
                 },
                 'multi-choice': {
                     'title': 'Вибрати декілька варіантів',
-                    'substrateView': '/client/views/controllers/dialogs/question-editor/editor-forms/choice/' +
-                        'substrate-view.html'
+                    'templateUrl': '/public/client/views/controllers/dialogs/question-editor/editor-forms/choice-form-view.html'
                 },
                 'range': {
                     'title': 'Вибрати із діапазона значеннь',
-                    'substrateView': '/client/views/controllers/dialogs/question-editor/editor-forms/range/' +
-                        'substrate-view.html'
+                    'templateUrl': '/public/client/views/controllers/dialogs/question-editor/editor-forms/range-form-view.html'
                 }
             };
 
             var onSave = options.onSave;
-            var questionModel = options.questionModel;
+            var model = options.model;
+            var originalModel = angular.copy(model);
 
             function save() {
-                onSave(questionModel, function () {
+                onSave(model, function () {
                     $modalInstance.close();
                 });
             }
@@ -47,12 +44,20 @@ angular.module('application')
             }
 
             $scope.editorForms = editorForms;
-            $scope.model = questionModel;
-            $scope.originalModel = angular.copy(questionModel);
             $scope.editorTitle = options.editorTitle;
+            $scope.mode = options.mode;
+            $scope.model = model;
 
             $scope.save = save;
             $scope.cancel = cancel;
+
+            $scope.$on('questionEditor:fetchModel', function (event, callback) {
+
+                callback(model, originalModel);
+
+                event.preventDefault();
+                event.stopPropagation();
+            });
         }
     ]
 );

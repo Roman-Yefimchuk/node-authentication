@@ -57,7 +57,7 @@
 
         function getUsersCount(callback) {
             dbWrapper.query("" +
-                "SELECT COUNT(*) AS count " +
+                "SELECT count(*) AS count " +
                 "FROM UserAccount", {
             }).then(function (results) {
                 callback(results[0].count);
@@ -66,9 +66,9 @@
             });
         }
 
-        function getChildrenCount(parentWorkspaceId, callback) {
+        function getWorkspaceChildrenCount(parentWorkspaceId, callback) {
             dbWrapper.query("" +
-                "SELECT COUNT(*) AS count " +
+                "SELECT count(*) AS count " +
                 "FROM Workspace " +
                 "WHERE parentWorkspaceId = :parentWorkspaceId", {
                 params: {
@@ -83,7 +83,7 @@
 
         function getPermittedChildrenCount(userId, parentWorkspaceId, callback) {
             dbWrapper.query("" +
-                "SELECT COUNT(*) AS count " +
+                "SELECT count(*) AS count " +
                 "FROM PermittedWorkspace " +
                 "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
                 params: {
@@ -611,6 +611,10 @@
 
             //TODO: remove all items
             function removeRecords(workspaceId, callback) {
+
+                callback();
+                return;
+
                 dbWrapper.query("" +
                     "DELETE FROM Todo " +
                     "WHERE workspaceId = :workspaceId", {
@@ -992,7 +996,7 @@
 
                     var workspaceId = extractPropertyId(workspace);
 
-                    getChildrenCount(workspaceId, function (childrenCount) {
+                    getWorkspaceChildrenCount(workspaceId, function (childrenCount) {
                         result.push({
                             id: workspaceId,
                             name: workspace.name,
@@ -1126,7 +1130,7 @@
                     var isPermittedWorkspaceExist = function (workspaceId, callback) {
 
                         dbWrapper.query("" +
-                            "SELECT COUNT(*) AS count " +
+                            "SELECT count(*) AS count " +
                             "FROM PermittedWorkspace " +
                             "WHERE userId = :userId AND workspaceId = :workspaceId", {
                             params: {
@@ -1294,7 +1298,7 @@
                                         callback(workspaceId);
                                     } else {
                                         dbWrapper.query("" +
-                                            "SELECT COUNT(*) AS count " +
+                                            "SELECT count(*) AS count " +
                                             "FROM PermittedWorkspace " +
                                             "WHERE userId = :userId AND parentWorkspaceId = :parentWorkspaceId", {
                                             params: {
@@ -1464,6 +1468,33 @@
             });
         }
 
+        function findTagsByName(namePart, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Tag " +
+                "WHERE title.indexOf(:namePart) > 0", {
+                params: {
+                    namePart: namePart
+                }
+            }).then(function (results) {
+                var tags = [];
+
+                _.forEach(results, function (tag) {
+                    tags.push({
+                        id: extractPropertyId(tag),
+                        title: tag.title,
+                        categoryId: tag.categoryId,
+                        authorId: tag.authorId,
+                        description: tag.description
+                    });
+                });
+
+                callback(tags);
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
         function updateTag(tagId, data, callback) {
             dbWrapper.query("" +
                 "UPDATE Tag " +
@@ -1499,16 +1530,31 @@
         function createCategory(data, callback) {
             dbWrapper.query("" +
                 "INSERT INTO Category (title, authorId, parentCategoryId, description)" +
-                "VALUES (:title, :authorId, :parentCategoryId, :description", {
+                "VALUES (:title, :authorId, :parentCategoryId, :description)", {
                 params: {
                     title: data.title,
                     authorId: data.authorId,
-                    parentCategoryId: data.parentCategoryId,
+                    parentCategoryId: data.parentCategoryId || ROOT_ID,
                     description: data.description
                 }
             }).then(function (results) {
                 var categoryId = extractPropertyId(results[0]);
                 callback(categoryId);
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function getCategoryChildrenCount(parentCategoryId, callback) {
+            dbWrapper.query("" +
+                "SELECT count(*) AS count " +
+                "FROM Category " +
+                "WHERE parentCategoryId = :parentCategoryId", {
+                params: {
+                    parentCategoryId: parentCategoryId
+                }
+            }).then(function (results) {
+                callback(results[0].count);
             }).catch(function (error) {
                 throw error;
             });
@@ -1524,13 +1570,19 @@
                 }
             }).then(function (results) {
                 if (results.length > 0) {
+
                     var category = results[0];
-                    callback({
-                        id: extractPropertyId(category),
-                        title: category.title,
-                        parentCategoryId: category.parentCategoryId,
-                        authorId: category.authorId,
-                        description: category.description
+                    var categoryId = extractPropertyId(category);
+
+                    getCategoryChildrenCount(categoryId, function (childrenCount) {
+                        callback({
+                            id: categoryId,
+                            title: category.title,
+                            parentCategoryId: category.parentCategoryId,
+                            authorId: category.authorId,
+                            description: category.description,
+                            childrenCount: childrenCount
+                        });
                     });
                 } else {
                     throw 'Category not found';
@@ -1556,23 +1608,61 @@
                     })()
                 }
             }).then(function (results) {
-                if (results.length > 0) {
-                    var categories = [];
+                var categories = [];
 
-                    _.forEach(results, function (category) {
+                AsyncUtils.each(results, function (category, index, next) {
+
+                    var categoryId = extractPropertyId(category);
+
+                    getCategoryChildrenCount(categoryId, function (childrenCount) {
                         categories.push({
-                            id: extractPropertyId(category),
+                            id: categoryId,
                             title: category.title,
                             parentCategoryId: category.parentCategoryId,
                             authorId: category.authorId,
-                            description: category.description
+                            description: category.description,
+                            childrenCount: childrenCount
                         });
+                        next();
                     });
-
+                }, function () {
                     callback(categories);
-                } else {
-                    callback([]);
+                });
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function findCategoriesByName(namePart, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Category " +
+                "WHERE title.indexOf(:namePart) > 0", {
+                params: {
+                    namePart: namePart
                 }
+            }).then(function (results) {
+                var categories = [];
+
+                AsyncUtils.each(results, function (category, index, next) {
+
+                    var categoryId = extractPropertyId(category);
+
+                    getCategoryChildrenCount(categoryId, function (childrenCount) {
+                        categories.push({
+                            id: categoryId,
+                            title: category.title,
+                            parentCategoryId: category.parentCategoryId,
+                            authorId: category.authorId,
+                            description: category.description,
+                            childrenCount: childrenCount
+                        });
+                        next();
+                    });
+                }, function () {
+                    callback(categories);
+                });
+
             }).catch(function (error) {
                 throw error;
             });
@@ -1596,14 +1686,44 @@
         }
 
         function removeCategory(categoryId, callback) {
+
+            function removeChildren(stack, callback) {
+                if (stack.length > 0) {
+
+                    var parentCategoryId = stack.pop();
+
+                    dbWrapper.query("" +
+                        "DELETE FROM Category " +
+                        "RETURN BEFORE " +
+                        "WHERE parentCategoryId = :parentCategoryId", {
+                        params: {
+                            parentCategoryId: parentCategoryId
+                        }
+                    }).then(function (results) {
+
+                        _.forEach(results, function (category) {
+                            var categoryId = extractPropertyId(category);
+                            stack.push(categoryId);
+                        });
+
+                        removeChildren(stack, callback);
+
+                    }).catch(function (error) {
+                        throw error;
+                    });
+                } else {
+                    callback();
+                }
+            }
+
             dbWrapper.query("" +
                 "DELETE FROM Category " +
                 "WHERE @rid = :categoryId", {
                 params: {
                     categoryId: categoryId
                 }
-            }).then(function (results) {
-                callback();
+            }).then(function () {
+                removeChildren([categoryId], callback);
             }).catch(function (error) {
                 throw error;
             });
@@ -2045,7 +2165,7 @@
 
         function getLectureCondition(lectureId, callback) {
             dbWrapper.query("" +
-                "SELECT COUNT(*) AS count " +
+                "SELECT count(*) AS count " +
                 "FROM ActiveLecture " +
                 "WHERE lectureId = :lectureId", {
                 params: {
@@ -2084,7 +2204,7 @@
 
         function updateLectureStatus(lectureId, lecturerId, status, callback) {
             dbWrapper.query("" +
-                "SELECT COUNT(*) AS count " +
+                "SELECT count(*) AS count " +
                 "FROM ActiveLecture " +
                 "WHERE lectureId = :lectureId", {
                 params: {
@@ -2160,7 +2280,10 @@
             }).then(function (results) {
                 var question = results[0];
                 var questionId = extractPropertyId(question);
-                callback(questionId);
+                callback({
+                    questionId: questionId,
+                    creationDate: question.creationDate
+                });
             }).catch(function (error) {
                 throw error;
             });
@@ -2699,6 +2822,20 @@
                     callback(tags);
                 });
             },
+            findTagsByName: function (namePart, callback) {
+                findTagsByName(namePart, function (tags) {
+
+                    _.forEach(tags, function (tag) {
+                        encodeObject(tag, [
+                            'id',
+                            'categoryId',
+                            'authorId'
+                        ]);
+                    });
+
+                    callback(tags);
+                });
+            },
             updateTag: function (tagId, data, callback) {
                 tagId = decodeId(tagId);
 
@@ -2741,8 +2878,8 @@
 
                 getCategoriesById(categoryIds, function (categories) {
 
-                    _.forEach(categories, function (tag) {
-                        encodeObject(tag, [
+                    _.forEach(categories, function (category) {
+                        encodeObject(category, [
                             'id',
                             'parentCategoryId',
                             'authorId'
@@ -2751,6 +2888,20 @@
 
                     callback(categories);
                 });
+            },
+            findCategoriesByName: function (namePart, callback) {
+                findCategoriesByName(namePart, function (categories) {
+
+                    _.forEach(categories, function (category) {
+                        encodeObject(category, [
+                            'id',
+                            'parentCategoryId',
+                            'authorId'
+                        ]);
+                    });
+
+                    callback(categories);
+                })
             },
             updateCategory: function (categoryId, data, callback) {
                 categoryId = decodeId(categoryId);
@@ -3003,9 +3154,13 @@
             },
             createQuestion: function (lectureId, questionModel, callback) {
                 lectureId = decodeId(lectureId);
-                createQuestion(lectureId, questionModel, function (questionId) {
-                    questionId = encodeId(questionId);
-                    callback(questionId);
+                createQuestion(lectureId, questionModel, function (question) {
+
+                    encodeObject(question, [
+                        'questionId'
+                    ]);
+
+                    callback(question);
                 });
             },
             updateQuestion: function (questionId, questionModel, callback) {

@@ -33,6 +33,34 @@
         UPDATE_WORKSPACE: '/api/update-workspace/:workspaceId',
         REMOVE_WORKSPACE: '/api/remove-workspace/:workspaceId',
         FEEDBACK: '/api/feedback',
+
+        GET_USER_PROFILE: '/api/users/:userId/profile',
+        UPDATE_USER_PROFILE: '/api/users/:userId/profile/update',
+        GET_QUICK_TIMESTAMP: '/api/quick-timestamp',
+
+        CREATE_TAG: '/api/tags/create',
+        GET_TAG_BY_ID: '/api/tags/:tagId',
+        GET_TAGS_BY_ID: '/api/tags/select',
+        FIND_TAGS_BY_NAME: '/api/tags/find/:namePart',
+        UPDATE_TAG: '/api/tags/:tagId/update',
+        REMOVE_TAG: '/api/tags/:tagId/remove',
+
+        CREATE_CATEGORY: '/api/categories/create',
+        GET_CATEGORY_BY_ID: '/api/categories/:categoryId',
+        GET_CATEGORIES_BY_ID: '/api/categories/select',
+        FIND_CATEGORIES_BY_NAME: '/api/categories/find/:namePart',
+        UPDATE_CATEGORY: '/api/categories/:categoryId/update',
+        REMOVE_CATEGORY: '/api/categories/:categoryId/remove',
+
+        CREATE_LINK: '/api/links/create',
+        ATTACH_LINK: '/api/links/:linkId/attach',
+        DETACH_LINK: '/api/links/:linkId/detach',
+        GET_ATTACHED_LINKS_BY_LECTURE_ID: '/api/links/get-by-lecture-id/:lectureId',
+        GET_LINK_BY_ID: '/api/links/:linkId',
+        GET_LINKS_BY_ID: '/api/links/select',
+        UPDATE_LINK: '/api/links/:linkId/update',
+        REMOVE_LINK: '/api/links/:linkId/remove',
+
         CREATE_LECTURE: '/api/lectures/create',
         UPDATE_LECTURE: '/api/lectures/:lectureId/update',
         REMOVE_LECTURE: '/api/lectures/:lectureId/remove',
@@ -44,23 +72,12 @@
         GET_LECTURE_CONDITION: '/api/lectures/:lectureId/condition',
         GET_ACTIVE_LECTURES: '/api/lectures/active',
         UPDATE_LECTURE_STATUS: '/api/lectures/:lectureId/update-status',
+
         CREATE_QUESTION: '/api/questions/create',
         UPDATE_QUESTION: '/api/questions/:questionId/update',
         REMOVE_QUESTION: '/api/questions/:questionId/remove',
         GET_QUESTION_BY_LECTURE_ID: '/api/questions/get-by-lecture-id/:lectureId',
-        GET_QUESTION_BY_ID: '/api/questions/get-by-id/:questionId',
-        GET_USER_PROFILE: '/api/users/:userId/profile',
-        UPDATE_USER_PROFILE: '/api/users/:userId/profile/update',
-        GET_QUICK_TIMESTAMP: '/api/quick-timestamp',
-
-        CREATE_LINK: '/api/links/create',
-        ATTACH_LINK: '/api/links/:linkId/attach',
-        DETACH_LINK: '/api/links/:linkId/detach',
-        GET_ATTACHED_LINKS_BY_LECTURE_ID: '/api/links/get-by-lecture-id/:lectureId',
-        GET_LINK_BY_ID: '/api/links/:linkId',
-        GET_LINKS_BY_ID: '/api/links/select',
-        UPDATE_LINK: '/api/links/:linkId/update',
-        REMOVE_LINK: '/api/links/:linkId/remove'
+        GET_QUESTION_BY_ID: '/api/questions/get-by-id/:questionId'
     };
 
     if (typeof exports !== 'undefined') {

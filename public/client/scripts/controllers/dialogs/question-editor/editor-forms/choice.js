@@ -8,34 +8,39 @@ angular.module('application')
 
         function ($scope) {
 
-            var model = $scope.model;
-            var originalModel = $scope.originalModel;
+            $scope.$emit('questionEditor:fetchModel', function (model, originalModel) {
 
-            if (originalModel.type == 'single-choice' || originalModel.type == 'multi-choice') {
-                model.data = originalModel.data;
-            } else {
-                model.data = [];
-            }
+                function addCase() {
+                    if ($scope.newCase['length'] > 0) {
 
-            function addCase() {
-                if ($scope.newCase['length'] > 0) {
-                    model.data.push($scope.newCase);
-                    $scope.newCase = '';
+                        var data = $scope.model['data'];
+                        data.push($scope.newCase);
+
+                        $scope.newCase = '';
+                    }
                 }
-            }
 
-            function editCase(index) {
-            }
+                function editCase(index) {
+                }
 
-            function removeCase(index) {
-                model.data = _.without(model.data, model.data[index]);
-            }
+                function removeCase(index) {
+                    var data = $scope.model['data'];
+                    $scope.model['data'] = _.without(data, data[index]);
+                }
 
-            $scope.newCase = '';
+                $scope.newCase = '';
+                $scope.model = model;
 
-            $scope.addCase = addCase;
-            $scope.editCase = editCase;
-            $scope.removeCase = removeCase;
+                $scope.addCase = addCase;
+                $scope.editCase = editCase;
+                $scope.removeCase = removeCase;
+
+                if (originalModel.type == 'single-choice' || originalModel.type == 'multi-choice') {
+                    model.data = originalModel.data;
+                } else {
+                    model.data = [];
+                }
+            });
         }
     ]
 );

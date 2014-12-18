@@ -70,12 +70,6 @@ angular.module('application', [
                 options: {
                     title: 'routes.lecture_manager'
                 }
-            }).when('/lectures/administration/question-manager/:questionId', {
-                templateUrl: '/public/client/views/controllers/lectures/administration/question-manager-view.html',
-                controller: 'QuestionManagerController',
-                options: {
-                    title: 'routes.question_manager'
-                }
             }).when('/lectures/administration/lecture-statistic/:lectureId', {
                 templateUrl: '/public/client/views/controllers/lectures/administration/lecture-statistic-view.html',
                 controller: 'StatisticController',
@@ -93,6 +87,12 @@ angular.module('application', [
                 controller: 'LectureHallController',
                 options: {
                     title: 'routes.lecture_hall'
+                }
+            }).when('/lectures/administration/categories-manager', {
+                templateUrl: '/public/client/views/controllers/lectures/administration/categories-manager-view.html',
+                controller: 'CategoriesManager',
+                options: {
+                    title: 'routes.categories_manager'
                 }
             }).when('/logout', {
                 template: '',

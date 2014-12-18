@@ -306,60 +306,6 @@ angular.module('application')
                         success: callback
                     });
                 },
-                createQuestion: function (lectureId, questionModel, callback) {
-                    httpClientService.sendRequest({
-                        method: 'POST',
-                        url: RestApi.CREATE_QUESTION,
-                        data: {
-                            lectureId: lectureId,
-                            questionModel: questionModel
-                        }
-                    }, {
-                        success: callback
-                    });
-                },
-                updateQuestion: function (questionId, questionModel, callback) {
-                    httpClientService.sendRequest({
-                        method: 'POST',
-                        url: RestApi.UPDATE_QUESTION,
-                        data: {
-                            questionModel: questionModel
-                        },
-                        urlParams: {
-                            questionId: questionId
-                        }
-                    }, {
-                        success: callback
-                    });
-                },
-                removeQuestion: function (questionId, callback) {
-                    httpClientService.sendRequest({
-                        url: RestApi.REMOVE_QUESTION,
-                        urlParams: {
-                            questionId: questionId
-                        }
-                    }, {
-                        success: callback
-                    });
-                },
-                getQuestionsByLectureId: function (lectureId, handler) {
-                    httpClientService.sendRequest({
-                        url: RestApi.GET_QUESTION_BY_LECTURE_ID,
-                        urlParams: {
-                            lectureId: lectureId
-                        }
-                    }, handler);
-                },
-                getQuestionById: function (questionId, callback) {
-                    httpClientService.sendRequest({
-                        url: RestApi.GET_QUESTION_BY_ID,
-                        urlParams: {
-                            questionId: questionId
-                        }
-                    }, {
-                        success: callback
-                    });
-                },
                 getUserProfile: function (userId, callback) {
                     httpClientService.sendRequest({
                         url: RestApi.GET_USER_PROFILE,
@@ -478,6 +424,180 @@ angular.module('application')
                         url: RestApi.REMOVE_LINK,
                         urlParams: {
                             linkId: linkId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                createQuestion: function (lectureId, questionModel, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.CREATE_QUESTION,
+                        data: {
+                            lectureId: lectureId,
+                            questionModel: questionModel
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                updateQuestion: function (questionId, questionModel, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_QUESTION,
+                        data: {
+                            questionModel: questionModel
+                        },
+                        urlParams: {
+                            questionId: questionId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                removeQuestion: function (questionId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.REMOVE_QUESTION,
+                        urlParams: {
+                            questionId: questionId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getQuestionsByLectureId: function (lectureId, handler) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_QUESTION_BY_LECTURE_ID,
+                        urlParams: {
+                            lectureId: lectureId
+                        }
+                    }, handler);
+                },
+                getQuestionById: function (questionId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_QUESTION_BY_ID,
+                        urlParams: {
+                            questionId: questionId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                createTag: function (data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.CREATE_TAG,
+                        data: data
+                    }, {
+                        success: callback
+                    });
+                },
+                getTagById: function (tagId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_TAG_BY_ID,
+                        urlParams: {
+                            tagId: tagId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getTagsById: function (tagIds, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.GET_TAGS_BY_ID,
+                        data: tagIds
+                    }, {
+                        success: callback
+                    });
+                },
+                findTagByName: function (namePart, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.FIND_TAGS_BY_NAME,
+                        urlParams: {
+                            namePart: namePart
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                updateTag: function (tagId, data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_TAG,
+                        data: data,
+                        urlParams: {
+                            tagId: tagId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                removeTag: function (tagId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.REMOVE_TAG,
+                        urlParams: {
+                            tagId: tagId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                createCategory: function (data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.CREATE_CATEGORY,
+                        data: data
+                    }, {
+                        success: callback
+                    });
+                },
+                getCategoryById: function (categoryId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_CATEGORY_BY_ID,
+                        urlParams: {
+                            categoryId: categoryId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                getCategoriesById: function (categoryIds, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.GET_CATEGORIES_BY_ID,
+                        data: categoryIds
+                    }, {
+                        success: callback
+                    });
+                },
+                findCategoriesByName: function (namePart, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.FIND_CATEGORIES_BY_NAME,
+                        urlParams: {
+                            namePart: namePart
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                updateCategory: function (categoryId, data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_CATEGORY,
+                        data: data,
+                        urlParams: {
+                            categoryId: categoryId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                removeCategory: function (categoryId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.REMOVE_CATEGORY,
+                        urlParams: {
+                            categoryId: categoryId
                         }
                     }, {
                         success: callback
