@@ -533,6 +533,99 @@
             });
         }
 
+        function getTasks(workspaceId, callback) {
+            dbWrapper.query("" +
+                "SELECT * " +
+                "FROM Task " +
+                "WHERE workspaceId = :workspaceId", {
+                params: {
+                    workspaceId: workspaceId
+                }
+            }).then(function (results) {
+
+                var tasks = [];
+
+                _.forEach(results, function (item) {
+                    tasks.push({
+                        id: extractPropertyId(item),
+                        creatorId: item.creatorId,
+                        title: item.title,
+                        completed: item.completed,
+                        workspaceId: item.workspaceId,
+                        creationDate: item.creationDate,
+                        priority: item.priority
+                    });
+                });
+
+                callback(tasks);
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function createTask(workspaceId, userId, data, callback) {
+            dbWrapper.query("" +
+                "INSERT INTO Task (workspaceId, creatorId, title, completed, creationDate, priority) " +
+                "VALUES (:workspaceId, :creatorId, :title, :completed, :creationDate, :priority)", {
+                params: {
+                    workspaceId: workspaceId,
+                    creatorId: userId,
+                    title: data.title,
+                    completed: data.completed,
+                    creationDate: _.now(),
+                    priority: data.priority
+                }
+            }).then(function (results) {
+                var task = results[0];
+                callback({
+                    taskId: extractPropertyId(task),
+                    creationDate: task.creationDate
+                });
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function updateTasks(tasksModels, callback) {
+            AsyncUtils.each(tasksModels, function (taskModel, index, next) {
+                dbWrapper.query("" +
+                    "UPDATE Task " +
+                    "SET title = :title, completed = :completed, priority = :priority " +
+                    "WHERE @rid = :id", {
+                    params: {
+                        id: taskModel.id,
+                        title: taskModel.title,
+                        completed: taskModel.completed,
+                        priority: taskModel.priority
+                    }
+                }).then(function () {
+                    next();
+                }).catch(function (error) {
+                    throw error;
+                });
+            }, function () {
+                callback();
+            });
+        }
+
+        function removeTasks(tasksIds, callback) {
+            AsyncUtils.each(tasksIds, function (taskId, index, next) {
+                dbWrapper.query("" +
+                    "DELETE FROM Task " +
+                    "WHERE @rid = :id", {
+                    params: {
+                        id: taskId
+                    }
+                }).then(function () {
+                    next();
+                }).catch(function (error) {
+                    throw error;
+                });
+            }, function () {
+                callback();
+            });
+        }
+
         function setUserWorkspaceId(userId, workspaceId, rootWorkspaceId, callback) {
             dbWrapper.query("" +
                 "UPDATE User " +
@@ -551,6 +644,7 @@
                             callback(permissions, isCreator);
                         })
                     });
+
                 } else {
                     throw 'User not found';
                 }
@@ -2492,6 +2586,54 @@
             },
             findUser: function (genericId, callback) {
                 findUser(genericId, getAccountEncoder(callback));
+            },
+            getTasks: function (workspaceId, callback) {
+
+                workspaceId = decodeId(workspaceId);
+
+                getTasks(workspaceId, function (tasks) {
+
+                    _.forEach(tasks, function (task) {
+                        encodeObject(task, [
+                            'id',
+                            'creatorId',
+                            'workspaceId'
+                        ]);
+                    });
+
+                    callback(tasks);
+                });
+            },
+            createTask: function (workspaceId, userId, data, callback) {
+
+                workspaceId = decodeId(workspaceId);
+
+                createTask(workspaceId, userId, data, function (task) {
+
+                    encodeObject(task, [
+                        'taskId'
+                    ]);
+
+                    callback(task);
+                });
+            },
+            updateTasks: function (tasksModels, callback) {
+
+                _.forEach(tasksModels, function (taskModel) {
+                    decodeObject(taskModel, [
+                        'id'
+                    ]);
+                });
+
+                updateTasks(tasksModels, callback);
+            },
+            removeTasks: function (tasksIds, callback) {
+
+                _.forEach(tasksIds, function (taskId, index) {
+                    tasksIds[index] = decodeId(taskId);
+                });
+
+                removeTasks(tasksIds, callback);
             },
             setUserWorkspaceId: function (userId, workspaceId, rootWorkspaceId, callback) {
 

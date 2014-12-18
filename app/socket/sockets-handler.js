@@ -139,39 +139,6 @@ module.exports = function (io, dbProvider) {
                 });
             });
 
-            on(SocketCommands.ADDED_ITEM, function (data) {
-
-                var userId = data.userId;
-                var item = data.item;
-
-                broadcast(SocketCommands.ADDED_ITEM, {
-                    userId: userId,
-                    item: item
-                });
-            });
-
-            on(SocketCommands.UPDATED_ITEM, function (data) {
-
-                var userId = data.userId;
-                var item = data.item;
-
-                broadcast(SocketCommands.UPDATED_ITEM, {
-                    userId: userId,
-                    item: item
-                });
-            });
-
-            on(SocketCommands.REMOVED_ITEM, function (data) {
-
-                var userId = data.userId;
-                var itemId = data.itemId;
-
-                broadcast(SocketCommands.REMOVED_ITEM, {
-                    userId: userId,
-                    itemId: itemId
-                });
-            });
-
             on(SocketCommands.PERMISSIONS_CHANGED, function (data) {
 
                 var userId = data.userId;
@@ -218,6 +185,80 @@ module.exports = function (io, dbProvider) {
                     presentUsers: presentUsers
                 });
             });
+
+            (function () {
+
+                on(SocketCommands.ADDED_ITEM, function (data) {
+
+                    var userId = data.userId;
+                    var item = data.item;
+
+                    broadcast(SocketCommands.ADDED_ITEM, {
+                        userId: userId,
+                        item: item
+                    });
+                });
+
+                on(SocketCommands.UPDATED_ITEM, function (data) {
+
+                    var userId = data.userId;
+                    var item = data.item;
+
+                    broadcast(SocketCommands.UPDATED_ITEM, {
+                        userId: userId,
+                        item: item
+                    });
+                });
+
+                on(SocketCommands.REMOVED_ITEM, function (data) {
+
+                    var userId = data.userId;
+                    var itemId = data.itemId;
+
+                    broadcast(SocketCommands.REMOVED_ITEM, {
+                        userId: userId,
+                        itemId: itemId
+                    });
+                });
+
+            })();
+
+            (function () {
+
+                on(SocketCommands.TASK_CREATED, function (data) {
+
+                    var userId = data.userId;
+                    var task = data.task;
+
+                    broadcast(SocketCommands.TASK_CREATED, {
+                        userId: userId,
+                        task: task
+                    });
+                });
+
+                on(SocketCommands.TASKS_UPDATED, function (data) {
+
+                    var userId = data.userId;
+                    var tasks = data.tasks;
+
+                    broadcast(SocketCommands.TASKS_UPDATED, {
+                        userId: userId,
+                        tasks: tasks
+                    });
+                });
+
+                on(SocketCommands.TASKS_REMOVED, function (data) {
+
+                    var userId = data.userId;
+                    var tasksIds = data.tasksIds;
+
+                    broadcast(SocketCommands.TASKS_REMOVED, {
+                        userId: userId,
+                        tasksIds: tasksIds
+                    });
+                });
+
+            })();
 
         })();
 

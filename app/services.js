@@ -706,7 +706,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
-    serviceProvider.get(RestApi.UPDATE_CATEGORY, function (request, response, resultCallback) {
+    serviceProvider.post(RestApi.UPDATE_CATEGORY, function (request, response, resultCallback) {
 
         checkAuthenticated(request);
 
@@ -725,6 +725,56 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var categoryId = request.params['categoryId'];
 
         dbProvider.removeCategory(categoryId, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.GET_TASKS, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var workspaceId = request.params['workspaceId'];
+
+        dbProvider.getTasks(workspaceId, function (tasks) {
+            resultCallback({
+                data: tasks
+            });
+        });
+    });
+
+    serviceProvider.post(RestApi.CREATE_TASK, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var workspaceId = request.params['workspaceId'];
+        var userId = getUserId(request);
+        var data = request.body;
+
+        dbProvider.createTask(workspaceId, userId, data, function (task) {
+            resultCallback({
+                data: task
+            });
+        });
+    });
+
+    serviceProvider.post(RestApi.UPDATE_TASKS, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var tasksModels = request.body;
+
+        dbProvider.updateTasks(tasksModels, function () {
+            resultCallback();
+        });
+    });
+
+    serviceProvider.post(RestApi.REMOVE_TASKS, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var tasksIds = request.body;
+
+        dbProvider.removeTasks(tasksIds, function () {
             resultCallback();
         });
     });

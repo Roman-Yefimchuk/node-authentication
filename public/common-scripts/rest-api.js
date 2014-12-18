@@ -77,7 +77,12 @@
         UPDATE_QUESTION: '/api/questions/:questionId/update',
         REMOVE_QUESTION: '/api/questions/:questionId/remove',
         GET_QUESTION_BY_LECTURE_ID: '/api/questions/get-by-lecture-id/:lectureId',
-        GET_QUESTION_BY_ID: '/api/questions/get-by-id/:questionId'
+        GET_QUESTION_BY_ID: '/api/questions/get-by-id/:questionId',
+
+        CREATE_TASK: '/api/tasks/:workspaceId/create',
+        GET_TASKS: '/api/tasks/:workspaceId',
+        UPDATE_TASKS: '/api/tasks/update',
+        REMOVE_TASKS: '/api/tasks/remove'
     };
 
     if (typeof exports !== 'undefined') {

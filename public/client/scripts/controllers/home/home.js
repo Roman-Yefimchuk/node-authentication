@@ -26,6 +26,23 @@ angular.module('application')
             var errorsTranslator = translatorService.getSector('home.errors');
             var notificationsTranslator = translatorService.getSector('home.notifications');
 
+            var tabs = [
+                {
+                    id: 'lectures',
+                    title: 'Лекції',
+                    icon: 'fa-bell',
+                    templateUrl: '/public/client/views/controllers/home/tabs/lectures-tab-view.html',
+                    isActive: true
+                },
+                {
+                    id: 'tasks',
+                    title: 'Задачі',
+                    icon: 'fa-tasks',
+                    templateUrl: '/public/client/views/controllers/home/tabs/tasks-tab-view.html',
+                    isActive: false
+                }
+            ];
+
             var workspaceDropdown = {
                 isOpen: false
             };
@@ -35,9 +52,6 @@ angular.module('application')
             var searchOptionsDropdown = {
                 isOpen: false
             };
-            var lectureModel = {
-                title: ''
-            };
             var searchModel = {
                 searchQuery: '',
                 result: [],
@@ -45,7 +59,6 @@ angular.module('application')
                 caseSensitive: false,
                 showHighlight: true
             };
-            var activeLectures = [];
             var BreadcrumbItem = (function () {
 
                 function BreadcrumbItem(node) {
@@ -72,13 +85,6 @@ angular.module('application')
 
             function search(searchQuery) {
                 if (searchQuery) {
-
-                    var startWith = function (str, prefix) {
-                        if (str.length >= prefix.length) {
-                            return str.substr(0, prefix.length) == prefix;
-                        }
-                        return false;
-                    };
 
                     var result = [];
                     var caseSensitive = searchModel.caseSensitive;
@@ -124,11 +130,6 @@ angular.module('application')
                 } else {
                     $scope.formMode = 'view';
                 }
-            }
-
-            function setFocus() {
-                var input = angular.element('#main-input');
-                input.focus();
             }
 
             function showWorkspaceId() {
@@ -328,108 +329,6 @@ angular.module('application')
             function canManageAccess() {
                 var permissions = $scope.permissions;
                 return permissions.admin;
-            }
-
-            function canManageLecture(lecture) {
-                if (canManageCollection()) {
-                    if (lecture.condition['status'] == 'stopped') {
-                        return true;
-                    }
-                    return lecture.condition['lecturerId'] == $scope.user['userId'];
-                }
-                return false;
-            }
-
-            function addedLecture(userId, lecture) {
-                changeNotification(userId, function (userName) {
-
-                    $scope.lectures.push(lecture);
-
-                    return notificationsTranslator.format('user_added_lecture', {
-                        userName: userName
-                    });
-                });
-            }
-
-            function updatedLecture(userId, lecture) {
-                changeNotification(userId, function (userName) {
-
-                    _.findWhere($scope.lectures, {
-                        id: lecture.id
-                    }).title = lecture.title;
-
-                    return notificationsTranslator.format('user_updated_lecture', {
-                        userName: userName
-                    });
-                });
-            }
-
-            function removedLecture(userId, lectureId) {
-                changeNotification(userId, function (userName) {
-
-                    $scope.lectures = _.filter($scope.lectures, function (lecture) {
-                        return lecture.id != lectureId;
-                    });
-
-                    return notificationsTranslator.format('user_removed_lecture', {
-                        userName: userName
-                    });
-                });
-            }
-
-            function addLecture() {
-                var title = lectureModel['title'].trim();
-                if (!title.length) {
-                    return;
-                }
-
-                var lecture = {
-                    title: title,
-                    authorId: $scope.user['userId'],
-                    workspaceId: getWorkspaceId(),
-                    description: '',
-                    tags: [],
-                    condition: {
-                        status: 'stopped'
-                    }
-                };
-
-                apiService.createLecture(lecture, function (response) {
-                    lecture.id = response.lectureId;
-                    lecture.creationDate = response.creationDate;
-
-                    $scope.lectures.push(lecture);
-                    lectureModel.title = '';
-
-                    var socketConnection = $scope.socketConnection;
-                    socketConnection.addedItem(lecture);
-
-                    setFocus();
-                });
-            }
-
-            function removeLecture(lecture) {
-                apiService.removeLecture(lecture.id, function () {
-
-                    $scope.lectures = _.without($scope.lectures, lecture);
-
-                    var socketConnection = $scope.socketConnection;
-                    socketConnection.removedItem(lecture.id);
-                });
-            }
-
-            function showItemEditor(lecture) {
-                dialogsService.showItemEditor({
-                    item: lecture,
-                    onUpdate: function (lecture, closeCallback) {
-                        apiService.updateLecture(lecture.id, lecture, function () {
-                            var socketConnection = $scope.socketConnection;
-                            socketConnection.updatedItem(lecture);
-
-                            closeCallback();
-                        });
-                    }
-                });
             }
 
             function showWorkspaceManager() {
@@ -654,18 +553,6 @@ angular.module('application')
                 });
             }
 
-            function findActiveLectureById(lectureId) {
-                return _.findWhere(activeLectures, {
-                    lectureId: lectureId
-                });
-            }
-
-            function findLectureById(lectureId) {
-                return _.findWhere($scope.lectures, {
-                    id: lectureId
-                });
-            }
-
             function subscribeForSocketEvent() {
                 $scope.$on('socketsService:' + SocketCommands.USER_CONNECTED, function (event, data) {
                     $scope.presentUsers = data['presentUsers'];
@@ -745,18 +632,6 @@ angular.module('application')
                     });
                 });
 
-                $scope.$on('socketsService:' + SocketCommands.ADDED_ITEM, function (event, data) {
-                    addedLecture(data['userId'], data['item']);
-                });
-
-                $scope.$on('socketsService:' + SocketCommands.UPDATED_ITEM, function (event, data) {
-                    updatedLecture(data['userId'], data['item']);
-                });
-
-                $scope.$on('socketsService:' + SocketCommands.REMOVED_ITEM, function (event, data) {
-                    removedLecture(data['userId'], data['itemId']);
-                });
-
                 $scope.$on('socketsService:' + SocketCommands.PERMISSIONS_CHANGED, function (event, data) {
                     var userId = data['userId'];
                     var workspaceId = data['workspaceId'];
@@ -790,164 +665,10 @@ angular.module('application')
                     $scope.presentUsers = data['presentUsers'];
                 });
 
-                $scope.$on('socketsService:' + SocketCommands.LECTURE_STARTED, function (event, data) {
-                    var lecturerId = data['lecturerId'];
-                    var lectureId = data['lectureId'];
-                    var lecture = findLectureById(lectureId);
-                    lecture.condition = {
-                        status: 'started',
-                        lecturerId: lecturerId
-                    };
-
-                    if (canManageLecture(lecture)) {
-                        $location.path("/lectures/lecture-board/" + lectureId);
-                    } else {
-                        var activeLecture = getActiveLecture(lecture);
-                        activeLectures.push(activeLecture);
-                        activeLecture.startTimer(function () {
-                            var socketConnection = $scope.socketConnection;
-                            socketConnection.getLectureDuration(lectureId);
-                        });
-                    }
-                });
-
-                $scope.$on('socketsService:' + SocketCommands.LECTURE_RESUMED, function (event, data) {
-                    var lectureId = data['lectureId'];
-                    var activeLecture = findActiveLectureById(lectureId);
-                    if (activeLecture) {
-                        var lecture = activeLecture.lecture;
-                        lecture.condition['status'] = 'started';
-                        activeLecture.startTimer(function () {
-                            var socketConnection = $scope.socketConnection;
-                            socketConnection.getLectureDuration(lectureId);
-                        });
-                    }
-                });
-
-                $scope.$on('socketsService:' + SocketCommands.LECTURE_SUSPENDED, function (event, data) {
-                    var lectureId = data['lectureId'];
-                    var activeLecture = findActiveLectureById(lectureId);
-                    if (activeLecture) {
-                        var lecture = activeLecture.lecture;
-                        lecture.condition['status'] = 'suspended';
-                        activeLecture.stopTimer();
-                    }
-                });
-
-                $scope.$on('socketsService:' + SocketCommands.LECTURE_STOPPED, function (event, data) {
-                    var lectureId = data['lectureId'];
-                    var activeLecture = findActiveLectureById(lectureId);
-                    if (activeLecture) {
-
-                        var lecture = activeLecture.lecture;
-                        lecture.condition = {
-                            status: 'stopped'
-                        };
-
-                        activeLecture.stopTimer();
-
-                        activeLectures = _.without(activeLectures, activeLecture);
-                    }
-                });
-
-                $scope.$on('socketsService:' + SocketCommands.UPDATE_LECTURE_DURATION, function (event, data) {
-                    var lectureId = data['lectureId'];
-                    var activeLecture = findActiveLectureById(lectureId);
-                    if (activeLecture) {
-                        $timeout(function () {
-                            activeLecture.duration = data['duration'];
-                        });
-                    }
-                });
-
-                $scope.$on('socketsService:' + SocketCommands.UPDATE_PRESENT_LISTENERS, function (event, data) {
-                    var lectureId = data['lectureId'];
-                    var activeLecture = findActiveLectureById(lectureId);
-                    if (activeLecture) {
-                        $timeout(function () {
-                            activeLecture.presentListeners = data['presentListeners'];
-                        });
-                    }
-                });
-
                 $scope.$on('socketsService:disconnect', function () {
                     var message = notificationsTranslator.translate('you_lost_connection');
                     notificationsService.error(message);
                 });
-            }
-
-            function startLecture(lecture) {
-                var socketConnection = $scope.socketConnection;
-                socketConnection.startLecture(lecture.id);
-            }
-
-            function resumeLecture(lecture) {
-                var socketConnection = $scope.socketConnection;
-                socketConnection.resumeLecture(lecture.id);
-            }
-
-            function suspendLecture(lecture) {
-                var socketConnection = $scope.socketConnection;
-                socketConnection.suspendLecture(lecture.id);
-            }
-
-            function stopLecture(lecture) {
-                var socketConnection = $scope.socketConnection;
-                socketConnection.stopLecture(lecture.id);
-            }
-
-            function getLectureDuration(lecture) {
-                var lectureId = lecture.id;
-                var activeLecture = findActiveLectureById(lectureId);
-                if (activeLecture) {
-                    return activeLecture.duration;
-                }
-                return 0;
-            }
-
-            function getPresentListenersCount(lecture) {
-                var lectureId = lecture.id;
-                var activeLecture = findActiveLectureById(lectureId);
-                if (activeLecture) {
-                    return activeLecture.presentListeners['length'];
-                }
-                return 0;
-            }
-
-            function showPresentListeners(lecture) {
-                var lectureId = lecture.id;
-                dialogsService.showPresentListeners({
-                    lectureId: lectureId,
-                    presentListeners: (function () {
-                        var activeLecture = findActiveLectureById(lectureId);
-                        if (activeLecture) {
-                            return activeLecture.presentListeners;
-                        }
-                        return [];
-                    })()
-                });
-            }
-
-            function getActiveLecture(lecture) {
-
-                var intervalId = null;
-
-                return {
-                    lectureId: lecture.id,
-                    lecture: lecture,
-                    duration: 0,
-                    presentListeners: [],
-                    startTimer: function (task) {
-                        task();
-                        intervalId = $interval(task, 1000, 0, false);
-                    },
-                    stopTimer: function () {
-                        if (intervalId) {
-                            $interval.cancel(intervalId);
-                            intervalId = null;
-                        }
-                    }
-                }
             }
 
             $scope.formMode = 'view';
@@ -956,9 +677,7 @@ angular.module('application')
             $scope.breadcrumb = [];
             $scope.errorMessage = null;
             $scope.currentWorkspace = undefined;
-            $scope.loading = true;
             $scope.lectures = [];
-            $scope.lectureModel = lectureModel;
             $scope.presentUsers = [];
             $scope.workspaces = [];
             $scope.user = {};
@@ -970,6 +689,10 @@ angular.module('application')
                 writer: false,
                 admin: false
             };
+            $scope.tabs = tabs;
+            $scope.tab = _.find(tabs, function (tab) {
+                return tab.isActive;
+            });
 
             $scope.$watch('searchModel.searchQuery', function (searchQuery) {
                 search(searchQuery);
@@ -981,8 +704,6 @@ angular.module('application')
                     var workspaceId = getWorkspaceId();
                     var rootWorkspaceId = getRootWorkspaceId();
 
-                    $scope.loading = true;
-
                     apiService.setUserWorkspace(workspaceId, rootWorkspaceId, function (data) {
 
                         var socketConnection = $scope.socketConnection;
@@ -993,26 +714,12 @@ angular.module('application')
                         $scope.permissions = data.permissions;
                         $scope.isOwnWorkspace = data.isOwnWorkspace;
 
-                        apiService.getLecturesByWorkspaceId(workspaceId, function (lectures) {
-                            $scope.lectures = lectures;
-
-                            _.forEach(lectures, function (lecture) {
-                                if (lecture.condition['status'] != 'stopped') {
-                                    var lectureId = lecture.id;
-                                    var activeLecture = getActiveLecture(lecture);
-                                    activeLectures.push(activeLecture);
-                                    activeLecture.startTimer(function () {
-                                        socketConnection.getLectureDuration(lectureId);
-                                    });
-                                }
-                            });
-
-                            $scope.loading = false;
-                        });
+                        $scope.$broadcast('home:workspaceChanged', workspaceId);
                     });
                 }
             });
 
+            $scope.getWorkspaceId = getWorkspaceId;
             $scope.updateSearchHistory = updateSearchHistory;
             $scope.search = search;
             $scope.clearSearchQuery = clearSearchQuery;
@@ -1023,25 +730,11 @@ angular.module('application')
             $scope.canReadOnly = canReadOnly;
             $scope.canManageCollection = canManageCollection;
             $scope.canManageAccess = canManageAccess;
-            $scope.addedLecture = addedLecture;
-            $scope.updatedLecture = updatedLecture;
-            $scope.removedLecture = removedLecture;
-            $scope.addLecture = addLecture;
-            $scope.removeLecture = removeLecture;
-            $scope.showItemEditor = showItemEditor;
             $scope.showWorkspaceManager = showWorkspaceManager;
             $scope.showPresentUsers = showPresentUsers;
             $scope.showWorkspaceCreator = showWorkspaceCreator;
             $scope.showWorkspaceInfo = showWorkspaceInfo;
             $scope.logout = logout;
-            $scope.startLecture = startLecture;
-            $scope.resumeLecture = resumeLecture;
-            $scope.suspendLecture = suspendLecture;
-            $scope.stopLecture = stopLecture;
-            $scope.getLectureDuration = getLectureDuration;
-            $scope.getPresentListenersCount = getPresentListenersCount;
-            $scope.showPresentListeners = showPresentListeners;
-            $scope.canManageLecture = canManageLecture;
 
             loaderService.showLoader();
 
@@ -1141,7 +834,7 @@ angular.module('application')
                         });
                     });
                 },
-                failure: function (error) {
+                failure: function () {
                     $location.path('/');
                     loaderService.hideLoader();
                 }

@@ -1,0 +1,224 @@
+<div ng-controller="TasksController">
+
+<form ng-submit="addTask()" ng-show="canManageCollection()">
+
+    <div class="input-group task-add">
+
+        <span class="input-group-btn dropdown" is-open="itemPriorityDropdown.isOpen">
+
+            <span class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
+                  tooltip="{{ 'home.priority' | translate }}">
+                <i class="fa fa-star"
+                   ng-class="{ 'star-priority-none' : newTask.priority == 'none',
+                               'star-priority-low' : newTask.priority == 'low',
+                               'star-priority-medium' : newTask.priority == 'medium',
+                               'star-priority-high' : newTask.priority == 'high'
+                             }">
+                </i>
+            </span>
+
+            <ul class="dropdown-menu" role="menu">
+                <li>
+                    <a href ng-click="setItemPriority('high')">
+                        <i class="fa fa-star star-priority-high"></i>
+                        &nbsp;
+                        <span l10n key="home.high_priority"
+                              ng-class="{ 'bold-fond' : newTask.priority == 'high' }">
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href ng-click="setItemPriority('medium')">
+                        <i class="fa fa-star star-priority-medium"></i>
+                        &nbsp;
+                        <span l10n key="home.medium_priority"
+                              ng-class="{ 'bold-fond' : newTask.priority == 'medium' }">
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href ng-click="setItemPriority('low')">
+                        <i class="fa fa-star star-priority-low"></i>
+                        &nbsp;
+                        <span l10n key="home.low_priority"
+                              ng-class="{ 'bold-fond' : newTask.priority == 'low' }">
+                        </span>
+                    </a>
+                </li>
+                <li>
+                    <a href ng-click="setItemPriority('none')">
+                        <i class="fa fa-star star-priority-none"></i>
+                        &nbsp;
+                        <span l10n key="home.without_priority"
+                              ng-class="{ 'bold-fond' : newTask.priority == 'none' }">
+                        </span>
+                    </a>
+                </li>
+            </ul>
+        </span>
+
+        <div class="form-group-sm" ng-class="{ 'has-feedback' : !!newTask.title }">
+            <label class="control-label" ng-show="false"></label>
+            <input type="text" class="form-control input-sm" id="main-input"
+                   l10n="placeholder" placeholder-key="home.what_needs_to_be_done"
+                   autofocus autocomplete="off" ng-model="newTask.title">
+                <span class="form-control-feedback" style="top: 0"
+                      ng-show="!!newTask.title">
+                    <i class="fa fa-times" style="cursor: pointer"
+                       tooltip="{{ 'home.clear' | translate }}"
+                       ng-click="newTask.title = ''"></i>
+                </span>
+        </div>
+
+         <span class="input-group-btn">
+
+             <span class="btn btn-success btn-sm"
+                   ng-click="addTask()">
+                 <i class="fa fa-plus"></i>
+                 &nbsp;
+                 <span l10n key="home.add_task"></span>
+             </span>
+
+         </span>
+
+    </div>
+
+</form>
+
+<div class="panel-body">
+
+    <div class="task-content">
+
+        <div ng-switch="loading">
+            <div ng-switch-when="true" style="margin-bottom: 15px;">
+                <div static-include="/public/client/views/common/loader-view.html"></div>
+            </div>
+            <div ng-switch-when="false">
+
+                <div ng-switch="tasks.length > 0 && (tasks | filter:statusFilter).length > 0"
+                     style="margin-bottom: 15px;">
+                    <div ng-switch-when="true">
+
+                        <ul class="task-list">
+
+                            <li ng-repeat="task in tasks | filter:statusFilter"
+                                ng-class="{ 'task-done' : task.completed }"
+                                is-lats-item="{{ $last }}">
+
+                                <div class="task-checkbox" ng-show="canManageCollection()">
+
+                                    <i class="fa" style="cursor: pointer;vertical-align: sub;margin-left: 8px;"
+                                       btn-checkbox ng-model="task.completed" ng-change="mark(task)"
+                                       ng-class="{ 'fa-square-o' : !task.completed, 'fa-check-square-o' : task.completed }">
+                                    </i>
+
+                                </div>
+
+                                <div class="task-title">
+
+                                <span class="task-title-sp"
+                                      style="vertical-align: sub;">
+                                    {{ task.title }}
+                                </span>
+
+                                    <div class="pull-right hidden-phone">
+
+                                        <i class="fa fa-star" ng-show="task.priority != 'none'"
+                                           ng-class="{ 'star-priority-low' : task.priority == 'low',
+                                                       'star-priority-medium' : task.priority == 'medium',
+                                                       'star-priority-high' : task.priority == 'high'
+                                                     }"
+                                           tooltip="{{ 'home.' + task.priority + '_priority' | translate }}"
+                                           style="vertical-align: sub;">
+                                        </i>
+
+                                        &nbsp;
+
+                                        <span style="padding-right: 8px;vertical-align: sub;">
+                                            {{ task.creationDate | formatDate:'mmm d, yyyy, h:MM TT' }}
+                                        </span>
+
+                                        <span class="btn btn-primary btn-xs"
+                                              tooltip="{{ 'home.edit' | translate }}"
+                                              ng-click="showItemEditor(task)"
+                                              ng-show="canManageCollection()">
+                                            <i class="fa fa-pencil"></i>
+                                        </span>
+
+                                        <span class="btn btn-danger btn-xs"
+                                              tooltip="{{ 'home.remove' | translate }}"
+                                              ng-click="removeTask(task)"
+                                              ng-show="canManageCollection()">
+                                            <i class="fa fa-trash-o"></i>
+                                        </span>
+
+                                    </div>
+                                </div>
+                            </li>
+
+                        </ul>
+
+                    </div>
+
+                    <div ng-switch-when="false">
+
+                        <div class="text-center">
+                            <div class="row clearfix">
+                                <div class="col-md-12 column">
+                                    <span l10n key="home.no_records"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="add-task-row">
+
+        <div class="row clearfix">
+            <div class="col-md-3 column">
+                <span class="btn btn-primary btn-sm pull-left"
+                      ng-model="allChecked" ng-click="markAll(!allChecked)"
+                      ng-class="{ 'disabled' : !tasks.length }"
+                      ng-show="canManageCollection()"
+                      btn-checkbox>
+                    <i class="fa fa-check"></i>
+                    &nbsp;
+                    <span l10n key="home.select_all"></span>
+                </span>
+            </div>
+
+            <div class="col-md-6 column text-center">
+                <div class="btn-group">
+                    <label ng-repeat="viewMode in viewModes"
+                           class="btn btn-success btn-sm"
+                           ng-model="currentViewMode"
+                           ng-click="setViewMode(viewMode)"
+                           btn-radio="viewMode">
+                        <i class="fa {{ viewMode.icon }}"></i>
+                        &nbsp;
+                        <span l10n key="{{ viewMode.titleKey }}"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="col-md-3 column">
+                <span class="btn btn-danger btn-sm pull-right"
+                      ng-show="remainingCount < tasks.length && canManageCollection()"
+                      ng-click="clearDoneTasks()">
+                    <i class="fa fa-trash-o"></i>
+                    &nbsp;
+                    <span l10n key="home.clear_completed"></span> ({{ tasks.length - remainingCount }})
+                </span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</div>

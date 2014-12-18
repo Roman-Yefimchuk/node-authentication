@@ -172,6 +172,12 @@ angular.module('application')
                             userId: userId,
                             lectureId: lectureId
                         });
+                    },
+                    createdTask: function () {
+                    },
+                    updatedTasks: function () {
+                    },
+                    removedTasks: function () {
                     }
                 };
             }

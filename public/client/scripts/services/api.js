@@ -602,6 +602,46 @@ angular.module('application')
                     }, {
                         success: callback
                     });
+                },
+                getTasks: function (workspaceId, callback) {
+                    httpClientService.sendRequest({
+                        url: RestApi.GET_TASKS,
+                        urlParams: {
+                            workspaceId: workspaceId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                createTask: function (workspaceId, data, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.CREATE_TASK,
+                        data: data,
+                        urlParams: {
+                            workspaceId: workspaceId
+                        }
+                    }, {
+                        success: callback
+                    });
+                },
+                updateTasks: function (tasksModels, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.UPDATE_TASKS,
+                        data: tasksModels
+                    }, {
+                        success: callback
+                    });
+                },
+                removeTasks: function (tasksIds, callback) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.REMOVE_TASKS,
+                        data: tasksIds
+                    }, {
+                        success: callback
+                    });
                 }
             };
         }

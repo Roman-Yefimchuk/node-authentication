@@ -1,7 +1,5 @@
 CREATE database plocal:local_db admin admin plocal graph
 
-## begin_integration
-
 CREATE CLASS ChartPoint
 CREATE PROPERTY ChartPoint.timestamp LONG
 CREATE PROPERTY ChartPoint.presentListeners INTEGER
@@ -61,11 +59,15 @@ CREATE PROPERTY Link.title STRING
 CREATE PROPERTY Link.authorId STRING
 CREATE PROPERTY Link.url STRING
 CREATE PROPERTY Link.description STRING
+CREATE PROPERTY Link.usedLectures EMBEDDEDLIST STRING ## TODO: find more appropriate property name
 
-## TODO: find more appropriate property name
-CREATE PROPERTY Link.usedLectures EMBEDDEDLIST STRING
-
-## end_integration
+CREATE CLASS Task
+CREATE PROPERTY Task.userId STRING
+CREATE PROPERTY Task.title STRING
+CREATE PROPERTY Task.completed BOOLEAN
+CREATE PROPERTY Task.workspaceId STRING
+CREATE PROPERTY Task.creationDate LONG
+CREATE PROPERTY Task.priority STRING
 
 CREATE CLASS User
 CREATE PROPERTY User.accountId STRING 

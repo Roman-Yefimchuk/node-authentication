@@ -95,7 +95,7 @@ angular.module('application')
                         dialogsService.showAlert({
                             title: 'Помилка',
                             message: 'Неможливо завантажити запитання',
-                            onClose: function (closeCallback) {
+                            onAccept: function (closeCallback) {
                                 closeCallback();
                             }
                         });
