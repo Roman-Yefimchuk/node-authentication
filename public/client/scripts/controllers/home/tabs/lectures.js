@@ -125,7 +125,7 @@ angular.module('application')
             }
 
             function showItemEditor(lecture) {
-                dialogsService.showItemEditor({
+                dialogsService.showTaskEditor({
                     item: lecture,
                     onUpdate: function (lecture, closeCallback) {
                         apiService.updateLecture(lecture.id, lecture, function () {
@@ -332,28 +332,7 @@ angular.module('application')
                 }
             }
 
-            $scope.loading = true;
-            $scope.lectures = [];
-            $scope.lectureModel = lectureModel;
-
-            $scope.addedLecture = addedLecture;
-            $scope.updatedLecture = updatedLecture;
-            $scope.removedLecture = removedLecture;
-            $scope.addLecture = addLecture;
-            $scope.removeLecture = removeLecture;
-            $scope.showItemEditor = showItemEditor;
-            $scope.startLecture = startLecture;
-            $scope.resumeLecture = resumeLecture;
-            $scope.suspendLecture = suspendLecture;
-            $scope.stopLecture = stopLecture;
-            $scope.getLectureDuration = getLectureDuration;
-            $scope.getPresentListenersCount = getPresentListenersCount;
-            $scope.showPresentListeners = showPresentListeners;
-            $scope.canManageLecture = canManageLecture;
-
-            subscribeForSocketEvent();
-
-            $scope.$on('home:workspaceChanged', function (event, workspaceId) {
+            function fetchLectures(workspaceId) {
                 $scope.loading = true;
                 apiService.getLecturesByWorkspaceId(workspaceId, function (lectures) {
 
@@ -373,6 +352,38 @@ angular.module('application')
 
                     $scope.loading = false;
                 });
+            }
+
+            $scope.loading = true;
+            $scope.lectures = [];
+            $scope.lectureModel = lectureModel;
+
+            $scope.addedLecture = addedLecture;
+            $scope.updatedLecture = updatedLecture;
+            $scope.removedLecture = removedLecture;
+            $scope.addLecture = addLecture;
+            $scope.removeLecture = removeLecture;
+            $scope.showTaskEditor = showItemEditor;
+            $scope.startLecture = startLecture;
+            $scope.resumeLecture = resumeLecture;
+            $scope.suspendLecture = suspendLecture;
+            $scope.stopLecture = stopLecture;
+            $scope.getLectureDuration = getLectureDuration;
+            $scope.getPresentListenersCount = getPresentListenersCount;
+            $scope.showPresentListeners = showPresentListeners;
+            $scope.canManageLecture = canManageLecture;
+
+            subscribeForSocketEvent();
+
+            $scope.$on('home:workspaceChanged', function (event, workspaceId) {
+                fetchLectures(workspaceId);
+            });
+
+            $scope.$on('home:formModeChanged', function (event, formMode) {
+                if (formMode == String('view')) {
+                    var workspaceId = getWorkspaceId();
+                    fetchLectures(workspaceId);
+                }
             });
         }
     ]

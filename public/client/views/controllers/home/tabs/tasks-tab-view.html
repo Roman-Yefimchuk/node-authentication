@@ -90,13 +90,12 @@
     <div class="task-content">
 
         <div ng-switch="loading">
-            <div ng-switch-when="true" style="margin-bottom: 15px;">
+            <div ng-switch-when="true">
                 <div static-include="/public/client/views/common/loader-view.html"></div>
             </div>
             <div ng-switch-when="false">
 
-                <div ng-switch="tasks.length > 0 && (tasks | filter:statusFilter).length > 0"
-                     style="margin-bottom: 15px;">
+                <div ng-switch="tasks.length > 0 && (tasks | filter:statusFilter).length > 0">
                     <div ng-switch-when="true">
 
                         <ul class="task-list">
@@ -140,7 +139,7 @@
 
                                         <span class="btn btn-primary btn-xs"
                                               tooltip="{{ 'home.edit' | translate }}"
-                                              ng-click="showItemEditor(task)"
+                                              ng-click="showTaskEditor(task)"
                                               ng-show="canManageCollection()">
                                             <i class="fa fa-pencil"></i>
                                         </span>
@@ -148,7 +147,8 @@
                                         <span class="btn btn-danger btn-xs"
                                               tooltip="{{ 'home.remove' | translate }}"
                                               ng-click="removeTask(task)"
-                                              ng-show="canManageCollection()">
+                                              ng-show="canManageCollection()"
+                                              style="padding-left: 6px;padding-right: 6px;">
                                             <i class="fa fa-trash-o"></i>
                                         </span>
 
@@ -178,7 +178,7 @@
 
     </div>
 
-    <div class="add-task-row">
+    <div class="add-task-row" ng-show="tasks.length > 0" style="margin-top: 15px;">
 
         <div class="row clearfix">
             <div class="col-md-3 column">

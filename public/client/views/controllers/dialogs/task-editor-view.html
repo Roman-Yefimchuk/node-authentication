@@ -5,7 +5,7 @@
         <h4 style="margin-bottom: 0;margin-top: 0;">
             <i class="fa fa-pencil"></i>
             &nbsp;
-            Edit item
+            Edit task
         </h4>
     </div>
 
@@ -15,70 +15,70 @@
 
             <div class="input-group task-add">
 
-                <span class="input-group-btn dropdown" is-open="itemPriorityDropdown.isOpen">
+                <span class="input-group-btn dropdown" is-open="taskPriorityDropdown.isOpen">
 
                     <span class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown"
                           tooltip="{{ 'home.priority' | translate }}">
                         <i class="fa fa-star"
-                           ng-class="{ 'star-priority-none' : itemModel.priority == 'none',
-                                       'star-priority-low' : itemModel.priority == 'low',
-                                       'star-priority-medium' : itemModel.priority == 'medium',
-                                       'star-priority-high' : itemModel.priority == 'high'
+                           ng-class="{ 'star-priority-none' : model.priority == 'none',
+                                       'star-priority-low' : model.priority == 'low',
+                                       'star-priority-medium' : model.priority == 'medium',
+                                       'star-priority-high' : model.priority == 'high'
                                      }">
                         </i>
                     </span>
 
                     <ul class="dropdown-menu" role="menu">
                         <li>
-                            <a href ng-click="setItemPriority('high')">
+                            <a href ng-click="setTaskPriority('high')">
                                 <i class="fa fa-star star-priority-high"></i>
                                 &nbsp;
                                 <span l10n key="home.high_priority"
-                                      ng-class="{ 'bold-fond' : itemModel.priority == 'high' }">
+                                      ng-class="{ 'bold-fond' : model.priority == 'high' }">
                                 </span>
                             </a>
                         </li>
                         <li>
-                            <a href ng-click="setItemPriority('medium')">
+                            <a href ng-click="setTaskPriority('medium')">
                                 <i class="fa fa-star star-priority-medium"></i>
                                 &nbsp;
                                 <span l10n key="home.medium_priority"
-                                      ng-class="{ 'bold-fond' : itemModel.priority == 'medium' }">
+                                      ng-class="{ 'bold-fond' : model.priority == 'medium' }">
                                 </span>
                             </a>
                         </li>
                         <li>
-                            <a href ng-click="setItemPriority('low')">
+                            <a href ng-click="setTaskPriority('low')">
                                 <i class="fa fa-star star-priority-low"></i>
                                 &nbsp;
                                 <span l10n key="home.low_priority"
-                                      ng-class="{ 'bold-fond' : itemModel.priority == 'low' }">
+                                      ng-class="{ 'bold-fond' : model.priority == 'low' }">
                                 </span>
                             </a>
                         </li>
                         <li>
-                            <a href ng-click="setItemPriority('none')">
+                            <a href ng-click="setTaskPriority('none')">
                                 <i class="fa fa-star star-priority-none"></i>
                                 &nbsp;
                                 <span l10n key="home.without_priority"
-                                      ng-class="{ 'bold-fond' : itemModel.priority == 'none' }">
+                                      ng-class="{ 'bold-fond' : model.priority == 'none' }">
                                 </span>
                             </a>
                         </li>
                     </ul>
                 </span>
 
-                <span class="form-group-sm" ng-class="{ 'has-feedback' : !!itemModel.title }">
+                <span class="form-group-sm" ng-class="{ 'has-feedback' : !!model.title }">
                     <label class="control-label" ng-show="false"></label>
                     <input type="text" class="form-control input-sm" id="main-input"
                            placeholder="Enter title"
-                           autofocus autocomplete="off" ng-model="itemModel.title"
+                           autofocus autocomplete="off" ng-model="model.title"
                            style="border-top-right-radius: 3px;border-bottom-right-radius: 3px;">
                     <span class="form-control-feedback" style="top: 0"
-                          ng-show="!!itemModel.title">
+                          ng-show="!!model.title">
                         <i class="fa fa-times" style="cursor: pointer"
                            tooltip="{{ 'home.clear' | translate }}"
-                           ng-click="itemModel.title = ''"></i>
+                           ng-click="model.title = ''"></i>
                     </span>
                 </span>
 
@@ -94,7 +94,7 @@
             Cancel
         </span>
         <span class="btn btn-primary btn-sm" ng-click="save()"
-              ng-class="{ 'disabled' : !canSaveItem() }">
+              ng-class="{ 'disabled' : isSaveDisabled() }">
             <i class="fa fa-floppy-o"></i>
             &nbsp;
             Save

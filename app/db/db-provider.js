@@ -703,21 +703,37 @@
 
         function removeWorkspace(userId, workspaceId, callback) {
 
-            //TODO: remove all items
             function removeRecords(workspaceId, callback) {
-
-                callback();
-                return;
-
-                dbWrapper.query("" +
-                    "DELETE FROM Todo " +
-                    "WHERE workspaceId = :workspaceId", {
-                    params: {
-                        workspaceId: workspaceId
+                AsyncUtils.parallel({
+                    removeTasks: function (resolve, reject) {
+                        dbWrapper.query("" +
+                            "DELETE FROM Task " +
+                            "WHERE workspaceId = :workspaceId", {
+                            params: {
+                                workspaceId: workspaceId
+                            }
+                        }).then(function () {
+                            resolve();
+                        }).catch(function (error) {
+                            reject(error);
+                        });
+                    },
+                    removeLectures: function (resolve, reject) {
+                        dbWrapper.query("" +
+                            "DELETE FROM Lecture " +
+                            "WHERE workspaceId = :workspaceId", {
+                            params: {
+                                workspaceId: workspaceId
+                            }
+                        }).then(function () {
+                            resolve();
+                        }).catch(function (error) {
+                            reject(error);
+                        });
                     }
-                }).then(function (total) {
+                }, function () {
                     callback();
-                }).catch(function (error) {
+                }, function (error) {
                     throw error;
                 });
             }

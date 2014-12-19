@@ -136,14 +136,20 @@ angular.module('application')
                 });
             }
 
-            function showItemEditor(task) {
-                dialogsService.showItemEditor({
-                    item: task,
-                    onUpdate: function (task, closeCallback) {
-                        apiService.updateTasks([task], function () {
+            function showTaskEditor(task) {
+                dialogsService.showTaskEditor({
+                    model: {
+                        title: task.title,
+                        priority: task.priority
+                    },
+                    onUpdate: function (taskModel, closeCallback) {
+                        apiService.updateTasks([taskModel], function () {
 
                             var socketConnection = $scope.socketConnection;
-                            socketConnection.updatedTasks([task]);
+                            socketConnection.updatedTasks([taskModel]);
+
+                            task.title = taskModel.title;
+                            task.priority = taskModel.priority;
 
                             closeCallback();
                         });
@@ -164,6 +170,7 @@ angular.module('application')
             function clearDoneTasks() {
 
                 var ids = [];
+
                 _.forEach($scope.tasks, function (task) {
                     if (task.completed) {
                         ids.push(task.id);
@@ -178,6 +185,7 @@ angular.module('application')
                     message: 'Remove <b>{{ count }}</b> completed item(s)?',
                     onAccept: function (closeCallback) {
                         apiService.removeTasks(ids, function () {
+
                             $scope.tasks = _.filter($scope.tasks, function (item) {
                                 return !item.completed;
                             });
@@ -242,6 +250,14 @@ angular.module('application')
 
                 $scope.$on(SocketCommands.TASKS_REMOVED, function (event, data) {
                     tasksRemoved(data['userId'], data['tasksIds']);
+                });
+            }
+
+            function fetchTasks(workspaceId) {
+                $scope.loading = true;
+                apiService.getTasks(workspaceId, function (tasks) {
+                    $scope.tasks = tasks;
+                    $scope.loading = false;
                 });
             }
 
@@ -311,7 +327,7 @@ angular.module('application')
             $scope.tasksUpdated = tasksUpdated;
             $scope.tasksRemoved = tasksRemoved;
             $scope.addTask = addTask;
-            $scope.showItemEditor = showItemEditor;
+            $scope.showTaskEditor = showTaskEditor;
             $scope.removeTask = removeTask;
             $scope.clearDoneTasks = clearDoneTasks;
             $scope.mark = mark;
@@ -320,11 +336,14 @@ angular.module('application')
             subscribeForSocketEvent();
 
             $scope.$on('home:workspaceChanged', function (event, workspaceId) {
-                $scope.loading = true;
-                apiService.getTasks(workspaceId, function (tasks) {
-                    $scope.tasks = tasks;
-                    $scope.loading = false;
-                });
+                fetchTasks(workspaceId);
+            });
+
+            $scope.$on('home:formModeChanged', function (event, formMode) {
+                if (formMode == String('view')) {
+                    var workspaceId = getWorkspaceId();
+                    fetchTasks(workspaceId);
+                }
             });
         }
     ]

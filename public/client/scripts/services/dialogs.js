@@ -24,10 +24,10 @@ angular.module('application')
                         }
                     });
                 },
-                showItemEditor: function (options) {
+                showTaskEditor: function (options) {
                     return open({
-                        templateUrl: '/public/client/views/controllers/dialogs/item-editor-view.html',
-                        controller: 'ItemEditorController',
+                        templateUrl: '/public/client/views/controllers/dialogs/task-editor-view.html',
+                        controller: 'TaskEditorController',
                         resolve: {
                             options: function () {
                                 return options;

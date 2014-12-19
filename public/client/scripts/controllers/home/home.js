@@ -9,6 +9,7 @@ angular.module('application')
         '$location',
         '$timeout',
         '$interval',
+        '$cookies',
         'apiService',
         'socketsService',
         'notificationsService',
@@ -21,7 +22,7 @@ angular.module('application')
         'DEBUG_MODE',
         'ROOT_ID',
 
-        function ($scope, $rootScope, $location, $timeout, $interval, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, translatorService, SOCKET_URL, DEBUG_MODE, ROOT_ID) {
+        function ($scope, $rootScope, $location, $timeout, $interval, $cookies, apiService, socketsService, notificationsService, filterFilter, userService, loaderService, dialogsService, translatorService, SOCKET_URL, DEBUG_MODE, ROOT_ID) {
 
             var errorsTranslator = translatorService.getSector('home.errors');
             var notificationsTranslator = translatorService.getSector('home.notifications');
@@ -32,7 +33,7 @@ angular.module('application')
                     title: 'Лекції',
                     icon: 'fa-bell',
                     templateUrl: '/public/client/views/controllers/home/tabs/lectures-tab-view.html',
-                    isActive: true
+                    isActive: false
                 },
                 {
                     id: 'tasks',
@@ -130,6 +131,7 @@ angular.module('application')
                 } else {
                     $scope.formMode = 'view';
                 }
+                $scope.$broadcast('home:formModeChanged', $scope.formMode);
             }
 
             function showWorkspaceId() {
@@ -553,6 +555,10 @@ angular.module('application')
                 });
             }
 
+            function setActiveTab(tab) {
+                $scope.tab = tab;
+            }
+
             function subscribeForSocketEvent() {
                 $scope.$on('socketsService:' + SocketCommands.USER_CONNECTED, function (event, data) {
                     $scope.presentUsers = data['presentUsers'];
@@ -690,8 +696,23 @@ angular.module('application')
                 admin: false
             };
             $scope.tabs = tabs;
-            $scope.tab = _.find(tabs, function (tab) {
-                return tab.isActive;
+            $scope.tab = (function () {
+
+                if (!$cookies.activeTabId) {
+                    $cookies.activeTabId = 'lectures';
+                }
+
+                var tab = _.find(tabs, function (tab) {
+                    return $cookies.activeTabId == tab.id;
+                });
+
+                tab.isActive = true;
+
+                return tab;
+            })();
+
+            $scope.$watch('tab', function (tab) {
+                $cookies.activeTabId = tab.id;
             });
 
             $scope.$watch('searchModel.searchQuery', function (searchQuery) {
@@ -735,6 +756,7 @@ angular.module('application')
             $scope.showWorkspaceCreator = showWorkspaceCreator;
             $scope.showWorkspaceInfo = showWorkspaceInfo;
             $scope.logout = logout;
+            $scope.setActiveTab = setActiveTab;
 
             loaderService.showLoader();
 
