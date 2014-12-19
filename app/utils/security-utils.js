@@ -2,15 +2,15 @@
 
 (function (require) {
 
-    var bCrypt = require('bcrypt-nodejs');
+    var BCrypt = require('bcrypt-nodejs');
 
     module.exports = {
         generateHash: function (password) {
-            return bCrypt.hashSync(password, bCrypt.genSaltSync(8), null);
+            return BCrypt.hashSync(password, BCrypt.genSaltSync(8), null);
         },
         validPassword: function (userAccount, password) {
             var userEncryptedPassword = userAccount.password;
-            return bCrypt.compareSync(password, userEncryptedPassword);
+            return BCrypt.compareSync(password, userEncryptedPassword);
         },
         decodeBase64: function (encoded) {
             return new Buffer(encoded || '', 'base64').toString('utf8');

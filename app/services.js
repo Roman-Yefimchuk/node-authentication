@@ -236,7 +236,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var senderAddress = feedbackModel.senderAddress;
         var message = feedbackModel.message;
 
-        emailSender.sendEmail(subject, senderAddress, message, function (error, response) {
+        emailSender.sendFeedback(subject, senderAddress, message, function (error, response) {
             resultCallback('OK');
         });
     });
