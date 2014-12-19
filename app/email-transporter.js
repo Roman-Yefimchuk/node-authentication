@@ -2,6 +2,9 @@
 
 (function (require) {
 
+    var a = "Какой пароль?" +
+        "i do not know";
+
     var SUPPORT_EMAIL = 'node.authentication@yandex.ru';
 
     var NodeMailer = require("nodemailer");
