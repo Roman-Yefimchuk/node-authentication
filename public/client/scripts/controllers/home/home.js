@@ -801,6 +801,17 @@ angular.module('application')
                                                         notificationsService.warning('Access to workspace ' + workspaceName + ' closed');
                                                         break;
                                                     }
+                                                    case ExternalNotificationCommands.EMAIL_NOT_DEFINED:
+                                                    {
+                                                        $scope.$broadcast('home:emailNotDefined');
+                                                        break;
+                                                    }
+                                                    case ExternalNotificationCommands.EMAIL_NOT_VERIFIED:
+                                                    {
+                                                        var email = notification.data['email'];
+                                                        $scope.$broadcast('home:emailNotVerified', email);
+                                                        break;
+                                                    }
                                                 }
                                             });
                                         }

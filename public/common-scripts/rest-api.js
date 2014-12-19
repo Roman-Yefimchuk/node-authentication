@@ -32,7 +32,10 @@
         LOAD_HIERARCHY: '/api/load-hierarchy',
         UPDATE_WORKSPACE: '/api/update-workspace/:workspaceId',
         REMOVE_WORKSPACE: '/api/remove-workspace/:workspaceId',
+
         FEEDBACK: '/api/feedback',
+        ATTACH_EMAIL: '/api/attach-email',
+        VERIFY_EMAIL: '/api/verify-email',
         EMAIL_VERIFICATION: '/api/email-verification/:token',
 
         GET_USER_PROFILE: '/api/users/:userId/profile',

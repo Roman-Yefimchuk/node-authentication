@@ -159,6 +159,17 @@ angular.module('application')
                             }
                         }
                     });
+                },
+                showEmailDialog: function (options) {
+                    return open({
+                        templateUrl: '/public/client/views/controllers/dialogs/email-dialog-view.html',
+                        controller: 'EmailDialogController',
+                        resolve: {
+                            options: function () {
+                                return options;
+                            }
+                        }
+                    });
                 }
             };
         }

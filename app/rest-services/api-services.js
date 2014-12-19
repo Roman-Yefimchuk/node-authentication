@@ -5,7 +5,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
     var _ = require('underscore');
 
     var Exception = require('../exception');
-    var EmailSender = require('../email-sender');
+    var EmailTransporter = require('../email-transporter');
     var RestApi = require('../../public/common-scripts/rest-api');
 
     function checkAuthenticated(request) {
@@ -236,8 +236,13 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var senderAddress = feedbackModel.senderAddress;
         var message = feedbackModel.message;
 
-        EmailSender.sendFeedback(subject, senderAddress, message, function (error, response) {
-            resultCallback('OK');
+        EmailTransporter.sendFeedback(subject, senderAddress, message, {
+            success: function () {
+                resultCallback('OK');
+            },
+            failure: function (error) {
+                throw new Exception(Exception.UNHANDLED_EXCEPTION, "Can't send feedback", error);
+            }
         });
     });
 

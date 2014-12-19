@@ -113,7 +113,7 @@
                                 token: generateToken(),
                                 authorizationProvider: 'local',
                                 registeredDate: _.now()
-                            }, {
+                            }, false, {
                                 success: function (userAccount) {
                                     done(null, userAccount);
                                 },
@@ -177,7 +177,7 @@
                                     token: provider.token,
                                     authorizationProvider: provider.name,
                                     registeredDate: _.now()
-                                }, {
+                                }, !!provider.email, {
                                     success: function (userAccount) {
                                         done(null, userAccount);
                                     },

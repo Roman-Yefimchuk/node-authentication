@@ -18,6 +18,24 @@ angular.module('application')
                         }
                     }, handler);
                 },
+                verifyEmail: function (email, handler) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.VERIFY_EMAIL,
+                        data: {
+                            email: email
+                        }
+                    }, handler);
+                },
+                attachEmail: function (email, handler) {
+                    httpClientService.sendRequest({
+                        method: 'POST',
+                        url: RestApi.ATTACH_EMAIL,
+                        data: {
+                            email: email
+                        }
+                    }, handler);
+                },
                 login: function (data, handler) {
                     httpClientService.sendRequest({
                         method: 'POST',

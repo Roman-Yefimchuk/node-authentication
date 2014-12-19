@@ -132,14 +132,13 @@
 
         require('./app/socket/sockets-handler')(io, dbProvider);
 
-        require('./app/rest-services/email-verifier')(app);
-
         require('./app/rest-services/authenticate/local-authenticate')(app, passport, dbProvider);
         require('./app/rest-services/authenticate/external-authenticate')(app, passport);
 
         var serviceProvider = require('./app/providers/services-provider')(app);
         require('./app/rest-services/api-services')(app, dbProvider, serviceProvider);
         require('./app/rest-services/session-manager')(app, dbProvider, serviceProvider);
+        require('./app/rest-services/email-manager')(app, dbProvider, serviceProvider);
 
         require('./app/rest-services/client')(app);
 

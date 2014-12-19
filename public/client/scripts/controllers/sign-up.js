@@ -31,7 +31,7 @@ angular.module('application')
 
             function quickSingUp() {
                 $scope.name = 'Roman Yefimchuk';
-                $scope.email = 'roman@gmail.com';
+                $scope.email = 'efimchuk.roma@gmail.com';
                 $scope.password = 'qwerty';
                 $scope.retypedPassword = 'qwerty';
 

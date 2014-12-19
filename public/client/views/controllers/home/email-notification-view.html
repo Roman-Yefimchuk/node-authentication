@@ -1,0 +1,16 @@
+<div ng-controller="EmailNotificationController">
+    <div ng-show="notification != null">
+        <div ng-switch="notification.command">
+            <div ng-switch-when="EMAIL_NOT_DEFINED">
+                <alert type="danger" close="disableNotification()" class="text-center">
+                    Email not defined, <a ng-click="defineEmail()" style="cursor: pointer">define email</a>
+                </alert>
+            </div>
+            <div ng-switch-when="EMAIL_NOT_VERIFIED">
+                <alert type="warning" close="disableNotification()" class="text-center">
+                    Email not verified, <a ng-click="verifyEmail()" style="cursor: pointer">verify email</a>
+                </alert>
+            </div>
+        </div>
+    </div>
+</div>

@@ -66,7 +66,7 @@ angular.module('application')
 
             function quickLogin() {
                 if (DEBUG_MODE) {
-                    $scope.email = 'roman@gmail.com';
+                    $scope.email = 'efimchuk.roma@gmail.com';
                     $scope.password = 'qwerty';
 
                     login();

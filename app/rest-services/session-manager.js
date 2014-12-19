@@ -59,6 +59,15 @@
                         externalNotifications.push({
                             command: ExternalNotificationCommands.EMAIL_NOT_DEFINED
                         });
+                    } else {
+                        if (!userAccount.isEmailVerified) {
+                            externalNotifications.push({
+                                command: ExternalNotificationCommands.EMAIL_NOT_VERIFIED,
+                                data: {
+                                    email: userAccount.email
+                                }
+                            });
+                        }
                     }
 
                     dbProvider.isAccessGrantedForWorkspace(userId, workspaceId, function (isAccessGranted) {

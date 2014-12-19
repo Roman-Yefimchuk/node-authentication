@@ -1,0 +1,51 @@
+<div>
+    <div class="modal-header">
+        <span class="close" ng-click="cancel()">×</span>
+        <h4 style="margin-bottom: 0;margin-top: 0;">
+            <i class="fa fa-plus"></i>
+            &nbsp;
+            Attach email
+        </h4>
+    </div>
+
+    <div class="modal-body">
+
+        <form ng-submit="attach()">
+
+            <div class="row clearfix">
+                <div class="col-md-12 column">
+
+                    <div class="form-group-sm" style="margin-bottom: 0"
+                         ng-class="{ 'has-feedback' : !!emailModel.email, 'has-error' : !isEmailValid() }">
+                        <label class="control-label" ng-show="false"></label>
+                        <input type="text" class="form-control input-sm"
+                               placeholder="Enter email"
+                               autofocus autocomplete="off" ng-model="emailModel.email">
+                        <span class="form-control-feedback" style="top: 0"
+                              ng-show="!!emailModel.email">
+                            <i class="fa fa-times" style="cursor: pointer"
+                               tooltip="{{ 'home.clear' | translate }}"
+                               ng-click="emailModel.email = ''"></i>
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+    <div class="modal-footer ng-scope" style="margin-top: 0">
+        <span class="btn btn-warning btn-sm" ng-click="cancel()">
+            <i class="fa fa-share"></i>
+            &nbsp;
+            Cancel
+        </span>
+        <span class="btn btn-success btn-sm" ng-click="attach()"
+              ng-disabled="isAttachDisabled()">
+            <i class="fa fa-plus"></i>
+            &nbsp;
+            Attach email
+        </span>
+    </div>
+</div>

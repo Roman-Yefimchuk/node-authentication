@@ -389,6 +389,7 @@
                     token: userAccount.token,
                     authorizationProvider: userAccount.authorizationProvider,
                     registeredDate: userAccount.registeredDate,
+                    isEmailVerified: userAccount.isEmailVerified,
                     isAuthenticated: function () {
                         return !!userAccount.token;
                     },
@@ -425,7 +426,7 @@
             }
         }
 
-        function createUser(data, callback) {
+        function createUser(data, isEmailVerified, callback) {
 
             var successCallback = callback.success;
             var failureCallback = callback.failure;
@@ -449,8 +450,8 @@
             }
 
             dbWrapper.query("" +
-                "INSERT INTO UserAccount (genericId, displayName, password, email, token, authorizationProvider, registeredDate) " +
-                "VALUES (:genericId, :displayName, :password, :email, :token, :authorizationProvider, :registeredDate)", {
+                "INSERT INTO UserAccount (genericId, displayName, password, email, token, authorizationProvider, registeredDate, isEmailVerified) " +
+                "VALUES (:genericId, :displayName, :password, :email, :token, :authorizationProvider, :registeredDate, :isEmailVerified)", {
                 params: {
                     genericId: data.genericId,
                     displayName: data.displayName,
@@ -458,7 +459,8 @@
                     email: data.email,
                     token: data.token,
                     authorizationProvider: data.authorizationProvider,
-                    registeredDate: data.registeredDate
+                    registeredDate: data.registeredDate,
+                    isEmailVerified: isEmailVerified
                 }
             }).then(function (results) {
                 var userAccount = results[0];
@@ -2580,7 +2582,7 @@
             }
         }
 
-        function getAccountEncoder(callback) {
+        function getAccountEncoder(handler) {
             return {
                 success: function (userAccount) {
 
@@ -2588,20 +2590,59 @@
                         'userId'
                     ]);
 
-                    callback.success(userAccount);
+                    handler.success(userAccount);
                 },
                 failure: function (error) {
-                    callback.failure(error);
+                    handler.failure(error);
                 }
             };
         }
 
+        function verifyEmail(userId, handler) {
+            dbWrapper.query("" +
+                "UPDATE UserAccount " +
+                "SET isEmailVerified = true " +
+                "WHERE userId = :userId", {
+                params: {
+                    userId: userId
+                }
+            }).then(function () {
+                handler.success();
+            }).catch(function (error) {
+                handler.failure(error);
+            });
+        }
+
+        function attachEmail(userId, email, handler) {
+            dbWrapper.query("" +
+                "UPDATE UserAccount " +
+                "SET email = :email, isEmailVerified = false " +
+                "WHERE userId = :userId", {
+                params: {
+                    email: email,
+                    userId: userId
+                }
+            }).then(function () {
+                handler.success();
+            }).catch(function (error) {
+                handler.failure(error);
+            });
+        }
+
         return {
-            createUser: function (data, callback) {
-                createUser(data, getAccountEncoder(callback));
+            createUser: function (data, isEmailVerified, handler) {
+                createUser(data, isEmailVerified, getAccountEncoder(handler));
             },
-            findUser: function (genericId, callback) {
-                findUser(genericId, getAccountEncoder(callback));
+            findUser: function (genericId, handler) {
+                findUser(genericId, getAccountEncoder(handler));
+            },
+            verifyEmail: function (userId, handler) {
+                userId = decodeId(userId);
+                verifyEmail(userId, handler);
+            },
+            attachEmail: function (userId, email, handler) {
+                userId = decodeId(userId);
+                attachEmail(userId, email, handler);
             },
             getTasks: function (workspaceId, callback) {
 
