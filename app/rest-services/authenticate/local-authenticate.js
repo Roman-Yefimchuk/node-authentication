@@ -4,8 +4,8 @@
 
     module.exports = function (app, passport, dbProvider, developmentMode) {
 
-        var Exception = require('../exception');
-        var RestApi = require('../../public/common-scripts/rest-api');
+        var Exception = require('../../exception');
+        var RestApi = require('../../../public/common-scripts/rest-api');
         var JSON = require('json3');
 
         function getError(error) {

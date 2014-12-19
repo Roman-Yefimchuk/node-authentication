@@ -83,6 +83,7 @@ CREATE PROPERTY UserAccount.genericId STRING
 CREATE PROPERTY UserAccount.displayName STRING
 CREATE PROPERTY UserAccount.password STRING
 CREATE PROPERTY UserAccount.email STRING
+CREATE PROPERTY UserAccount.isEmailVerified BOOLEAN
 CREATE PROPERTY UserAccount.token STRING
 CREATE PROPERTY UserAccount.authorizationProvider STRING
 CREATE PROPERTY UserAccount.avatarUrl STRING

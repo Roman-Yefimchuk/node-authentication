@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+
+    <title><%= status %></title>
+
+    <link rel="stylesheet" href="/public/bower_components/bootstrap/dist/css/bootstrap.css">
+    <link rel="stylesheet" href="/public/bower_components/font-awesome/css/font-awesome.css">
+
+    <style>
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <% switch (status) {
+    case 'NOT_AUTHENTICATED':
+    {
+    %>
+    <h1 class="text-center">NOT_AUTHENTICATED</h1>
+    <%
+        break;
+    }
+    case 'SESSION_NOT_FOUND':
+    {
+    %>
+    <h1 class="text-center">SESSION_NOT_FOUND</h1>
+    <%
+        break;
+    }
+    case 'INVALID_TOKEN':
+    {
+    %>
+    <h1 class="text-center">INVALID_TOKEN</h1>
+    <%
+        break;
+    }
+    case 'INTERNAL_SERVER_ERROR':
+    {
+    %>
+    <h1 class="text-center">INTERNAL_SERVER_ERROR</h1>
+    <%
+        break;
+    }
+    case 'SESSION_EXPIRED':
+    {
+    %>
+    <h1 class="text-center">SESSION_EXPIRED</h1>
+    <%
+        break;
+    }
+    case 'EMAIL_VERIFIED':
+    {
+    %>
+    <h1 class="text-center">Success! <%= userName %>, your email <%= email %> was verified</h1>
+    <%
+        break;
+    }
+    } %>
+
+</div>
+
+</body>
+</html>

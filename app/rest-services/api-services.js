@@ -4,9 +4,9 @@ module.exports = function (app, dbProvider, serviceProvider) {
 
     var _ = require('underscore');
 
-    var Exception = require('../app/exception');
-    var emailSender = require('../app/email-sender');
-    var RestApi = require('../public/common-scripts/rest-api');
+    var Exception = require('../exception');
+    var EmailSender = require('../email-sender');
+    var RestApi = require('../../public/common-scripts/rest-api');
 
     function checkAuthenticated(request) {
         if (!request.user) {
@@ -236,7 +236,7 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var senderAddress = feedbackModel.senderAddress;
         var message = feedbackModel.message;
 
-        emailSender.sendFeedback(subject, senderAddress, message, function (error, response) {
+        EmailSender.sendFeedback(subject, senderAddress, message, function (error, response) {
             resultCallback('OK');
         });
     });

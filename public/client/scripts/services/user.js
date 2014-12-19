@@ -18,8 +18,8 @@ angular.module('application')
             var userService = {
                 getData: function (handler) {
 
-                    var successCallback = function (user, externalNotification) {
-                        (handler.success || angular.noop)(user, externalNotification);
+                    var successCallback = function (user, externalNotifications) {
+                        (handler.success || angular.noop)(user, externalNotifications);
                     };
 
                     var failureCallback = function (error) {
@@ -44,7 +44,7 @@ angular.module('application')
                                     sessionManagerService.getUserData({
                                         success: function (data) {
                                             user = data.user;
-                                            successCallback(user, data.externalNotification);
+                                            successCallback(user, data.externalNotifications);
                                         },
                                         failure: function (error) {
                                             failureCallback(error);

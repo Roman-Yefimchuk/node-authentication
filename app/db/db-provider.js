@@ -415,7 +415,7 @@
                             "SET " + formatParams(accountData) + " " +
                             "WHERE @rid = " + extractPropertyId(userAccount), {
                             params: accountData
-                        }).then(function (results) {
+                        }).then(function () {
                             successCallback(wrapUserAccount(userAccount));
                         }).catch(function (error) {
                             failureCallback(error);

@@ -761,7 +761,7 @@ angular.module('application')
             loaderService.showLoader();
 
             userService.getData({
-                success: function (user, externalNotification) {
+                success: function (user, externalNotifications) {
 
                     $scope.$on('socketsService:error', function (event, error) {
                         $scope.errorMessage = errorsTranslator.translate('connection_problem_with_socket');
@@ -792,8 +792,17 @@ angular.module('application')
                                     function onLoadingReady() {
                                         loaderService.hideLoader();
 
-                                        if (externalNotification) {
-                                            notificationsService.notify(externalNotification.message, externalNotification.type);
+                                        if (externalNotifications.length > 0) {
+                                            _.forEach(externalNotifications, function (notification) {
+                                                switch (notification.command) {
+                                                    case ExternalNotificationCommands.ACCESS_CLOSED:
+                                                    {
+                                                        var workspaceName = notification.data['workspaceName'];
+                                                        notificationsService.warning('Access to workspace ' + workspaceName + ' closed');
+                                                        break;
+                                                    }
+                                                }
+                                            });
                                         }
 
                                         var notification = notificationsTranslator.format('greeting', {

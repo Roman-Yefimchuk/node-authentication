@@ -33,6 +33,7 @@
         UPDATE_WORKSPACE: '/api/update-workspace/:workspaceId',
         REMOVE_WORKSPACE: '/api/remove-workspace/:workspaceId',
         FEEDBACK: '/api/feedback',
+        EMAIL_VERIFICATION: '/api/email-verification/:token',
 
         GET_USER_PROFILE: '/api/users/:userId/profile',
         UPDATE_USER_PROFILE: '/api/users/:userId/profile/update',

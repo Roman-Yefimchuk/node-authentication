@@ -132,19 +132,21 @@
 
         require('./app/socket/sockets-handler')(io, dbProvider);
 
-        require('./app/authenticate/local-authenticate')(app, passport, dbProvider);
-        require('./app/authenticate/external-authenticate')(app, passport);
+        require('./app/rest-services/email-verifier')(app);
+
+        require('./app/rest-services/authenticate/local-authenticate')(app, passport, dbProvider);
+        require('./app/rest-services/authenticate/external-authenticate')(app, passport);
 
         var serviceProvider = require('./app/providers/services-provider')(app);
-        require('./app/services')(app, dbProvider, serviceProvider);
-        require('./app/session-manager')(app, dbProvider, serviceProvider);
+        require('./app/rest-services/api-services')(app, dbProvider, serviceProvider);
+        require('./app/rest-services/session-manager')(app, dbProvider, serviceProvider);
 
-        require('./app/client')(app, developmentMode);
+        require('./app/rest-services/client')(app);
 
         server.listen(port);
 
         console.log('Server successfully started on port ' + port);
 
-    }, developmentMode);
+    });
 
 })(require);
