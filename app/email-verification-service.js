@@ -26,6 +26,8 @@
                     }
                 }
             })();
+
+            this.isClosed = false;
         }
 
         VerificationSession.prototype = {
@@ -34,7 +36,7 @@
                 return _.now() - timestamp >= EXPIRED_TIME;
             },
             closeSession: function () {
-                sessions = _.without(sessions, this);
+                this.isClosed = true;
             }
         };
 
@@ -44,18 +46,25 @@
 
     function createSession(userId, email) {
 
-        if (sessions.length > 100) {
+        var session = _.findWhere(sessions, {
+            userId: userId
+        });
+        if (session) {
+            session.closeSession();
+        }
 
-            var expiredSessions = [];
+        if (sessions.length > 0xFF) {
+
+            var inactiveSessions = [];
 
             _.forEach(sessions, function (session) {
-                if (session.isSessionExpired()) {
-                    expiredSessions.push(session);
+                if (session.isSessionExpired() || session.isClosed) {
+                    inactiveSessions.push(session);
                 }
             });
 
-            if (expiredSessions.length > 0) {
-                sessions = _.difference(sessions, expiredSessions);
+            if (inactiveSessions.length > 0) {
+                sessions = _.difference(sessions, inactiveSessions);
             }
         }
 
@@ -66,9 +75,16 @@
     }
 
     function getSession(token) {
-        return _.findWhere(sessions, {
+
+        var session = _.findWhere(sessions, {
             token: token
-        })
+        });
+
+        if (session && session.isClosed) {
+            return null;
+        }
+
+        return session;
     }
 
     module.exports = {

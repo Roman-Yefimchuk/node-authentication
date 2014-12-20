@@ -7,7 +7,7 @@
     var ExternalNotificationCommands = {
         ACCESS_CLOSED: 'ACCESS_CLOSED',
         EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
-        EMAIL_NOT_DEFINED: 'EMAIL_NOT_DEFINED'
+        EMAIL_NOT_ATTACHED: 'EMAIL_NOT_ATTACHED'
     };
 
     if (typeof exports !== 'undefined') {

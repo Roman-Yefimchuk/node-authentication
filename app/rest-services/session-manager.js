@@ -57,7 +57,7 @@
 
                     if (!userAccount.email) {
                         externalNotifications.push({
-                            command: ExternalNotificationCommands.EMAIL_NOT_DEFINED
+                            command: ExternalNotificationCommands.EMAIL_NOT_ATTACHED
                         });
                     } else {
                         if (!userAccount.isEmailVerified) {

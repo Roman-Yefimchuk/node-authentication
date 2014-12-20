@@ -1,9 +1,9 @@
 <div ng-controller="EmailNotificationController">
     <div ng-show="notification != null">
         <div ng-switch="notification.command">
-            <div ng-switch-when="EMAIL_NOT_DEFINED">
+            <div ng-switch-when="EMAIL_NOT_ATTACHED">
                 <alert type="danger" close="disableNotification()" class="text-center">
-                    Email not defined, <a ng-click="defineEmail()" style="cursor: pointer">define email</a>
+                    Email not attached, <a ng-click="attachEmail()" style="cursor: pointer">attach email</a>
                 </alert>
             </div>
             <div ng-switch-when="EMAIL_NOT_VERIFIED">

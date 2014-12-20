@@ -32,7 +32,7 @@ angular.module('application')
                 }
             }
 
-            function defineEmail() {
+            function attachEmail() {
                 dialogsService.showEmailDialog({
                     onAttach: function (email, closeCallback) {
                         apiService.attachEmail(email, {
@@ -43,7 +43,8 @@ angular.module('application')
                                         email: email
                                     },
                                     title: 'Success',
-                                    message: 'Email <b>{{ email }}</b> succesfully attached',
+                                    message: 'Email <b>{{ email }}</b> succesfully attached. ' +
+                                        'Check your email for confirmation',
                                     onAccept: function (closeCallback) {
                                         $scope.notification = null;
                                         closeCallback();
@@ -74,7 +75,7 @@ angular.module('application')
                                 email: email
                             },
                             title: 'Success',
-                            message: 'Request for verify email <b>{{ email }}</b> sent',
+                            message: 'Request for verification email <b>{{ email }}</b> sent',
                             onAccept: function (closeCallback) {
                                 $scope.notification = null;
                                 closeCallback();
@@ -96,13 +97,13 @@ angular.module('application')
             $scope.notification = null;
 
             $scope.disableNotification = disableNotification;
-            $scope.defineEmail = defineEmail;
+            $scope.attachEmail = attachEmail;
             $scope.verifyEmail = verifyEmail;
 
-            $scope.$on('home:emailNotDefined', function () {
+            $scope.$on('home:emailNotAttached', function () {
 
                 var config = getEmailNotificationConfig();
-                var command = ExternalNotificationCommands.EMAIL_NOT_DEFINED;
+                var command = ExternalNotificationCommands.EMAIL_NOT_ATTACHED;
 
                 if (_.indexOf(config, command) == -1) {
                     $scope.notification = {
