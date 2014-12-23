@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports = function (app, passport, developmentMode) {
+module.exports = function (app, passport) {
 
     // facebook -------------------------------
 
@@ -42,9 +42,37 @@ module.exports = function (app, passport, developmentMode) {
         failureRedirect: '/'
     }));
 
-// =============================================================================
-// AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
-// =============================================================================
+    // linked-in ------------------------------
+
+    app.get('/auth/linked-in', passport.authenticate('linkedin', {
+        scope: [
+            'r_basicprofile',
+            'r_emailaddress'
+        ]
+    }));
+
+    app.get('/auth/linked-in/callback', passport.authenticate('linkedin', {
+        successRedirect: '/#/home',
+        failureRedirect: '/'
+    }));
+
+    // windows-live ---------------------------
+
+    app.get('/auth/windows-live', passport.authenticate('windowslive', {
+        scope: [
+            'wl.signin',
+            'wl.basic'
+        ]
+    }));
+
+    app.get('/auth/windows-live/callback', passport.authenticate('windowslive', {
+        successRedirect: '/#/home',
+        failureRedirect: '/'
+    }));
+
+    // =============================================================================
+    // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
+    // =============================================================================
 
     // facebook -------------------------------
 
@@ -82,6 +110,34 @@ module.exports = function (app, passport, developmentMode) {
     }));
 
     app.get('/connect/google/callback', passport.authorize('google', {
+        successRedirect: '/#/home',
+        failureRedirect: '/'
+    }));
+
+    // linked-in ------------------------------
+
+    app.get('/connect/linked-in', passport.authorize('linkedin', {
+        scope: [
+            'r_basicprofile',
+            'r_emailaddress'
+        ]
+    }));
+
+    app.get('/connect/linked-in/callback', passport.authorize('linkedin', {
+        successRedirect: '/#/home',
+        failureRedirect: '/'
+    }));
+
+    // windows-live ---------------------------
+
+    app.get('/connect/windows-live', passport.authorize('windowslive', {
+        scope: [
+            'wl.signin',
+            'wl.basic'
+        ]
+    }));
+
+    app.get('/connect/windows-live/callback', passport.authorize('windowslive', {
         successRedirect: '/#/home',
         failureRedirect: '/'
     }));
