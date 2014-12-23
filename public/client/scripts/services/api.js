@@ -36,6 +36,22 @@ angular.module('application')
                         }
                     }, handler);
                 },
+                checkEmailExists: function (email, handler) {
+                    httpClientService.sendRequest({
+                        url: RestApi.CHECK_EMAIL_EXISTS,
+                        urlParams: {
+                            email: email
+                        }
+                    }, handler);
+                },
+                isEmailActive: function (userId, handler) {
+                    httpClientService.sendRequest({
+                        url: RestApi.IS_EMAIL_ACTIVE,
+                        urlParams: {
+                            userId: userId
+                        }
+                    }, handler);
+                },
                 login: function (data, handler) {
                     httpClientService.sendRequest({
                         method: 'POST',

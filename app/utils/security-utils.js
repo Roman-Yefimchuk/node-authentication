@@ -25,9 +25,7 @@
 
         var chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz';
 
-        if (!length) {
-            length = 64;
-        }
+        length = length || 32;
 
         var result = '';
         for (var index = 0; index < length; index++) {

@@ -547,15 +547,16 @@
 
                 var tasks = [];
 
-                _.forEach(results, function (item) {
+                _.forEach(results, function (task) {
                     tasks.push({
-                        id: extractPropertyId(item),
-                        creatorId: item.creatorId,
-                        title: item.title,
-                        completed: item.completed,
-                        workspaceId: item.workspaceId,
-                        creationDate: item.creationDate,
-                        priority: item.priority
+                        id: extractPropertyId(task),
+                        creatorId: task.creatorId,
+                        assignedUserId: task,
+                        title: task.title,
+                        completed: task.completed,
+                        workspaceId: task.workspaceId,
+                        creationDate: task.creationDate,
+                        priority: task.priority
                     });
                 });
 
@@ -583,6 +584,39 @@
                     taskId: extractPropertyId(task),
                     creationDate: task.creationDate
                 });
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function assignTask(taskId, userId, callback) {
+            dbWrapper.query("" +
+                "UPDATE Task " +
+                "SET assignedUserId = :assignedUserId " +
+                "RETURN BEFORE " +
+                "WHERE @rid = :taskId", {
+                params: {
+                    assignedUserId: userId,
+                    taskId: taskId
+                }
+            }).then(function (results) {
+                callback();
+            }).catch(function (error) {
+                throw error;
+            });
+        }
+
+        function cancelTaskAssignment(taskId, callback) {
+            dbWrapper.query("" +
+                "UPDATE Task " +
+                "SET assignedUserId = null " +
+                "RETURN BEFORE " +
+                "WHERE @rid = :taskId", {
+                params: {
+                    taskId: taskId
+                }
+            }).then(function (results) {
+                callback();
             }).catch(function (error) {
                 throw error;
             });
@@ -2629,6 +2663,46 @@
             });
         }
 
+        function checkEmailExists(email, handler) {
+            dbWrapper.query("" +
+                "SELECT count(*) AS count " +
+                "FROM UserAccount " +
+                "WHERE email = :email", {
+                params: {
+                    email: email
+                }
+            }).then(function (results) {
+                var isEmailExists = results[0].count > 0;
+                handler.success(isEmailExists);
+            }).catch(function (error) {
+                handler.failure(error);
+            });
+        }
+
+        function isEmailActive(userId, handler) {
+            dbWrapper.query("" +
+                "SELECT email, isEmailVerified " +
+                "FROM UserAccount " +
+                "WHERE userId = :userId", {
+                params: {
+                    userId: userId
+                }
+            }).then(function (results) {
+                if (results.length > 0) {
+                    var userAccount = results[0];
+                    if (userAccount.email && userAccount.isEmailVerified) {
+                        handler.success(true);
+                    } else {
+                        handler.success(false);
+                    }
+                } else {
+                    throw 'User not found';
+                }
+            }).catch(function (error) {
+                handler.failure(error);
+            });
+        }
+
         return {
             createUser: function (data, isEmailVerified, handler) {
                 createUser(data, isEmailVerified, getAccountEncoder(handler));
@@ -2644,6 +2718,13 @@
                 userId = decodeId(userId);
                 attachEmail(userId, email, handler);
             },
+            checkEmailExists: function (email, handler) {
+                checkEmailExists(email, handler);
+            },
+            isEmailActive: function (userId, handler) {
+                userId = decodeId(userId);
+                isEmailActive(userId, handler);
+            },
             getTasks: function (workspaceId, callback) {
 
                 workspaceId = decodeId(workspaceId);
@@ -2654,6 +2735,7 @@
                         encodeObject(task, [
                             'id',
                             'creatorId',
+                            'assignedUserId',
                             'workspaceId'
                         ]);
                     });
@@ -2664,6 +2746,7 @@
             createTask: function (workspaceId, userId, data, callback) {
 
                 workspaceId = decodeId(workspaceId);
+                userId = decodeId(userId);
 
                 createTask(workspaceId, userId, data, function (task) {
 
@@ -2673,6 +2756,15 @@
 
                     callback(task);
                 });
+            },
+            assignTask: function (taskId, userId, callback) {
+                taskId = decodeId(taskId);
+                userId = decodeId(userId);
+                assignTask(taskId, userId, callback);
+            },
+            cancelTaskAssignment: function (taskId, callback) {
+                taskId = decodeId(taskId);
+                cancelTaskAssignment(taskId, callback);
             },
             updateTasks: function (tasksModels, callback) {
 

@@ -2,7 +2,7 @@
 
 (function (require) {
 
-    var fs = require("fs");
+    var fileSystem = require("fs");
 
     module.exports = function (app) {
 
@@ -10,7 +10,7 @@
         var indexFile = null;
 
         function getIndexFile(callback) {
-            fs.readFile('public/client/index.html', "binary", function (error, file) {
+            fileSystem.readFile('public/client/index.html', "binary", function (error, file) {
                 if (error) {
                     callback.failure(error);
                 } else {

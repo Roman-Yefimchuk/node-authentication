@@ -127,6 +127,19 @@ module.exports = function (app, dbProvider, serviceProvider) {
         });
     });
 
+    serviceProvider.get(RestApi.IS_EMAIL_ACTIVE, function (request, response, resultCallback) {
+
+        var userId = request.body['userId'];
+
+        dbProvider.isEmailActive(userId, function (isEmailActive) {
+            resultCallback({
+                data: {
+                    isEmailActive: isEmailActive
+                }
+            });
+        });
+    });
+
     serviceProvider.post(RestApi.GET_ALL_WORKSPACES, function (request, response, resultCallback) {
         var parentWorkspaceId = request.body['parentWorkspaceId'];
         dbProvider.getAllWorkspaces(parentWorkspaceId, function (workspaces) {
@@ -242,6 +255,26 @@ module.exports = function (app, dbProvider, serviceProvider) {
             },
             failure: function (error) {
                 throw new Exception(Exception.UNHANDLED_EXCEPTION, "Can't send feedback", error);
+            }
+        });
+    });
+
+    serviceProvider.get(RestApi.CHECK_EMAIL_EXISTS, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var email = request.params['email'];
+
+        dbProvider.checkEmailExists(email, {
+            success: function (isEmailExists) {
+                resultCallback({
+                    data: {
+                        isEmailExists: isEmailExists
+                    }
+                });
+            },
+            failure: function (error) {
+                throw new Exception(Exception.UNHANDLED_EXCEPTION, "Can't check email exists", error);
             }
         });
     });
@@ -759,6 +792,35 @@ module.exports = function (app, dbProvider, serviceProvider) {
             resultCallback({
                 data: task
             });
+        });
+    });
+
+    serviceProvider.get(RestApi.ASSIGN_TASK, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var taskId = request.params['taskId'];
+        var userId = request.params['userId'];
+
+        dbProvider.assignTask(taskId, userId, function () {
+
+            var userAccount = request.user;
+
+            resultCallback();
+        });
+    });
+
+    serviceProvider.get(RestApi.CANCEL_TASK_ASSIGNMENT, function (request, response, resultCallback) {
+
+        checkAuthenticated(request);
+
+        var taskId = request.params['taskId'];
+
+        dbProvider.cancelTaskAssignment(taskId, function () {
+
+            var userAccount = request.user;
+
+            resultCallback();
         });
     });
 

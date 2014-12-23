@@ -38,11 +38,32 @@
         return false;
     }
 
-    module.exports = {
-        format: format,
-        replaceAll: replaceAll,
-        startWith: startWith,
-        endWith: endWith
-    };
+    if (typeof exports !== 'undefined') {
+
+        var StringUtils = {
+            format: format,
+            replaceAll: replaceAll,
+            startWith: startWith,
+            endWith: endWith
+        };
+
+        if (typeof module !== 'undefined' && module.exports) {
+            exports = module.exports = StringUtils;
+        }
+        exports.StringUtils = StringUtils;
+    } else {
+        String.prototype.format = function (args) {
+            return format(this, args);
+        };
+        String.prototype.replaceAll = function (searchValue, replaceValue) {
+            return replaceAll(this, searchValue, replaceValue);
+        };
+        String.prototype.startWith = function (prefix) {
+            return startWith(this, prefix);
+        };
+        String.prototype.endWith = function (suffix) {
+            return endWith(this, suffix);
+        };
+    }
 
 })();

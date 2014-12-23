@@ -6,14 +6,13 @@
     var FacebookStrategy = require('passport-facebook').Strategy;
     var TwitterStrategy = require('passport-twitter').Strategy;
     var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
-
     var _ = require('underscore');
-    var security = require('../utils/security-utils');
-    var authorizationConfig = require('./../../config/authorization-config');
+
+    var SecurityUtils = require('../utils/security-utils');
+    var AuthorizationConfig = require('./../../config/authorization-config');
+    var Exception = require('../exception');
 
     module.exports = function (passport, dbProvider) {
-
-        var Exception = require('../exception');
 
         passport.serializeUser(function (userAccount, done) {
             done(null, userAccount.genericId);
@@ -45,7 +44,7 @@
                 dbProvider.findUser(email, {
                     success: function (userAccount) {
                         if (userAccount) {
-                            if (security.validPassword(userAccount, password)) {
+                            if (SecurityUtils.validPassword(userAccount, password)) {
                                 return done(null, userAccount);
                             } else {
                                 var error = new Exception(Exception.INVALID_PASSWORD, 'Oops! Wrong password.');
@@ -77,7 +76,7 @@
             process.nextTick(function () {
 
                 function generateToken() {
-                    return security.randomString();
+                    return SecurityUtils.randomString();
                 }
 
                 dbProvider.findUser(email, {
@@ -93,7 +92,7 @@
                             userAccount.update({
                                 displayName: request.body['name'],
                                 email: email,
-                                password: security.generateHash(password),
+                                password: SecurityUtils.generateHash(password),
                                 token: generateToken()
                             }, {
                                 success: function (userAccount) {
@@ -108,7 +107,7 @@
                             dbProvider.createUser({
                                 genericId: email,
                                 displayName: request.body['name'],
-                                password: security.generateHash(password),
+                                password: SecurityUtils.generateHash(password),
                                 email: email,
                                 token: generateToken(),
                                 authorizationProvider: 'local',
@@ -200,9 +199,9 @@
         // =========================================================================
 
         passport.use(new FacebookStrategy({
-            clientID: authorizationConfig.facebookAuth.clientID,
-            clientSecret: authorizationConfig.facebookAuth.clientSecret,
-            callbackURL: authorizationConfig.facebookAuth.callbackURL,
+            clientID: AuthorizationConfig.facebookAuth.clientID,
+            clientSecret: AuthorizationConfig.facebookAuth.clientSecret,
+            callbackURL: AuthorizationConfig.facebookAuth.callbackURL,
             passReqToCallback: true
         }, function (request, token, refreshToken, profile, done) {
 
@@ -222,9 +221,9 @@
         // =========================================================================
 
         passport.use(new TwitterStrategy({
-            consumerKey: authorizationConfig.twitterAuth.consumerKey,
-            consumerSecret: authorizationConfig.twitterAuth.consumerSecret,
-            callbackURL: authorizationConfig.twitterAuth.callbackURL,
+            consumerKey: AuthorizationConfig.twitterAuth.consumerKey,
+            consumerSecret: AuthorizationConfig.twitterAuth.consumerSecret,
+            callbackURL: AuthorizationConfig.twitterAuth.callbackURL,
             passReqToCallback: true
         }, function (request, token, tokenSecret, profile, done) {
             externalAuthorization(request.user, {
@@ -240,9 +239,9 @@
         // =========================================================================
 
         passport.use(new GoogleStrategy({
-            clientID: authorizationConfig.googleAuth.clientID,
-            clientSecret: authorizationConfig.googleAuth.clientSecret,
-            callbackURL: authorizationConfig.googleAuth.callbackURL,
+            clientID: AuthorizationConfig.googleAuth.clientID,
+            clientSecret: AuthorizationConfig.googleAuth.clientSecret,
+            callbackURL: AuthorizationConfig.googleAuth.callbackURL,
             passReqToCallback: true
         }, function (request, token, refreshToken, profile, done) {
             externalAuthorization(request.user, {

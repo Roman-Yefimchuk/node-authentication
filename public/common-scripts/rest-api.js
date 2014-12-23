@@ -20,6 +20,7 @@
         GET_WORKSPACE_BY_ID: '/api/get-workspace/:workspaceId',
         GET_USER_BY_ID: '/api/get-user/:userId',
         GET_USERS: '/api/get-users',
+        IS_EMAIL_ACTIVE: '/api/users/:userId/is-email-active',
         SET_PERMISSIONS_FOR_WORKSPACE: '/api/set-users-permissions-for-workspace',
         GET_ALL_USERS_WITH_PERMISSIONS: '/api/get-all-users-with-permissions/:workspaceId',
         GET_PERMITTED_WORKSPACES: '/api/get-permitted-workspaces',
@@ -41,6 +42,7 @@
         GET_USER_PROFILE: '/api/users/:userId/profile',
         UPDATE_USER_PROFILE: '/api/users/:userId/profile/update',
         GET_QUICK_TIMESTAMP: '/api/quick-timestamp',
+        CHECK_EMAIL_EXISTS: '/api/check-email-exists/:email',
 
         CREATE_TAG: '/api/tags/create',
         GET_TAG_BY_ID: '/api/tags/:tagId',
@@ -86,7 +88,9 @@
         CREATE_TASK: '/api/tasks/:workspaceId/create',
         GET_TASKS: '/api/tasks/:workspaceId',
         UPDATE_TASKS: '/api/tasks/update',
-        REMOVE_TASKS: '/api/tasks/remove'
+        REMOVE_TASKS: '/api/tasks/remove',
+        ASSIGN_TASK: '/api/tasks/:taskId:/assign/:userId',
+        CANCEL_TASK_ASSIGNMENT: '/api/tasks/:taskId:/assign/cancel'
     };
 
     if (typeof exports !== 'undefined') {
