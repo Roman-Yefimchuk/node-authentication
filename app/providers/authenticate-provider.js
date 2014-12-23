@@ -262,11 +262,11 @@
         // =========================================================================
 
         passport.use(new WindowsLiveStrategy(AuthorizationConfig.windowsLive,
-            function (request, accessToken, refreshToken, profile, done) {
+            function (request, token, refreshToken, profile, done) {
                 externalAuthorization(request.user, {
                     genericId: profile.id,
                     displayName: profile.displayName,
-                    token: accessToken,
+                    token: token,
                     email: profile._json['email'],
                     name: 'windows-live',
                     gender: profile._json['gender'] || null,

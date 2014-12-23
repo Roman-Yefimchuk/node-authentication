@@ -105,12 +105,9 @@ angular.module('application')
             }
 
             function getUserName(userId, callback) {
-                apiService.getUser(userId, {
-                    success: function (response) {
-                        var user = response.user;
-                        var userName = user.name;
-                        callback(userName);
-                    }
+                apiService.getUser(userId, function (user) {
+                    var userName = user.displayName;
+                    callback(userName);
                 });
             }
 

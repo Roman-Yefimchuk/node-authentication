@@ -99,6 +99,11 @@
                 });
 
                 app.use(function (error, request, response, next) {
+
+                    if (developmentMode) {
+                        console.trace(error);
+                    }
+
                     response.status(error.status || 500);
 
                     function extractErrorMessage(error) {

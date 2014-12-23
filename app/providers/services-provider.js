@@ -64,6 +64,11 @@
                         handleResult(request, response, result);
                     });
                 }, function (e) {
+
+                    if (developmentMode) {
+                        console.trace(e);
+                    }
+
                     if (e instanceof Exception) {
                         send(request, response, {
                             status: false,
