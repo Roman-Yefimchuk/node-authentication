@@ -155,10 +155,8 @@ angular.module('application')
 
                         lectureTimer.stop();
 
-                        $timeout(function () {
-                            activityCollection.push({
-                                command: ACTIVITY_COMMANDS.LECTURE_SUSPENDED
-                            });
+                        activityCollection.push({
+                            command: ACTIVITY_COMMANDS.LECTURE_SUSPENDED
                         });
 
                         dialogsService.showSuspendedDialog({
@@ -266,12 +264,10 @@ angular.module('application')
                     var message = data['message'];
 
                     getUserName(userId, function (userName) {
-                        $timeout(function () {
-                            activityCollection.push({
-                                command: ACTIVITY_COMMANDS.ON_MESSAGE,
-                                userName: userName,
-                                message: message
-                            });
+                        activityCollection.push({
+                            command: ACTIVITY_COMMANDS.ON_MESSAGE,
+                            userName: userName,
+                            message: message
                         });
                     });
                 });
