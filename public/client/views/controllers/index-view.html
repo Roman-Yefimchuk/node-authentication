@@ -1,55 +1,39 @@
-<div class="panel jumbotron text-center" style="margin-top: 80px;background-color: #fff">
+<div class="col-sm-6 col-sm-offset-3 panel jumbotron text-center" style="margin-top: 80px;background-color: #fff">
 
-    <div ng-show="redirectReason != null">
-        <alert type="danger" close="redirectReason = null">
-            {{ redirectReason }}
-        </alert>
+    <div class="text-center">
+
+        <div class="row clearfix">
+            <div class="col-md-12 column" style="font-size: 15px;">
+                <h2>
+                    <span class="fa fa-lock"></span>
+                    &nbsp;
+                    <b>NODE-AUTHENTICATION</b>
+                </h2>
+            </div>
+        </div>
+
+        &nbsp;
+
+        <div class="row clearfix" style="margin-bottom: 15px">
+            <div class="col-md-12 column">
+                <a href="#/login" class="btn btn-default col-md-12">
+                    <span class="fa fa-user"></span>
+                    &nbsp;
+                    Увійти
+                </a>
+            </div>
+        </div>
+
+        <div class="row clearfix">
+            <div class="col-md-12 column">
+                <a href="#/sign-up" class="btn btn-default col-md-12">
+                    <span class="fa fa-sign-in"></span>
+                    &nbsp;
+                    Реєстрація
+                </a>
+            </div>
+        </div>
+
     </div>
-
-    <p>
-        <span l10n key="index.title"></span>
-    </p>
-
-    <a href="#/login" class="btn btn-default">
-        <span class="fa fa-user"></span>
-        &nbsp;
-        <span l10n key="index.local_login"></span>
-    </a>
-
-    <a href="#/sign-up" class="btn btn-default">
-        <span class="fa fa-user"></span>
-        &nbsp;
-        <span l10n key="index.local_signup"></span>
-    </a>
-
-    <a href="/auth/facebook" class="btn btn-primary" ng-click="showLoader()">
-        <span class="fa fa-facebook"></span>
-        &nbsp;
-        <span l10n key="index.facebook"></span>
-    </a>
-
-    <a href="/auth/twitter" class="btn btn-info" ng-click="showLoader()">
-        <span class="fa fa-twitter"></span>
-        &nbsp;
-        <span l10n key="index.twitter"></span>
-    </a>
-
-    <a href="/auth/google" class="btn btn-danger" ng-click="showLoader()">
-        <span class="fa fa-google-plus"></span>
-        &nbsp;
-        <span l10n key="index.google_plus"></span>
-    </a>
-
-    <a href="/auth/linked-in" class="btn btn-primary" ng-click="showLoader()">
-        <span class="fa fa-linkedin"></span>
-        &nbsp;
-        <span l10n key="index.linked_in"></span>
-    </a>
-
-    <a href="/auth/windows-live" class="btn btn-primary" ng-click="showLoader()">
-        <span class="fa fa-windows"></span>
-        &nbsp;
-        <span l10n key="index.windows-live"></span>
-    </a>
 
 </div>

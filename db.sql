@@ -78,19 +78,19 @@ CREATE PROPERTY User.role STRING
 CREATE PROPERTY User.ownWorkspaces EMBEDDEDLIST STRING
 CREATE PROPERTY User.ownGroups EMBEDDEDLIST STRING
 
-CREATE CLASS UserAccount
-CREATE PROPERTY UserAccount.userId STRING
-CREATE PROPERTY UserAccount.genericId STRING
-CREATE PROPERTY UserAccount.displayName STRING
-CREATE PROPERTY UserAccount.password STRING
-CREATE PROPERTY UserAccount.email STRING
-CREATE PROPERTY UserAccount.isEmailVerified BOOLEAN
-CREATE PROPERTY UserAccount.token STRING
-CREATE PROPERTY UserAccount.authorizationProvider STRING
-CREATE PROPERTY UserAccount.avatarUrl STRING
-CREATE PROPERTY UserAccount.gender STRING
-CREATE PROPERTY UserAccount.birthday LONG
-CREATE PROPERTY UserAccount.registeredDate LONG
+CREATE CLASS UserProfile
+CREATE PROPERTY UserProfile.userId STRING
+CREATE PROPERTY UserProfile.genericId STRING
+CREATE PROPERTY UserProfile.displayName STRING
+CREATE PROPERTY UserProfile.password STRING
+CREATE PROPERTY UserProfile.email STRING
+CREATE PROPERTY UserProfile.isEmailVerified BOOLEAN
+CREATE PROPERTY UserProfile.token STRING
+CREATE PROPERTY UserProfile.authorizationProvider STRING
+CREATE PROPERTY UserProfile.avatarUrl STRING
+CREATE PROPERTY UserProfile.gender STRING
+CREATE PROPERTY UserProfile.birthday LONG
+CREATE PROPERTY UserProfile.registeredDate LONG
 
 CREATE CLASS Workspace
 CREATE PROPERTY Workspace.name STRING

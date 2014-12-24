@@ -58,7 +58,7 @@
         function getUsersCount(callback) {
             dbWrapper.query("" +
                 "SELECT count(*) AS count " +
-                "FROM UserAccount", {
+                "FROM UserProfile", {
             }).then(function (results) {
                 callback(results[0].count);
             }).catch(function (error) {
@@ -378,20 +378,20 @@
             return result;
         }
 
-        function wrapUserAccount(userAccount) {
-            if (userAccount) {
+        function wrapUserProfile(userProfile) {
+            if (userProfile) {
                 return {
-                    userId: userAccount.userId,
-                    genericId: userAccount.genericId,
-                    displayName: userAccount.displayName,
-                    password: userAccount.password,
-                    email: userAccount.email,
-                    token: userAccount.token,
-                    authorizationProvider: userAccount.authorizationProvider,
-                    registeredDate: userAccount.registeredDate,
-                    isEmailVerified: userAccount.isEmailVerified,
+                    userId: userProfile.userId,
+                    genericId: userProfile.genericId,
+                    displayName: userProfile.displayName,
+                    password: userProfile.password,
+                    email: userProfile.email,
+                    token: userProfile.token,
+                    authorizationProvider: userProfile.authorizationProvider,
+                    registeredDate: userProfile.registeredDate,
+                    isEmailVerified: userProfile.isEmailVerified,
                     isAuthenticated: function () {
-                        return !!userAccount.token;
+                        return !!userProfile.token;
                     },
                     update: function (accountData, callback) {
 
@@ -407,17 +407,17 @@
                             'authorizationProvider'
                         ], function (key) {
                             if (key in accountData) {
-                                userAccount[key] = accountData[key];
+                                userProfile[key] = accountData[key];
                             }
                         });
 
                         dbWrapper.query("" +
-                            "UPDATE UserAccount " +
+                            "UPDATE UserProfile " +
                             "SET " + formatParams(accountData) + " " +
-                            "WHERE @rid = " + extractPropertyId(userAccount), {
+                            "WHERE @rid = " + extractPropertyId(userProfile), {
                             params: accountData
                         }).then(function () {
-                            successCallback(wrapUserAccount(userAccount));
+                            successCallback(wrapUserProfile(userProfile));
                         }).catch(function (error) {
                             failureCallback(error);
                         });
@@ -450,7 +450,7 @@
             }
 
             dbWrapper.query("" +
-                "INSERT INTO UserAccount (genericId, displayName, password, email, token, authorizationProvider, registeredDate, isEmailVerified) " +
+                "INSERT INTO UserProfile (genericId, displayName, password, email, token, authorizationProvider, registeredDate, isEmailVerified) " +
                 "VALUES (:genericId, :displayName, :password, :email, :token, :authorizationProvider, :registeredDate, :isEmailVerified)", {
                 params: {
                     genericId: data.genericId,
@@ -463,39 +463,41 @@
                     isEmailVerified: isEmailVerified
                 }
             }).then(function (results) {
-                var userAccount = results[0];
+
+                var userProfile = results[0];
 
                 dbWrapper.query("" +
                     "INSERT INTO User (accountId) " +
                     "VALUES (:accountId)", {
                     params: {
-                        accountId: extractPropertyId(userAccount)
+                        accountId: extractPropertyId(userProfile)
                     }
                 }).then(function (results) {
+
                     var user = results[0];
                     var userId = extractPropertyId(user);
 
                     addUserToGroup(userId, 'users', function () {
 
-                        userAccount.userId = userId;
+                        userProfile.userId = userId;
 
                         dbWrapper.query("" +
-                            "UPDATE UserAccount " +
+                            "UPDATE UserProfile " +
                             "SET userId = :userId " +
                             "WHERE @rid = :id", {
                             params: {
                                 userId: userId,
-                                id: extractPropertyId(userAccount)
+                                id: extractPropertyId(userProfile)
                             }
                         }).then(function (total) {
-                            var userId = userAccount.userId;
-                            var workspaceName = userAccount.displayName + '[' + userAccount.authorizationProvider + ']';
+                            var userId = userProfile.userId;
+                            var workspaceName = userProfile.displayName + '[' + userProfile.authorizationProvider + ']';
 
                             createDefaultWorkspace(workspaceName, userId, function (workspace) {
 
                                 var workspaceId = workspace.id;
                                 setUserWorkspaceId(userId, workspaceId, workspaceId, function () {
-                                    var account = wrapUserAccount(userAccount);
+                                    var account = wrapUserProfile(userProfile);
                                     successCallback(account);
                                 });
                             });
@@ -518,14 +520,14 @@
 
             dbWrapper.query("" +
                 "SELECT * " +
-                "FROM UserAccount " +
+                "FROM UserProfile " +
                 "WHERE genericId = :genericId", {
                 params: {
                     genericId: genericId
                 }
             }).then(function (results) {
                 if (results.length > 0) {
-                    var account = wrapUserAccount(results[0]);
+                    var account = wrapUserProfile(results[0]);
                     successCallback(account);
                 } else {
                     successCallback();
@@ -963,18 +965,18 @@
         function getUserById(userId, callback) {
             dbWrapper.query("" +
                 "SELECT displayName, registeredDate " +
-                "FROM UserAccount " +
+                "FROM UserProfile " +
                 "WHERE userId = :userId", {
                 params: {
                     userId: userId
                 }
             }).then(function (results) {
                 if (results.length > 0) {
-                    var userAccount = results[0];
+                    var userProfile = results[0];
                     callback({
                         id: userId,
-                        displayName: userAccount.displayName,
-                        registeredDate: userAccount.registeredDate
+                        displayName: userProfile.displayName,
+                        registeredDate: userProfile.registeredDate
                     });
                 } else {
                     throw 'User not found';
@@ -990,19 +992,19 @@
             AsyncUtils.each(ids, function (userId, index, next) {
                 dbWrapper.query("" +
                     "SELECT displayName, registeredDate " +
-                    "FROM UserAccount " +
+                    "FROM UserProfile " +
                     "WHERE userId = :userId", {
                     params: {
                         userId: userId
                     }
                 }).then(function (results) {
 
-                    var userAccount = results[0];
+                    var userProfile = results[0];
 
                     result.push({
                         id: userId,
-                        displayName: userAccount.displayName,
-                        registeredDate: userAccount.registeredDate
+                        displayName: userProfile.displayName,
+                        registeredDate: userProfile.registeredDate
                     });
 
                     next();
@@ -1166,21 +1168,20 @@
                 if (count > 0) {
                     dbWrapper.query("" +
                         "SELECT userId, displayName, registeredDate " +
-                        "FROM UserAccount SKIP :skip LIMIT :limit", {
+                        "FROM UserProfile SKIP :skip LIMIT :limit", {
                         params: {
                             skip: skip,
                             limit: limit
                         }
                     }).then(function (results) {
-                        var usersAccount = results;
 
                         var users = [];
 
-                        AsyncUtils.each(usersAccount, function (userAccount, index, next) {
+                        AsyncUtils.each(results, function (userProfile, index, next) {
                             users.push({
-                                id: userAccount.userId,
-                                displayName: userAccount.displayName,
-                                registeredDate: userAccount.registeredDate
+                                id: userProfile.userId,
+                                displayName: userProfile.displayName,
+                                registeredDate: userProfile.registeredDate
                             });
 
                             next();
@@ -1207,27 +1208,26 @@
                 if (count > 0) {
                     dbWrapper.query("" +
                         "SELECT userId, displayName, registeredDate " +
-                        "FROM UserAccount SKIP :skip LIMIT :limit", {
+                        "FROM UserProfile SKIP :skip LIMIT :limit", {
                         params: {
                             skip: skip,
                             limit: limit
                         }
                     }).then(function (results) {
-                        var usersAccount = results;
 
                         var users = [];
 
-                        AsyncUtils.each(usersAccount, function (userAccount, index, next) {
-                            var userId = userAccount.userId;
+                        AsyncUtils.each(results, function (userProfile, index, next) {
+                            var userId = userProfile.userId;
 
                             getUserPermissionsForWorkspace(userId, workspaceId, function (permissions) {
                                 isCreator(userId, workspaceId, function (isCreator) {
                                     users.push({
                                         id: userId,
-                                        displayName: userAccount.displayName,
+                                        displayName: userProfile.displayName,
                                         permissions: permissions,
                                         isCreator: isCreator,
-                                        registeredDate: userAccount.registeredDate
+                                        registeredDate: userProfile.registeredDate
                                     });
 
                                     next();
@@ -2529,7 +2529,7 @@
         function getUserProfile(userId, callback) {
             db.query("" +
                 "SELECT displayName AS name, email, avatarUrl, gender, birthday " +
-                "FROM UserAccount " +
+                "FROM UserProfile " +
                 "WHERE @rid = :userId", {
                 params: {
                     userId: userId
@@ -2618,13 +2618,13 @@
 
         function getAccountEncoder(handler) {
             return {
-                success: function (userAccount) {
+                success: function (userProfile) {
 
-                    encodeObject(userAccount, [
+                    encodeObject(userProfile, [
                         'userId'
                     ]);
 
-                    handler.success(userAccount);
+                    handler.success(userProfile);
                 },
                 failure: function (error) {
                     handler.failure(error);
@@ -2634,7 +2634,7 @@
 
         function verifyEmail(userId, handler) {
             dbWrapper.query("" +
-                "UPDATE UserAccount " +
+                "UPDATE UserProfile " +
                 "SET isEmailVerified = true " +
                 "WHERE userId = :userId", {
                 params: {
@@ -2649,7 +2649,7 @@
 
         function attachEmail(userId, email, handler) {
             dbWrapper.query("" +
-                "UPDATE UserAccount " +
+                "UPDATE UserProfile " +
                 "SET email = :email, isEmailVerified = false " +
                 "WHERE userId = :userId", {
                 params: {
@@ -2666,7 +2666,7 @@
         function checkEmailExists(email, handler) {
             dbWrapper.query("" +
                 "SELECT count(*) AS count " +
-                "FROM UserAccount " +
+                "FROM UserProfile " +
                 "WHERE email = :email", {
                 params: {
                     email: email
@@ -2682,15 +2682,15 @@
         function isEmailActive(userId, handler) {
             dbWrapper.query("" +
                 "SELECT email, isEmailVerified " +
-                "FROM UserAccount " +
+                "FROM UserProfile " +
                 "WHERE userId = :userId", {
                 params: {
                     userId: userId
                 }
             }).then(function (results) {
                 if (results.length > 0) {
-                    var userAccount = results[0];
-                    if (userAccount.email && userAccount.isEmailVerified) {
+                    var userProfile = results[0];
+                    if (userProfile.email && userProfile.isEmailVerified) {
                         handler.success(true);
                     } else {
                         handler.success(false);

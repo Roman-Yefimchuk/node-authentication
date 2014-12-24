@@ -9,13 +9,13 @@
         var ExternalNotificationCommands = require('../../public/common-scripts/external-notification-commands');
 
         serviceProvider.get(RestApi.IS_AUTHENTICATED, function (request, response, resultCallback) {
-            var userAccount = request.user;
+            var userProfile = request.user;
 
-            if (userAccount && userAccount.isAuthenticated()) {
+            if (userProfile && userProfile.isAuthenticated()) {
                 resultCallback({
                     data: {
                         isAuthenticated: true,
-                        token: userAccount.token
+                        token: userProfile.token
                     }
                 });
             } else {
@@ -28,20 +28,20 @@
         });
 
         serviceProvider.get(RestApi.GET_USER_DATA, function (request, response, resultCallback) {
-            var userAccount = request.user;
+            var userProfile = request.user;
 
-            if (userAccount && userAccount.isAuthenticated()) {
+            if (userProfile && userProfile.isAuthenticated()) {
 
-                var userId = userAccount.userId;
+                var userId = userProfile.userId;
 
                 var sendResponse = function (workspaceId, rootWorkspaceId, defaultWorkspaceId, externalNotifications) {
                     resultCallback({
                         data: {
                             user: {
                                 userId: userId,
-                                token: userAccount.token,
-                                displayName: userAccount.displayName,
-                                authorizationProvider: userAccount.authorizationProvider,
+                                token: userProfile.token,
+                                displayName: userProfile.displayName,
+                                authorizationProvider: userProfile.authorizationProvider,
                                 workspaceId: workspaceId,
                                 rootWorkspaceId: rootWorkspaceId,
                                 defaultWorkspaceId: defaultWorkspaceId
@@ -55,16 +55,16 @@
 
                     var externalNotifications = [];
 
-                    if (!userAccount.email) {
+                    if (!userProfile.email) {
                         externalNotifications.push({
                             command: ExternalNotificationCommands.EMAIL_NOT_ATTACHED
                         });
                     } else {
-                        if (!userAccount.isEmailVerified) {
+                        if (!userProfile.isEmailVerified) {
                             externalNotifications.push({
                                 command: ExternalNotificationCommands.EMAIL_NOT_VERIFIED,
                                 data: {
-                                    email: userAccount.email
+                                    email: userProfile.email
                                 }
                             });
                         }

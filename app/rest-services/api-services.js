@@ -20,9 +20,9 @@ module.exports = function (app, dbProvider, serviceProvider) {
     }
 
     function getUserId(request) {
-        var userAccount = request.user;
-        if (userAccount && userAccount.isAuthenticated()) {
-            return userAccount.userId;
+        var userProfile = request.user;
+        if (userProfile && userProfile.isAuthenticated()) {
+            return userProfile.userId;
         } else {
             throw new Exception(Exception.NOT_AUTHENTICATED, 'You are not authenticated');
         }
@@ -803,9 +803,6 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var userId = request.params['userId'];
 
         dbProvider.assignTask(taskId, userId, function () {
-
-            var userAccount = request.user;
-
             resultCallback();
         });
     });
@@ -817,9 +814,6 @@ module.exports = function (app, dbProvider, serviceProvider) {
         var taskId = request.params['taskId'];
 
         dbProvider.cancelTaskAssignment(taskId, function () {
-
-            var userAccount = request.user;
-
             resultCallback();
         });
     });

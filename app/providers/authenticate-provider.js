@@ -17,14 +17,14 @@
 
     module.exports = function (passport, dbProvider) {
 
-        passport.serializeUser(function (userAccount, done) {
-            done(null, userAccount.genericId);
+        passport.serializeUser(function (userProfile, done) {
+            done(null, userProfile.genericId);
         });
 
         passport.deserializeUser(function (genericId, done) {
             dbProvider.findUser(genericId, {
-                success: function (userAccount) {
-                    done(null, userAccount);
+                success: function (userProfile) {
+                    done(null, userProfile);
                 },
                 failure: function (error) {
                     done(error);
@@ -42,10 +42,10 @@
                 process.nextTick(function () {
 
                     dbProvider.findUser(email, {
-                        success: function (userAccount) {
-                            if (userAccount) {
-                                if (SecurityUtils.validPassword(userAccount, password)) {
-                                    return done(null, userAccount);
+                        success: function (userProfile) {
+                            if (userProfile) {
+                                if (SecurityUtils.validPassword(userProfile.password, password)) {
+                                    return done(null, userProfile);
                                 } else {
                                     var error = new Exception(Exception.INVALID_PASSWORD, 'Oops! Wrong password.');
                                     return done(null, null, error);
@@ -77,23 +77,23 @@
                     }
 
                     dbProvider.findUser(email, {
-                        success: function (userAccount) {
+                        success: function (userProfile) {
 
-                            if (userAccount) {
+                            if (userProfile) {
                                 var error = new Exception(Exception.EMAIL_ALREADY_EXIST, 'That email is already taken.');
                                 return done(null, null, error);
                             }
 
                             if (request.user) {
-                                userAccount = request.user;
-                                userAccount.update({
+                                userProfile = request.user;
+                                userProfile.update({
                                     displayName: request.body['name'],
                                     email: email,
                                     password: SecurityUtils.generateHash(password),
                                     token: generateToken()
                                 }, {
-                                    success: function (userAccount) {
-                                        done(null, userAccount);
+                                    success: function (userProfile) {
+                                        done(null, userProfile);
                                     },
                                     failure: function (error) {
                                         error = new Exception(Exception.UNHANDLED_EXCEPTION, "Can't update user.");
@@ -110,8 +110,8 @@
                                     authorizationProvider: 'local',
                                     registeredDate: _.now()
                                 }, false, {
-                                    success: function (userAccount) {
-                                        done(null, userAccount);
+                                    success: function (userProfile) {
+                                        done(null, userProfile);
                                     },
                                     failure: function (error) {
                                         error = new Exception(Exception.UNHANDLED_EXCEPTION, "Can't create user.");
@@ -128,17 +128,17 @@
                 });
             }));
 
-        function externalAuthorization(userAccount, provider, done) {
+        function externalAuthorization(userProfile, provider, done) {
             process.nextTick(function () {
-                if (userAccount) {
-                    userAccount.update({
+                if (userProfile) {
+                    userProfile.update({
                         genericId: provider.genericId,
                         token: provider.token,
                         displayName: provider.displayName,
                         email: provider.email
                     }, {
-                        success: function (userAccount) {
-                            done(null, userAccount);
+                        success: function (userProfile) {
+                            done(null, userProfile);
                         },
                         failure: function (error) {
                             done(error);
@@ -146,18 +146,18 @@
                     });
                 } else {
                     dbProvider.findUser(provider.genericId, {
-                        success: function (userAccount) {
-                            if (userAccount) {
-                                if (userAccount.isAuthenticated()) {
-                                    done(null, userAccount);
+                        success: function (userProfile) {
+                            if (userProfile) {
+                                if (userProfile.isAuthenticated()) {
+                                    done(null, userProfile);
                                 } else {
-                                    userAccount.update({
+                                    userProfile.update({
                                         token: provider.token,
                                         displayName: provider.displayName,
                                         email: provider.email
                                     }, {
-                                        success: function (userAccount) {
-                                            done(null, userAccount);
+                                        success: function (userProfile) {
+                                            done(null, userProfile);
                                         },
                                         failure: function (error) {
                                             done(error);
@@ -174,8 +174,8 @@
                                     authorizationProvider: provider.name,
                                     registeredDate: _.now()
                                 }, !!provider.email, {
-                                    success: function (userAccount) {
-                                        done(null, userAccount);
+                                    success: function (userProfile) {
+                                        done(null, userProfile);
                                     },
                                     failure: function (error) {
                                         done(error);

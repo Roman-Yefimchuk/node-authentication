@@ -8,9 +8,8 @@
         return BCrypt.hashSync(password, BCrypt.genSaltSync(8), null);
     }
 
-    function validPassword(userAccount, password) {
-        var userEncryptedPassword = userAccount.password;
-        return BCrypt.compareSync(password, userEncryptedPassword);
+    function validPassword(hashedPassword, password) {
+        return BCrypt.compareSync(password, hashedPassword);
     }
 
     function decodeBase64(encoded) {
