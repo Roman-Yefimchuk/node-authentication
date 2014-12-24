@@ -24,8 +24,8 @@ angular.module('application')
                 },
                 "index": {
                     "title": "Войдите или Зарегистрируйтесь",
-                    "local_login": "Войти локально",
-                    "local_signup": "Зарегистрироваться локально",
+                    "login": "Войти",
+                    "sign_up": "Зарегистрироваться",
                     "facebook": "Facebook",
                     "twitter": "Twitter",
                     "google_plus": "Google+"

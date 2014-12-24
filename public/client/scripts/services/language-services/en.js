@@ -24,8 +24,8 @@ angular.module('application')
                 },
                 "index": {
                     "title": "Login or Register",
-                    "local_login": "Local login",
-                    "local_signup": "Local Signup",
+                    "login": "Login",
+                    "sign_up": "Sign Up",
                     "facebook": "Facebook",
                     "twitter": "Twitter",
                     "google_plus": "Google+"
