@@ -11,10 +11,10 @@
 
         serviceProvider.post(RestApi.VERIFY_EMAIL, function (request, response, resultCallback) {
 
-            var userProfile = request.user;
-            if (userProfile && userProfile.isAuthenticated()) {
+            if (request.isAuthenticated()) {
 
-                var userId = userProfile.userId;
+                var user = request.user;
+                var userId = user.userId;
                 var email = request.body['email'];
 
                 var token = (function () {
@@ -24,7 +24,7 @@
 
                 EmailTransporter.sendEmailVerification({
                     userId: userId,
-                    displayName: userProfile.displayName
+                    displayName: user.displayName
                 }, email, token, {
                     success: function () {
                         resultCallback({
@@ -45,10 +45,10 @@
 
         serviceProvider.post(RestApi.ATTACH_EMAIL, function (request, response, resultCallback) {
 
-            var userProfile = request.user;
-            if (userProfile && userProfile.isAuthenticated()) {
+            if (request.isAuthenticated()) {
 
-                var userId = userProfile.userId;
+                var user = request.user;
+                var userId = user.userId;
                 var email = request.body['email'];
 
                 dbProvider.attachEmail(userId, email, {
@@ -61,7 +61,7 @@
 
                         EmailTransporter.sendEmailVerification({
                             userId: userId,
-                            displayName: userProfile.displayName
+                            displayName: user.displayName
                         }, email, token, {
                             success: function () {
                                 resultCallback({
@@ -87,11 +87,11 @@
 
         app.get(RestApi.EMAIL_VERIFICATION, function (request, response) {
 
-            var userProfile = request.user;
-            if (userProfile && userProfile.isAuthenticated()) {
+            if (request.isAuthenticated()) {
 
+                var user = request.user;
                 var token = request.params['token'];
-                var userId = userProfile.userId;
+                var userId = user.userId;
 
                 var verificationSession = EmailVerificationService.getSession(token);
                 if (verificationSession) {
@@ -107,8 +107,8 @@
                                     verificationSession.closeSession();
                                     response.render('email-verification.ejs', {
                                         status: 'EMAIL_VERIFIED',
-                                        userName: userProfile.displayName,
-                                        email: userProfile.email
+                                        userName: user.displayName,
+                                        email: user.email
                                     });
                                 },
                                 failure: function () {

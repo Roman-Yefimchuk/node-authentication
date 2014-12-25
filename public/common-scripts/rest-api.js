@@ -12,7 +12,7 @@
         LOGOUT: '/logout',
 
         //local authenticate
-        LOGIN: '/api/authenticate/login',
+        SIGN_IN: '/api/authenticate/sign-in',
         SIGN_UP: '/api/authenticate/sign-up',
 
         //services

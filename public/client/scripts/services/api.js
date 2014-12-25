@@ -52,10 +52,10 @@ angular.module('application')
                         }
                     }, handler);
                 },
-                login: function (data, handler) {
+                signIn: function (data, handler) {
                     httpClientService.sendRequest({
                         method: 'POST',
-                        url: RestApi.LOGIN,
+                        url: RestApi.SIGN_IN,
                         data: data
                     }, handler);
                 },

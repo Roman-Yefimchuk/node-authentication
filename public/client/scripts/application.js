@@ -34,11 +34,11 @@ angular.module('application', [
                 options: {
                     title: 'routes.index'
                 }
-            }).when('/login', {
-                templateUrl: '/public/client/views/controllers/login-view.html',
-                controller: 'LoginController',
+            }).when('/sign-in', {
+                templateUrl: '/public/client/views/controllers/sign-in-view.html',
+                controller: 'SignInController',
                 options: {
-                    title: 'routes.login'
+                    title: 'routes.sign_in'
                 }
             }).when('/sign-up', {
                 templateUrl: '/public/client/views/controllers/sign-up-view.html',

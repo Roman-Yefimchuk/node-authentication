@@ -1,4 +1,4 @@
-<div class="panel col-sm-4 col-sm-offset-4" style="margin-top: 80px">
+<div class="panel col-sm-4 col-sm-offset-4" style="margin-top: 15px">
 
     <h1><span class="fa fa-sign-in" ng-click="quickSingUp()"></span>
         <span l10n key="sign_up.title"></span>
@@ -12,6 +12,8 @@
             {{ errorMessage }}
         </alert>
     </div>
+
+    <div social-networks action="sign-up"></div>
 
     <form ng-submit="signUp()" autocomplete="off">
 
@@ -49,7 +51,7 @@
             </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
-                <div class="input-group-addon"><i class="fa fa-key"></i></i></i></div>
+                <div class="input-group-addon"><i class="fa fa-key"></i></div>
                 <input class="form-control" type="password" ng-model="password"
                        l10n="placeholder" placeholder-key="sign_up.password_placeholder"
                        autocomplete="off">
@@ -62,7 +64,7 @@
             </label>
 
             <div class="input-group" ng-class="{ 'has-error' : !isPasswordValid() }">
-                <div class="input-group-addon"><i class="fa fa-key"></i></i></i></div>
+                <div class="input-group-addon"><i class="fa fa-key"></i></div>
                 <input class="form-control" type="password" ng-model="retypedPassword"
                        l10n="placeholder" placeholder-key="sign_up.retype_password_placeholder"
                        autocomplete="off">
@@ -79,8 +81,8 @@
 
     <p>
         <span l10n key="sign_up.already_have_an_account"></span>
-        <a href="#/login">
-            <span l10n key="sign_up.login"></span>
+        <a href="#/sign-in">
+            <span l10n key="sign_up.sign_in"></span>
         </a>
     </p>
 

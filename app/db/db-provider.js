@@ -378,54 +378,6 @@
             return result;
         }
 
-        function wrapUserProfile(userProfile) {
-            if (userProfile) {
-                return {
-                    userId: userProfile.userId,
-                    genericId: userProfile.genericId,
-                    displayName: userProfile.displayName,
-                    password: userProfile.password,
-                    email: userProfile.email,
-                    token: userProfile.token,
-                    authorizationProvider: userProfile.authorizationProvider,
-                    registeredDate: userProfile.registeredDate,
-                    isEmailVerified: userProfile.isEmailVerified,
-                    isAuthenticated: function () {
-                        return !!userProfile.token;
-                    },
-                    update: function (accountData, callback) {
-
-                        var successCallback = callback.success;
-                        var failureCallback = callback.failure;
-
-                        _.forEach([
-                            'genericId',
-                            'displayName',
-                            'password',
-                            'email',
-                            'token',
-                            'authorizationProvider'
-                        ], function (key) {
-                            if (key in accountData) {
-                                userProfile[key] = accountData[key];
-                            }
-                        });
-
-                        dbWrapper.query("" +
-                            "UPDATE UserProfile " +
-                            "SET " + formatParams(accountData) + " " +
-                            "WHERE @rid = " + extractPropertyId(userProfile), {
-                            params: accountData
-                        }).then(function () {
-                            successCallback(wrapUserProfile(userProfile));
-                        }).catch(function (error) {
-                            failureCallback(error);
-                        });
-                    }
-                };
-            }
-        }
-
         function createUser(data, isEmailVerified, callback) {
 
             var successCallback = callback.success;
@@ -497,8 +449,17 @@
 
                                 var workspaceId = workspace.id;
                                 setUserWorkspaceId(userId, workspaceId, workspaceId, function () {
-                                    var account = wrapUserProfile(userProfile);
-                                    successCallback(account);
+                                    successCallback({
+                                        userId: userProfile.userId,
+                                        genericId: userProfile.genericId,
+                                        displayName: userProfile.displayName,
+                                        password: userProfile.password,
+                                        email: userProfile.email,
+                                        token: userProfile.token,
+                                        authorizationProvider: userProfile.authorizationProvider,
+                                        registeredDate: userProfile.registeredDate,
+                                        isEmailVerified: userProfile.isEmailVerified
+                                    });
                                 });
                             });
                         }).catch(function (error) {
@@ -527,8 +488,18 @@
                 }
             }).then(function (results) {
                 if (results.length > 0) {
-                    var account = wrapUserProfile(results[0]);
-                    successCallback(account);
+                    var userProfile = results[0];
+                    successCallback({
+                        userId: userProfile.userId,
+                        genericId: userProfile.genericId,
+                        displayName: userProfile.displayName,
+                        password: userProfile.password,
+                        email: userProfile.email,
+                        token: userProfile.token,
+                        authorizationProvider: userProfile.authorizationProvider,
+                        registeredDate: userProfile.registeredDate,
+                        isEmailVerified: userProfile.isEmailVerified
+                    });
                 } else {
                     successCallback();
                 }

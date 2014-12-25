@@ -6,13 +6,14 @@ angular.module('application')
 
         '$scope',
         '$location',
+        '$routeParams',
         'loaderService',
         'apiService',
         'NAME_PATTERN',
         'EMAIL_PATTERN',
         'PASSWORD_PATTERN',
 
-        function ($scope, $location, loaderService, apiService, NAME_PATTERN, EMAIL_PATTERN, PASSWORD_PATTERN) {
+        function ($scope, $location, $routeParams, loaderService, apiService, NAME_PATTERN, EMAIL_PATTERN, PASSWORD_PATTERN) {
 
             function isNameValid() {
                 var name = ($scope.name || '');
@@ -57,7 +58,21 @@ angular.module('application')
                 });
             }
 
-            $scope.errorMessage = null;
+            $scope.errorMessage = (function () {
+                if ($routeParams['authenticate_error_code']) {
+                    switch ($routeParams['authenticate_error_code']) {
+                        case AuthenticateErrorCodes.USER_NOT_FOUND:
+                        {
+                            return 'USER_NOT_FOUND';
+                        }
+                        case AuthenticateErrorCodes.USER_ALREADY_EXISTS:
+                        {
+                            return 'USER_ALREADY_EXISTS';
+                        }
+                    }
+                }
+                return null;
+            })();
             $scope.name = "";
             $scope.email = "";
             $scope.password = "";

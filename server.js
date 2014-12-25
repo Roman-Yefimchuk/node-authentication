@@ -137,8 +137,12 @@
 
         require('./app/socket/sockets-handler')(io, dbProvider);
 
-        require('./app/rest-services/authenticate/local-authenticate')(app, passport, dbProvider);
-        require('./app/rest-services/authenticate/external-authenticate')(app, passport);
+        var profileProvider = require('./app/providers/profile-provider')(dbProvider);
+
+        require('./app/rest-services/authenticate/social-networks/facebook')(app, passport, profileProvider);
+        require('./app/rest-services/authenticate/social-networks/twitter')(app, passport, profileProvider);
+        require('./app/rest-services/authenticate/social-networks/google')(app, passport, profileProvider);
+        require('./app/rest-services/authenticate/local')(app, passport, profileProvider, dbProvider);
 
         var serviceProvider = require('./app/providers/services-provider')(app);
         require('./app/rest-services/api-services')(app, dbProvider, serviceProvider);

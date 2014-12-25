@@ -10,7 +10,7 @@ angular.module('application')
             "translations": {
                 "routes": {
                     "index": "Index",
-                    "login": "Login",
+                    "sign_in": "Sign In",
                     "sign_up": "Sign Up",
                     "home": "Home",
                     "profile": "Profile",
@@ -24,14 +24,14 @@ angular.module('application')
                 },
                 "index": {
                     "title": "Login or Register",
-                    "login": "Login",
+                    "sign_in": "Sign In",
                     "sign_up": "Sign Up",
                     "facebook": "Facebook",
                     "twitter": "Twitter",
                     "google_plus": "Google+"
                 },
                 "login": {
-                    "title": "Login",
+                    "title": "Sign In",
                     "select_workspace": "Select workspace",
                     "email": "E-mail",
                     "email_placeholder": "Enter e-mail",
@@ -56,7 +56,7 @@ angular.module('application')
                     "retype_password_placeholder": "Enter retyped password",
                     "btn_sign_up": "Sign Up",
                     "already_have_an_account": "Already have an account?",
-                    "login": "Login",
+                    "sign_in": "Sign In",
                     "or_go": "Or go",
                     "home": "home"
                 },

@@ -24,7 +24,7 @@ angular.module('application')
                 },
                 "index": {
                     "title": "Увійдіть або Зареєструйтеся",
-                    "login": "Увійти",
+                    "sign_in": "Увійти",
                     "sign_up": "Зареєструватися",
                     "facebook": "Facebook",
                     "twitter": "Twitter",
@@ -56,7 +56,7 @@ angular.module('application')
                     "retype_password_placeholder": "Введіть повторений пароль",
                     "btn_sign_up": "Реєстрація",
                     "already_have_an_account": "Вже є аккаунт?",
-                    "login": "Увійти",
+                    "sign_in": "Увійти",
                     "or_go": "Або перейти",
                     "home": "додому"
                 },

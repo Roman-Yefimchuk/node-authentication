@@ -20,9 +20,9 @@ module.exports = function (app, dbProvider, serviceProvider) {
     }
 
     function getUserId(request) {
-        var userProfile = request.user;
-        if (userProfile && userProfile.isAuthenticated()) {
-            return userProfile.userId;
+        if (request.isAuthenticated()) {
+            var user = request.user;
+            return user.userId;
         } else {
             throw new Exception(Exception.NOT_AUTHENTICATED, 'You are not authenticated');
         }

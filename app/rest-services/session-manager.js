@@ -9,13 +9,12 @@
         var ExternalNotificationCommands = require('../../public/common-scripts/external-notification-commands');
 
         serviceProvider.get(RestApi.IS_AUTHENTICATED, function (request, response, resultCallback) {
-            var userProfile = request.user;
-
-            if (userProfile && userProfile.isAuthenticated()) {
+            if (request.isAuthenticated()) {
+                var user = request.user;
                 resultCallback({
                     data: {
                         isAuthenticated: true,
-                        token: userProfile.token
+                        token: user.token
                     }
                 });
             } else {
@@ -28,20 +27,20 @@
         });
 
         serviceProvider.get(RestApi.GET_USER_DATA, function (request, response, resultCallback) {
-            var userProfile = request.user;
 
-            if (userProfile && userProfile.isAuthenticated()) {
+            if (request.isAuthenticated()) {
 
-                var userId = userProfile.userId;
+                var user = request.user;
+                var userId = user.userId;
 
                 var sendResponse = function (workspaceId, rootWorkspaceId, defaultWorkspaceId, externalNotifications) {
                     resultCallback({
                         data: {
                             user: {
                                 userId: userId,
-                                token: userProfile.token,
-                                displayName: userProfile.displayName,
-                                authorizationProvider: userProfile.authorizationProvider,
+                                token: user.token,
+                                displayName: user.displayName,
+                                authorizationProvider: user.authorizationProvider,
                                 workspaceId: workspaceId,
                                 rootWorkspaceId: rootWorkspaceId,
                                 defaultWorkspaceId: defaultWorkspaceId
@@ -55,16 +54,16 @@
 
                     var externalNotifications = [];
 
-                    if (!userProfile.email) {
+                    if (!user.email) {
                         externalNotifications.push({
                             command: ExternalNotificationCommands.EMAIL_NOT_ATTACHED
                         });
                     } else {
-                        if (!userProfile.isEmailVerified) {
+                        if (!user.isEmailVerified) {
                             externalNotifications.push({
                                 command: ExternalNotificationCommands.EMAIL_NOT_VERIFIED,
                                 data: {
-                                    email: userProfile.email
+                                    email: user.email
                                 }
                             });
                         }

@@ -1,0 +1,20 @@
+<hr>
+<div class="text-center" style="margin-top: -10px;margin-bottom: -10px;">
+    <div class="row clearfix" style="margin-left: 0;margin-right: 0;">
+        <table class="col-md-12 column">
+            <tr>
+                <td ng-repeat="socialNetwork in socialNetworksList"
+                    ng-style="{
+                        width: (100 / socialNetworksList.length) + '%'
+                    }">
+                    <a ng-href="{{ getUrl(socialNetwork) }}" ng-click="showLoader()">
+                        <span class="fa {{ socialNetwork.icon }} fa-2x"
+                              tooltip="{{ socialNetwork.title }}">
+                        </span>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<hr>

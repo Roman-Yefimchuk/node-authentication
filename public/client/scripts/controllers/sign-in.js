@@ -2,11 +2,12 @@
 
 angular.module('application')
 
-    .controller('LoginController', [
+    .controller('SignInController', [
 
         '$scope',
         '$rootScope',
         '$location',
+        '$routeParams',
         'apiService',
         'loaderService',
         'translatorService',
@@ -14,7 +15,7 @@ angular.module('application')
         'EMAIL_PATTERN',
         'PASSWORD_PATTERN',
 
-        function ($scope, $rootScope, $location, apiService, loaderService, translatorService, DEBUG_MODE, EMAIL_PATTERN, PASSWORD_PATTERN) {
+        function ($scope, $rootScope, $location, $routeParams, apiService, loaderService, translatorService, DEBUG_MODE, EMAIL_PATTERN, PASSWORD_PATTERN) {
 
             var loginTranslator = translatorService.getSector('login');
 
@@ -64,20 +65,20 @@ angular.module('application')
                 return PASSWORD_PATTERN.test(password);
             }
 
-            function quickLogin() {
+            function quickSignIn() {
                 if (DEBUG_MODE) {
                     $scope.email = 'efimchuk.roma@gmail.com';
                     $scope.password = 'qwerty';
 
-                    login();
+                    signIn();
                 }
             }
 
-            function login() {
+            function signIn() {
 
                 loaderService.showLoader();
 
-                apiService.login({
+                apiService.signIn({
                     email: $scope.email,
                     password: $scope.password,
                     workspaceId: getWorkspaceId(),
@@ -95,7 +96,21 @@ angular.module('application')
 
             $scope.isSystemEmpty = false;
             $scope.treeModel = [];
-            $scope.errorMessage = null;
+            $scope.errorMessage = (function () {
+                if ($routeParams['authenticate_error_code']) {
+                    switch ($routeParams['authenticate_error_code']) {
+                        case AuthenticateErrorCodes.USER_NOT_FOUND:
+                        {
+                            return 'USER_NOT_FOUND';
+                        }
+                        case AuthenticateErrorCodes.USER_ALREADY_EXISTS:
+                        {
+                            return 'USER_ALREADY_EXISTS';
+                        }
+                    }
+                }
+                return null;
+            })();
             $scope.currentWorkspace = undefined;
             $scope.email = "";
             $scope.password = "";
@@ -107,8 +122,8 @@ angular.module('application')
             $scope.onWorkspaceLoading = onWorkspaceLoading;
             $scope.isEmailValid = isEmailValid;
             $scope.isPasswordValid = isPasswordValid;
-            $scope.quickLogin = quickLogin;
-            $scope.login = login;
+            $scope.quickSignIn = quickSignIn;
+            $scope.signIn = signIn;
 
             loaderService.showLoader();
 
@@ -144,7 +159,9 @@ angular.module('application')
                     $scope.treeModel = treeModel;
 
                 } else {
-                    $scope.errorMessage = loginTranslator.translate('system_empty');
+                    if (!$scope.errorMessage) {
+                        $scope.errorMessage = loginTranslator.translate('system_empty');
+                    }
                     $scope.isSystemEmpty = true;
                     loaderService.hideLoader();
                 }

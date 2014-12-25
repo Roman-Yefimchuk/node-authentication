@@ -24,7 +24,7 @@ angular.module('application')
                 },
                 "index": {
                     "title": "Войдите или Зарегистрируйтесь",
-                    "login": "Войти",
+                    "sign_in": "Войти",
                     "sign_up": "Зарегистрироваться",
                     "facebook": "Facebook",
                     "twitter": "Twitter",
@@ -56,7 +56,7 @@ angular.module('application')
                     "retype_password_placeholder": "Введите повторенный пароль",
                     "btn_sign_up": "Регистрация",
                     "already_have_an_account": "Уже есть аккаунт?",
-                    "login": "Войти",
+                    "sign_in": "Войти",
                     "or_go": "Или перейти",
                     "home": "домой"
                 },

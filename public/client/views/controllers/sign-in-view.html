@@ -1,7 +1,7 @@
-<div class="panel col-sm-4 col-sm-offset-4" style="margin-top: 80px">
+<div class="panel col-sm-4 col-sm-offset-4" style="margin-top: 15px">
 
     <h1>
-        <span class="fa fa-user" ng-click="quickLogin()">
+        <span class="fa fa-user" ng-click="quickSignIn()">
         </span>
         <span l10n key="login.title"></span>
     </h1>
@@ -15,7 +15,9 @@
         </alert>
     </div>
 
-    <form ng-submit="login()" autocomplete="off">
+    <div social-networks action="sign-in"></div>
+
+    <form ng-submit="signIn()" autocomplete="off">
 
         <div class="form-group" ng-show="treeModel.length > 0">
 
