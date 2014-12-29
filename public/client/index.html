@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="/public/client/styles/styles.css">
     <link rel="stylesheet" href="/public/client/styles/ajax-loader.css">
     <link rel="stylesheet" href="/public/client/styles/tasks.css">
+    <link rel="stylesheet" href="/public/client/styles/oauth-frame.css">
     <!-- endbuild -->
 
 </head>
@@ -25,6 +26,7 @@
 
 <div language-switcher style="padding: 5px;position: fixed;right: 0;"></div>
 <div info-widget style="padding: 5px;position: fixed;"></div>
+<div oauth-frame width='600px' height='522px'></div>
 
 <div class="container">
     <div ng-view>
@@ -127,6 +129,7 @@
 <script type="text/javascript" src="/public/client/scripts/directives/survey-donut.js"></script>
 <script type="text/javascript" src="/public/client/scripts/directives/generic-header.js"></script>
 <script type="text/javascript" src="/public/client/scripts/directives/social-networks.js"></script>
+<script type="text/javascript" src="/public/client/scripts/directives/oauth-frame.js"></script>
 <!--end_directives-->
 
 <!--begin_filters-->
@@ -154,10 +157,6 @@
 <script type="text/javascript" src="/public/client/scripts/services/language-services/ru.js"></script>
 <script type="text/javascript" src="/public/client/scripts/services/language-services/uk.js"></script>
 <!--end_services-->
-
-<!--begin_common-->
-<script type="text/javascript" src="/public/client/scripts/utils/extension-methods.js"></script>
-<!--end_common-->
 
 <!--begin_common_scripts-->
 <script type="text/javascript" src="/public/common-scripts/async-utils.js"></script>
